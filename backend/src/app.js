@@ -1,6 +1,7 @@
 import express from "express"
 import cors from "cors"
 import employeeRoutes from "./routes/employeeRoutes.js"
+import { apiLimiter } from "./middleware/rateLimitMiddleware.js"
 
 const app = express()
 
@@ -16,6 +17,9 @@ const corsOptions = {
 };
 app.use(cors(corsOptions))
 app.use(express.json())
+
+// Apply rate limiter to all API routes
+app.use("/api", apiLimiter)
 
 // 👇 THIS LINE IS CRITICAL
 app.use("/api/employees", employeeRoutes)
