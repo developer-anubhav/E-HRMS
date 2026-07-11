@@ -37,6 +37,10 @@ export const createEmployee = async (req, res) => {
 export const createStaff = async (req, res) => {
   try {
     const { name, email, employeeId, department, role, password } = req.body;
+    if (typeof email !== "string" || email.trim() === "") {
+        return res.status(400).json({ message: "Valid email is required" });
+    }
+    const normalizedEmail = email.trim();
 
     if (req.user.role !== "ADMIN") {
         return res.status(403).json({ message: "Only Admins can create HR or Managers" });
@@ -49,13 +53,13 @@ export const createStaff = async (req, res) => {
     const company = await getOwnCompany(req.user.companyId);
     
     // Check for duplicate employeeId or email within THIS company
-    const existing = company.employees.find(emp => emp.employeeId === employeeId || emp.email === email);
+    const existing = company.employees.find(emp => emp.employeeId === employeeId || emp.email === normalizedEmail);
     if (existing) {
         return res.status(400).json({ message: "Employee ID or Email already exists in your company" });
     }
 
     // Check if user already exists in Auth collection
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: { $eq: normalizedEmail } });
     if (existingUser) {
         return res.status(400).json({ message: "A user with this email already exists" });
     }
@@ -64,7 +68,7 @@ export const createStaff = async (req, res) => {
     company.employees.push({
         employeeId,
         name,
-        email,
+        email: normalizedEmail,
         department,
         role,
         status: "Active"
@@ -77,7 +81,7 @@ export const createStaff = async (req, res) => {
 
     const newUser = new User({
         name,
-        email,
+        email: normalizedEmail,
         password: hashedPassword,
         role,
         companyId: req.user.companyId
