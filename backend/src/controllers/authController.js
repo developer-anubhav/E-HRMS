@@ -49,6 +49,10 @@ export const organizationSignup = async (req, res) => {
     }
 
     const normalizedEmail = email.toLowerCase().trim()
+    if (typeof companyName !== "string") {
+      return res.status(400).json({ message: "Invalid company name" })
+    }
+    const normalizedCompanyName = companyName.trim()
     
     // Check if user already exists
     const existingUser = await User.findOne({ email: normalizedEmail })
@@ -57,14 +61,14 @@ export const organizationSignup = async (req, res) => {
     }
 
     // Check if company already exists
-    const existingCompany = await Company.findOne({ name: companyName })
+    const existingCompany = await Company.findOne({ name: { $eq: normalizedCompanyName } })
     if (existingCompany) {
       return res.status(400).json({ message: "Company name already registered" })
     }
 
     // 1. Create Company
     const newCompany = new Company({
-      name: companyName,
+      name: normalizedCompanyName,
       email: normalizedEmail,
       adminName: name,
       status: "Active"
