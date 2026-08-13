@@ -19,11 +19,12 @@ export const updateCompanyStatus = async (req, res) => {
         const { id } = req.params;
         const { status } = req.body;
 
-        if (!['Active', 'Suspended', 'Inactive'].includes(status)) {
+        if (typeof status !== 'string' || !['Active', 'Suspended', 'Inactive'].includes(status)) {
             return res.status(400).json({ success: false, message: "Invalid status" });
         }
 
-        const company = await Company.findByIdAndUpdate(id, { status }, { new: true });
+        const sanitizedStatus = String(status);
+        const company = await Company.findByIdAndUpdate(id, { status: sanitizedStatus }, { new: true });
         if (!company) {
             return res.status(404).json({ success: false, message: "Company not found" });
         }
