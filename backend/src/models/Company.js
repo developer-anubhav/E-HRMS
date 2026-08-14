@@ -84,6 +84,19 @@ const attendanceSchema = new mongoose.Schema({
     type: String,
     enum: ["Present", "Absent", "Leave"],
     default: "Present"
+  },
+  verificationMethod: {
+    type: String,
+    enum: ["Manual", "Facial Recognition"],
+    default: "Manual"
+  },
+  confidence: {
+    type: Number,
+    default: null
+  },
+  checkInTime: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

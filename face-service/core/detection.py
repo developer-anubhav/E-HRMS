@@ -25,10 +25,10 @@ from facenet_pytorch import MTCNN
 logger = logging.getLogger("face-service.detection")
 
 # Minimum acceptable face size (pixels) in the original image
-MIN_FACE_SIZE_PX = 80
+MIN_FACE_SIZE_PX = 60
 
 # Minimum MTCNN detection probability
-MIN_CONFIDENCE = 0.95
+MIN_CONFIDENCE = 0.85
 
 # Singleton MTCNN instance (CPU by default for portability)
 _mtcnn: Optional[MTCNN] = None

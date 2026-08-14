@@ -90,16 +90,31 @@ export default function FaceEnrollModal({ employee, open, onClose, onEnrolled })
 
     const video = videoRef.current
     const canvas = canvasRef.current
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
+
+    // Scale down to max 640x480 for efficient payload size
+    const maxW = 640
+    const maxH = 480
+    let w = video.videoWidth || maxW
+    let h = video.videoHeight || maxH
+
+    if (w > maxW) {
+      h = Math.round((h * maxW) / w)
+      w = maxW
+    }
+    if (h > maxH) {
+      w = Math.round((w * maxH) / h)
+      h = maxH
+    }
+
+    canvas.width = w
+    canvas.height = h
 
     const ctx = canvas.getContext("2d")
-    // Mirror the image so it looks natural (front camera)
     ctx.translate(canvas.width, 0)
     ctx.scale(-1, 1)
-    ctx.drawImage(video, 0, 0)
+    ctx.drawImage(video, 0, 0, w, h)
 
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.85)
+    const dataUrl = canvas.toDataURL("image/jpeg", 0.80)
     setCaptures(prev => [...prev, dataUrl])
   }
 

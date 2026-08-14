@@ -19,9 +19,9 @@ import numpy as np
 logger = logging.getLogger("face-service.quality")
 
 # Tunable thresholds
-MIN_LAPLACIAN_VARIANCE = 50.0    # below this → image is too blurry
-MIN_MEAN_BRIGHTNESS = 30.0       # below this → image is too dark
-MAX_MEAN_BRIGHTNESS = 240.0      # above this → image is overexposed
+MIN_LAPLACIAN_VARIANCE = 15.0    # below this → image is too blurry (lowered for webcam compatibility)
+MIN_MEAN_BRIGHTNESS = 20.0       # below this → image is too dark
+MAX_MEAN_BRIGHTNESS = 245.0      # above this → image is overexposed
 MIN_IMAGE_SIZE_PX = 100          # minimum width or height
 
 

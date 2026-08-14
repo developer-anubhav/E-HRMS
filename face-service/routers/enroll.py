@@ -17,7 +17,7 @@ from pydantic import BaseModel
 
 from core.detection import detect_and_align
 from core.preprocessing import preprocess_face
-from core.facenet_model import get_model
+from core.facenet_model import get_model, get_device
 from core.embedding_store import (
     save_profile,
     load_profile,
@@ -141,7 +141,8 @@ async def enroll_face(employee_id: str, body: EnrollRequest):
             face_tensor = preprocess_face(face_tensor)
 
             # 5. FaceNet embedding
-            embedding = model(face_tensor.unsqueeze(0))  # shape: (1, 512)
+            device = get_device()
+            embedding = model(face_tensor.unsqueeze(0).to(device))  # shape: (1, 512)
             embedding_list = embedding.detach().cpu().numpy().flatten().tolist()
             embeddings.append(embedding_list)
 

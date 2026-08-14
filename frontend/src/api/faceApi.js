@@ -31,3 +31,15 @@ export const getFaceProfile = (employeeMongoId) =>
  */
 export const deleteFaceProfile = (employeeMongoId) =>
   api.delete(`/face/profile/${employeeMongoId}`);
+
+/**
+ * Verify a face image frame and record attendance for the recognized employee.
+ * @param {string} image - Base64 encoded image frame
+ * @param {string} [employeeMongoId] - Optional employee MongoDB _id for 1:1 check
+ */
+export const verifyAndCheckIn = (image, employeeMongoId = null) =>
+  api.post("/face/verify-checkin", {
+    image,
+    employeeId: employeeMongoId,
+  });
+

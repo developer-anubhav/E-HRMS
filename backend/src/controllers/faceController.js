@@ -196,3 +196,118 @@ export const deleteFaceProfile = async (req, res) => {
     return res.status(500).json({ message: err.message || "Internal server error" });
   }
 };
+
+// ---------------------------------------------------------------------------
+// POST /api/face/verify-checkin
+// ---------------------------------------------------------------------------
+export const verifyAndCheckInFace = async (req, res) => {
+  try {
+    const { image, employeeId } = req.body; // image: base64, employeeId optional for 1:1
+
+    if (!image) {
+      return res.status(400).json({ message: "No image frame provided for verification" });
+    }
+
+    // 1. Call Python face-service /face/verify
+    const pyPayload = { image };
+    if (employeeId) {
+      pyPayload.employee_id = employeeId;
+    }
+
+    const verificationResult = await callFaceService("/face/verify", {
+      method: "POST",
+      body: JSON.stringify(pyPayload),
+    });
+
+    if (!verificationResult.matched || !verificationResult.employee_id) {
+      return res.status(422).json({
+        matched: false,
+        message: verificationResult.message || "Face not recognized",
+      });
+    }
+
+    const matchedEmployeeId = verificationResult.employee_id;
+
+    // 2. Fetch company & verify matched employee belongs to this company
+    const company = await Company.findById(req.user.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const employee = company.employees.id(matchedEmployeeId);
+    if (!employee) {
+      return res.status(404).json({
+        message: "Matched employee does not belong to your company",
+      });
+    }
+
+    // 3. Mark / update today's attendance record
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const existingAttIndex = company.attendance.findIndex(
+      (att) =>
+        att.employeeId.toString() === matchedEmployeeId.toString() &&
+        new Date(att.date).setUTCHours(0, 0, 0, 0) === today.getTime()
+    );
+
+    let attRecord;
+    const now = new Date();
+
+    if (existingAttIndex >= 0) {
+      attRecord = company.attendance[existingAttIndex];
+      attRecord.status = "Present";
+      attRecord.verificationMethod = "Facial Recognition";
+      attRecord.confidence = verificationResult.confidence;
+      attRecord.checkInTime = attRecord.checkInTime || now;
+    } else {
+      attRecord = {
+        employeeId: matchedEmployeeId,
+        date: today,
+        status: "Present",
+        verificationMethod: "Facial Recognition",
+        confidence: verificationResult.confidence,
+        checkInTime: now,
+      };
+      company.attendance.push(attRecord);
+    }
+
+    await company.save();
+
+    const savedRecord = company.attendance[company.attendance.length - 1];
+
+    return res.json({
+      success: true,
+      matched: true,
+      employee: {
+        _id: employee._id,
+        employeeId: employee.employeeId,
+        name: employee.name,
+        department: employee.department,
+        role: employee.role,
+        email: employee.email,
+      },
+      verification: {
+        confidence: verificationResult.confidence,
+        similarity: verificationResult.similarity,
+        distance: verificationResult.distance,
+      },
+      attendance: savedRecord,
+      message: `Attendance marked Present for ${employee.name} (${verificationResult.confidence}% match)!`,
+    });
+  } catch (err) {
+    console.error("[FaceController] verifyAndCheckInFace error:", err.message);
+
+    if (err.status === 422) {
+      return res.status(422).json({ matched: false, message: err.message });
+    }
+    if (err.code === "ECONNREFUSED" || err.cause?.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        message: "Face recognition service is unavailable. Please check if face-service is running.",
+      });
+    }
+
+    return res.status(500).json({ message: err.message || "Internal server error" });
+  }
+};
+

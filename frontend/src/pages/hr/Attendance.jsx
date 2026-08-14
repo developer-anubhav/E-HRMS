@@ -15,6 +15,8 @@ import {
 import { getEmployees } from "../../api/employeeApi"
 
 import EditAttendanceForm from "../../components/hr/EditAttendanceForm"
+import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
+import { ScanFace, Sparkles, ShieldCheck } from "lucide-react"
 
 export default function Attendance() {
   const [searchParams] = useSearchParams()
@@ -30,6 +32,7 @@ export default function Attendance() {
 
   const [selected, setSelected] = useState(null)
   const [openEdit, setOpenEdit] = useState(false)
+  const [openFacialCheckIn, setOpenFacialCheckIn] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // =========================
@@ -154,9 +157,27 @@ export default function Attendance() {
         <Loader fullScreen={false} />
       ) : (
         <>
-      <h1 className="text-3xl font-bold text-white mb-8 tracking-tight">
-        Attendance
-      </h1>
+      <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-white tracking-tight">
+            Attendance
+          </h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Track daily attendance records and perform instant AI facial check-in
+          </p>
+        </div>
+
+        <button
+          onClick={() => setOpenFacialCheckIn(true)}
+          className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
+        >
+          <ScanFace size={20} />
+          <span>Facial Check-In</span>
+          <span className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
+            <Sparkles size={10} /> AI
+          </span>
+        </button>
+      </div>
 
       <Card>
         <div className="mb-6 flex items-center gap-4">
@@ -219,7 +240,7 @@ export default function Attendance() {
             className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={!selectedDepartment || employees.length === 0 || !date}
           >
-            Mark Attendance for All
+            Bulk Mark Present
           </button>
         </div>
 
@@ -257,22 +278,21 @@ export default function Attendance() {
           </div>
         )}
 
-        {/* TABLE */}
+        {/* ATTENDANCE TABLE */}
 
-        <div className="w-full overflow-hidden rounded-xl border border-white/10">
-          <table className="min-w-full text-left border-collapse">
-
-            <thead className="bg-white/5 border-b border-white/10">
-              <tr>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Employee ID</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Name</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Date</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Status</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Actions</th>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10 text-gray-400 text-xs font-semibold uppercase tracking-wider">
+                <th className="p-4">Emp ID</th>
+                <th className="p-4">Employee</th>
+                <th className="p-4">Date</th>
+                <th className="p-4">Method</th>
+                <th className="p-4">Status</th>
+                <th className="p-4">Actions</th>
               </tr>
             </thead>
-
-            <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+            <tbody className="divide-y divide-white/5">
 
               {attendance
                 .filter(item => 
@@ -293,6 +313,18 @@ export default function Attendance() {
 
                   <td className="p-4 text-gray-400 whitespace-nowrap">
                     {new Date(item.date).toLocaleDateString()}
+                  </td>
+
+                  <td className="p-4 whitespace-nowrap">
+                    {item.verificationMethod === "Facial Recognition" ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-400">
+                        <ShieldCheck size={13} /> Face ID {item.confidence ? `(${item.confidence}%)` : ""}
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                        Manual
+                      </span>
+                    )}
                   </td>
 
                   <td className="p-4 whitespace-nowrap">
@@ -348,6 +380,16 @@ export default function Attendance() {
           />
         )}
       </Modal>
+
+      {/* FACIAL CHECK-IN MODAL */}
+      <FacialCheckInModal
+        open={openFacialCheckIn}
+        onClose={() => setOpenFacialCheckIn(false)}
+        employees={employees}
+        onAttendanceMarked={() => {
+          fetchAttendance()
+        }}
+      />
         </>
       )}
     </MainLayout>

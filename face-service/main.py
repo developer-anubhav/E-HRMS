@@ -61,7 +61,10 @@ app.add_middleware(
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
-app.include_router(enroll.router, prefix="/face", tags=["Face Enrollment"])
+from routers import enroll, verify
+
+app.include_router(enroll.router, prefix="/face", tags=["enrollment"])
+app.include_router(verify.router, prefix="/face", tags=["verification"])
 
 
 @app.get("/", tags=["Health"])
