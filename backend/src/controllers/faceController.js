@@ -367,3 +367,154 @@ export const verifyAndCheckInFace = async (req, res) => {
   }
 };
 
+// ---------------------------------------------------------------------------
+// GET /api/face/analytics
+// Aggregate facial recognition attendance metrics for HR Dashboard
+// ---------------------------------------------------------------------------
+export const getFacialAnalytics = async (req, res) => {
+  try {
+    const company = await Company.findById(req.user.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const allRecords = company.attendance || [];
+    const todayStr = new Date().toDateString();
+
+    const todayRecords = allRecords.filter(att => new Date(att.date).toDateString() === todayStr);
+
+    let facialToday = 0;
+    let manualToday = 0;
+    let facialTotal = 0;
+    let manualTotal = 0;
+    let confidenceSum = 0;
+    let confidenceCount = 0;
+
+    const confDist = { high: 0, normal: 0, borderline: 0 };
+    const methodBreakdown = { facial: 0, manual: 0 };
+    const hourlyCounts = Array(24).fill(0);
+
+    allRecords.forEach(att => {
+      const isFacial = att.verificationMethod === "Facial Recognition";
+      if (isFacial) {
+        facialTotal++;
+        methodBreakdown.facial++;
+        if (att.confidence) {
+          confidenceSum += att.confidence;
+          confidenceCount++;
+          if (att.confidence >= 90) confDist.high++;
+          else if (att.confidence >= 80) confDist.normal++;
+          else confDist.borderline++;
+        }
+
+        if (att.checkInTime) {
+          const hour = new Date(att.checkInTime).getHours();
+          if (hour >= 0 && hour < 24) hourlyCounts[hour]++;
+        }
+      } else {
+        manualTotal++;
+        methodBreakdown.manual++;
+      }
+
+      if (new Date(att.date).toDateString() === todayStr) {
+        if (isFacial) facialToday++;
+        else manualToday++;
+      }
+    });
+
+    const totalToday = facialToday + manualToday;
+    const adoptionRate = totalToday > 0 ? roundNumber((facialToday / totalToday) * 100, 1) : 0;
+    const avgConfidence = confidenceCount > 0 ? roundNumber(confidenceSum / confidenceCount, 1) : 0;
+
+    // Enrolled employees vs total employees
+    const employees = company.employees || [];
+    const enrolledEmployees = employees.filter(e => e.faceProfile?.enrolled).length;
+    const totalEmployees = employees.length;
+
+    return res.json({
+      success: true,
+      metrics: {
+        facialToday,
+        manualToday,
+        totalToday,
+        adoptionRate,
+        avgConfidence,
+        enrolledEmployees,
+        totalEmployees,
+        enrollmentPercentage: totalEmployees > 0 ? roundNumber((enrolledEmployees / totalEmployees) * 100, 1) : 0,
+      },
+      confidenceDistribution: confDist,
+      methodBreakdown,
+      hourlyCheckIns: hourlyCounts,
+    });
+  } catch (err) {
+    console.error("[FaceController] getFacialAnalytics error:", err);
+    return res.status(500).json({ message: "Error loading facial analytics" });
+  }
+};
+
+// ---------------------------------------------------------------------------
+// GET /api/face/audit-logs
+// Audit logs of facial recognition check-in events
+// ---------------------------------------------------------------------------
+export const getFacialAuditLogs = async (req, res) => {
+  try {
+    const company = await Company.findById(req.user.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    const { search = "", limit = 50 } = req.query;
+
+    const empMap = new Map();
+    company.employees.forEach(emp => {
+      empMap.set(emp._id.toString(), emp);
+    });
+
+    const logs = [];
+
+    company.attendance.forEach(att => {
+      if (att.verificationMethod === "Facial Recognition") {
+        const emp = empMap.get(att.employeeId?.toString());
+
+        if (!search || (emp && (emp.name.toLowerCase().includes(search.toLowerCase()) || emp.employeeId?.toLowerCase().includes(search.toLowerCase())))) {
+          logs.push({
+            _id: att._id,
+            date: att.date,
+            checkInTime: att.checkInTime,
+            checkOutTime: att.checkOutTime,
+            status: att.status,
+            remarks: att.remarks,
+            confidence: att.confidence || 95.0,
+            verificationMethod: att.verificationMethod,
+            workDurationMinutes: att.workDurationMinutes,
+            employee: emp ? {
+              _id: emp._id,
+              employeeId: emp.employeeId,
+              name: emp.name,
+              department: emp.department,
+              role: emp.role,
+            } : null,
+          });
+        }
+      }
+    });
+
+    // Newest first
+    logs.sort((a, b) => new Date(b.checkInTime || b.date) - new Date(a.checkInTime || a.date));
+
+    return res.json({
+      success: true,
+      total: logs.length,
+      logs: logs.slice(0, Number(limit)),
+    });
+  } catch (err) {
+    console.error("[FaceController] getFacialAuditLogs error:", err);
+    return res.status(500).json({ message: "Error loading facial audit logs" });
+  }
+};
+
+function roundNumber(num, decimals) {
+  return Number(Math.round(num + "e" + decimals) + "e-" + decimals);
+}
+

@@ -45,3 +45,14 @@ export const verifyAndCheckIn = (image, employeeMongoId = null, prevImage = null
     employeeId: employeeMongoId,
   });
 
+/**
+ * Fetch aggregate facial attendance metrics for HR Analytics Dashboard.
+ */
+export const getFacialAnalytics = () => api.get("/face/analytics");
+
+/**
+ * Fetch facial verification audit logs.
+ * @param {object} [params] - Optional query params { search, limit }
+ */
+export const getFacialAuditLogs = (params = {}) => api.get("/face/audit-logs", { params });
+

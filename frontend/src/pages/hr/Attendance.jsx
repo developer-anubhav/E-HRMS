@@ -17,7 +17,8 @@ import { getEmployees } from "../../api/employeeApi"
 import EditAttendanceForm from "../../components/hr/EditAttendanceForm"
 import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
 import ShiftSettingsModal from "../../components/hr/ShiftSettingsModal"
-import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info } from "lucide-react"
+import FacialAnalyticsModal from "../../components/hr/FacialAnalyticsModal"
+import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info, Activity } from "lucide-react"
 
 export default function Attendance() {
   const navigate = useNavigate()
@@ -36,6 +37,7 @@ export default function Attendance() {
   const [openEdit, setOpenEdit] = useState(false)
   const [openFacialCheckIn, setOpenFacialCheckIn] = useState(false)
   const [openShiftModal, setOpenShiftModal] = useState(false)
+  const [openAnalyticsModal, setOpenAnalyticsModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // =========================
@@ -171,6 +173,15 @@ export default function Attendance() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setOpenAnalyticsModal(true)}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            title="View Biometric Facial Analytics & Audit Trail"
+          >
+            <Activity size={18} className="text-indigo-400" />
+            <span>Face Analytics</span>
+          </button>
+
           <button
             onClick={() => setOpenShiftModal(true)}
             className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
@@ -442,6 +453,12 @@ export default function Attendance() {
         onUpdated={() => {
           fetchAttendance()
         }}
+      />
+
+      {/* FACIAL ANALYTICS & AUDIT LOGS MODAL */}
+      <FacialAnalyticsModal
+        isOpen={openAnalyticsModal}
+        onClose={() => setOpenAnalyticsModal(false)}
       />
         </>
       )}
