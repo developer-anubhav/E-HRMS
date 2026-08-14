@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useSearchParams } from "react-router-dom"
+import { useSearchParams, useNavigate } from "react-router-dom"
 import MainLayout from "../../layouts/MainLayout"
 import Card from "../../components/ui/Card"
 import Modal from "../../components/ui/Modal"
@@ -19,6 +19,7 @@ import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
 import { ScanFace, Sparkles, ShieldCheck } from "lucide-react"
 
 export default function Attendance() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const urlSearch = searchParams.get("search") || ""
 
@@ -167,16 +168,26 @@ export default function Attendance() {
           </p>
         </div>
 
-        <button
-          onClick={() => setOpenFacialCheckIn(true)}
-          className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
-        >
-          <ScanFace size={20} />
-          <span>Facial Check-In</span>
-          <span className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
-            <Sparkles size={10} /> AI
-          </span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => navigate("/kiosk")}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+          >
+            <ScanFace size={18} className="text-cyan-400" />
+            <span>Launch Kiosk Mode</span>
+          </button>
+
+          <button
+            onClick={() => setOpenFacialCheckIn(true)}
+            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
+          >
+            <ScanFace size={20} />
+            <span>Facial Check-In</span>
+            <span className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
+              <Sparkles size={10} /> AI
+            </span>
+          </button>
+        </div>
       </div>
 
       <Card>

@@ -97,6 +97,10 @@ const attendanceSchema = new mongoose.Schema({
   checkInTime: {
     type: Date,
     default: null
+  },
+  checkOutTime: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });
 

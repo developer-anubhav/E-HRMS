@@ -13,6 +13,9 @@ import Company from "../models/Company.js";
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://localhost:8000";
 
+// In-memory cooldown tracker (employeeId -> lastScanTimestamp)
+const scansCooldownMap = new Map();
+
 // ---------------------------------------------------------------------------
 // Helper: forward a request to the face-service and return JSON
 // ---------------------------------------------------------------------------
@@ -228,6 +231,30 @@ export const verifyAndCheckInFace = async (req, res) => {
 
     const matchedEmployeeId = verificationResult.employee_id;
 
+    // --- 10-Second Cooldown Check ---
+    const nowMs = Date.now();
+    const COOLDOWN_MS = 10 * 1000; // 10 seconds
+    const lastScanMs = scansCooldownMap.get(matchedEmployeeId) || 0;
+
+    if (nowMs - lastScanMs < COOLDOWN_MS) {
+      // Cooldown active — fetch employee info for UI without saving duplicate record
+      const company = await Company.findById(req.user.companyId);
+      const employee = company?.employees.id(matchedEmployeeId);
+      return res.json({
+        success: true,
+        matched: true,
+        actionType: "COOLDOWN",
+        employee: employee ? {
+          _id: employee._id,
+          employeeId: employee.employeeId,
+          name: employee.name,
+          department: employee.department,
+          role: employee.role,
+        } : null,
+        message: `Cooldown active for ${employee?.name || 'employee'}. Please wait a few seconds before scanning again.`,
+      });
+    }
+
     // 2. Fetch company & verify matched employee belongs to this company
     const company = await Company.findById(req.user.companyId);
     if (!company) {
@@ -241,7 +268,7 @@ export const verifyAndCheckInFace = async (req, res) => {
       });
     }
 
-    // 3. Mark / update today's attendance record
+    // 3. Mark / update today's attendance record (Check-In vs Check-Out)
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0);
 
@@ -253,13 +280,23 @@ export const verifyAndCheckInFace = async (req, res) => {
 
     let attRecord;
     const now = new Date();
+    let actionType = "CHECK_IN";
 
     if (existingAttIndex >= 0) {
       attRecord = company.attendance[existingAttIndex];
+      const checkInMs = attRecord.checkInTime ? new Date(attRecord.checkInTime).getTime() : 0;
+      
+      // If checkInTime exists and > 1 minute has elapsed, set checkOutTime
+      if (attRecord.checkInTime && (!attRecord.checkOutTime || (now.getTime() - checkInMs > 60000))) {
+        attRecord.checkOutTime = now;
+        actionType = "CHECK_OUT";
+      } else {
+        attRecord.checkInTime = attRecord.checkInTime || now;
+        actionType = "CHECK_IN";
+      }
       attRecord.status = "Present";
       attRecord.verificationMethod = "Facial Recognition";
       attRecord.confidence = verificationResult.confidence;
-      attRecord.checkInTime = attRecord.checkInTime || now;
     } else {
       attRecord = {
         employeeId: matchedEmployeeId,
@@ -268,17 +305,25 @@ export const verifyAndCheckInFace = async (req, res) => {
         verificationMethod: "Facial Recognition",
         confidence: verificationResult.confidence,
         checkInTime: now,
+        checkOutTime: null,
       };
       company.attendance.push(attRecord);
+      actionType = "CHECK_IN";
     }
+
+    // Update cooldown map
+    scansCooldownMap.set(matchedEmployeeId, nowMs);
 
     await company.save();
 
-    const savedRecord = company.attendance[company.attendance.length - 1];
+    const savedRecord = company.attendance[existingAttIndex >= 0 ? existingAttIndex : company.attendance.length - 1];
+
+    const actionText = actionType === "CHECK_OUT" ? "Check-Out recorded" : "Check-In recorded";
 
     return res.json({
       success: true,
       matched: true,
+      actionType,
       employee: {
         _id: employee._id,
         employeeId: employee.employeeId,
@@ -293,7 +338,7 @@ export const verifyAndCheckInFace = async (req, res) => {
         distance: verificationResult.distance,
       },
       attendance: savedRecord,
-      message: `Attendance marked Present for ${employee.name} (${verificationResult.confidence}% match)!`,
+      message: `${actionText} for ${employee.name} (${verificationResult.confidence}% match)!`,
     });
   } catch (err) {
     console.error("[FaceController] verifyAndCheckInFace error:", err.message);
