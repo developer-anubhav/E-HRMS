@@ -40,7 +40,34 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     enum: ["Active", "Inactive"],
     default: "Active",
-  }
+  },
+
+  // --- Face Profile Mirror ---
+  // The actual embeddings live in the Python face-service (face-service/data/embeddings.json).
+  // This sub-document mirrors the enrollment STATUS so the HR dashboard can
+  // display it without calling the face-service on every employee list request.
+  faceProfile: {
+    enrolled: {
+      type: Boolean,
+      default: false,
+    },
+    embeddingCount: {
+      type: Number,
+      default: 0,
+    },
+    modelVersion: {
+      type: String,
+      default: "",
+    },
+    enrolledAt: {
+      type: Date,
+      default: null,
+    },
+    updatedAt: {
+      type: Date,
+      default: null,
+    },
+  },
 }, { timestamps: true });
 
 // Sub-schema for Attendance
