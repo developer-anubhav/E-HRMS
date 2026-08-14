@@ -16,7 +16,8 @@ import { getEmployees } from "../../api/employeeApi"
 
 import EditAttendanceForm from "../../components/hr/EditAttendanceForm"
 import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
-import { ScanFace, Sparkles, ShieldCheck } from "lucide-react"
+import ShiftSettingsModal from "../../components/hr/ShiftSettingsModal"
+import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info } from "lucide-react"
 
 export default function Attendance() {
   const navigate = useNavigate()
@@ -34,6 +35,7 @@ export default function Attendance() {
   const [selected, setSelected] = useState(null)
   const [openEdit, setOpenEdit] = useState(false)
   const [openFacialCheckIn, setOpenFacialCheckIn] = useState(false)
+  const [openShiftModal, setOpenShiftModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // =========================
@@ -170,6 +172,15 @@ export default function Attendance() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setOpenShiftModal(true)}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            title="Configure Shift Start/End Hours & Grace Period"
+          >
+            <Clock size={18} className="text-cyan-400" />
+            <span>Shift Settings</span>
+          </button>
+
+          <button
             onClick={() => navigate("/kiosk")}
             className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
           >
@@ -298,83 +309,105 @@ export default function Attendance() {
                 <th className="p-4">Emp ID</th>
                 <th className="p-4">Employee</th>
                 <th className="p-4">Date</th>
-                <th className="p-4">Method</th>
+                <th className="p-4">Check-In / Out</th>
+                <th className="p-4">Duration</th>
                 <th className="p-4">Status</th>
+                <th className="p-4">Remarks & Method</th>
                 <th className="p-4">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/5">
-
               {attendance
                 .filter(item => 
                   item.employee?.name.toLowerCase().includes(search.toLowerCase()) ||
                   item.employee?.employeeId.toLowerCase().includes(search.toLowerCase())
                 )
-                .map(item => (
+                .map(item => {
+                  const statusLower = item.status?.toLowerCase() || ""
+                  const isPresent = statusLower === "present"
+                  const isLate = statusLower === "late"
+                  const isHalfDay = statusLower === "half day"
 
-                <tr key={item._id} className="hover:bg-white/5 transition-colors">
+                  let statusClass = "bg-gray-500/10 text-gray-400 border-gray-500/20"
+                  if (isPresent) statusClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                  if (isLate) statusClass = "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  if (isHalfDay) statusClass = "bg-purple-500/10 text-purple-400 border-purple-500/20"
 
-                  <td className="p-4 text-gray-300 font-medium whitespace-nowrap">
-                    {item.employee?.employeeId}
-                  </td>
+                  const checkInFormatted = item.checkInTime ? new Date(item.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"
+                  const checkOutFormatted = item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"
 
-                  <td className="p-4 text-gray-300 whitespace-nowrap">
-                    {item.employee?.name}
-                  </td>
+                  let durationFormatted = "—"
+                  if (item.workDurationMinutes) {
+                    const hrs = Math.floor(item.workDurationMinutes / 60)
+                    const mins = item.workDurationMinutes % 60
+                    durationFormatted = `${hrs}h ${mins}m`
+                  }
 
-                  <td className="p-4 text-gray-400 whitespace-nowrap">
-                    {new Date(item.date).toLocaleDateString()}
-                  </td>
+                  return (
+                    <tr key={item._id} className="hover:bg-white/5 transition-colors">
+                      <td className="p-4 text-gray-300 font-medium whitespace-nowrap">
+                        {item.employee?.employeeId}
+                      </td>
 
-                  <td className="p-4 whitespace-nowrap">
-                    {item.verificationMethod === "Facial Recognition" ? (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-400">
-                        <ShieldCheck size={13} /> Face ID {item.confidence ? `(${item.confidence}%)` : ""}
-                      </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1 text-xs text-slate-500">
-                        Manual
-                      </span>
-                    )}
-                  </td>
+                      <td className="p-4 text-gray-300 whitespace-nowrap font-semibold">
+                        {item.employee?.name}
+                      </td>
 
-                  <td className="p-4 whitespace-nowrap">
-                     <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${
-                        item.status?.toLowerCase() === 'active' || item.status?.toLowerCase() === 'present' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                        item.status?.toLowerCase() === 'leave' || item.status?.toLowerCase() === 'absent' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                        'bg-gray-500/10 text-gray-400 border-gray-500/20'
-                     }`}>
-                        {item.status || 'N/A'}
-                     </span>
-                  </td>
+                      <td className="p-4 text-gray-400 whitespace-nowrap text-xs font-mono">
+                        {new Date(item.date).toLocaleDateString()}
+                      </td>
 
-                  <td className="p-4 space-x-3 whitespace-nowrap">
+                      <td className="p-4 text-xs whitespace-nowrap">
+                        <span className="text-emerald-300 font-mono">{checkInFormatted}</span>
+                        <span className="text-slate-500 mx-1">/</span>
+                        <span className="text-amber-300 font-mono">{checkOutFormatted}</span>
+                      </td>
 
-                    <button
-                      onClick={() => handleEdit(item)}
-                      className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm"
-                    >
-                      Edit
-                    </button>
+                      <td className="p-4 text-xs font-mono text-slate-300 whitespace-nowrap">
+                        {durationFormatted}
+                      </td>
 
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="text-red-400 hover:text-red-300 transition-colors font-medium text-sm"
-                    >
-                      Delete
-                    </button>
+                      <td className="p-4 whitespace-nowrap">
+                        <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${statusClass}`}>
+                          {item.status || 'N/A'}
+                        </span>
+                      </td>
 
-                  </td>
+                      <td className="p-4 text-xs whitespace-nowrap">
+                        <div className="flex flex-col gap-0.5">
+                          {item.verificationMethod === "Facial Recognition" ? (
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                              <ShieldCheck size={12} /> Face ID {item.confidence ? `(${item.confidence}%)` : ""}
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-slate-500">Manual</span>
+                          )}
+                          {item.remarks && (
+                            <span className="text-[10px] text-slate-400">{item.remarks}</span>
+                          )}
+                        </div>
+                      </td>
 
-                </tr>
-
-              ))}
-
+                      <td className="p-4 space-x-3 whitespace-nowrap">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item._id)}
+                          className="text-red-400 hover:text-red-300 transition-colors font-medium text-sm"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
             </tbody>
-
           </table>
         </div>
-
       </Card>
 
       {/* EDIT MODAL */}
@@ -398,6 +431,15 @@ export default function Attendance() {
         onClose={() => setOpenFacialCheckIn(false)}
         employees={employees}
         onAttendanceMarked={() => {
+          fetchAttendance()
+        }}
+      />
+
+      {/* SHIFT SETTINGS MODAL */}
+      <ShiftSettingsModal
+        open={openShiftModal}
+        onClose={() => setOpenShiftModal(false)}
+        onUpdated={() => {
           fetchAttendance()
         }}
       />

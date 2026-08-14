@@ -110,6 +110,8 @@ export default function KioskMode() {
     if (!videoRef.current || !canvasRef.current || !isScanning) return
     const video = videoRef.current
     if (!video.videoWidth || !video.videoHeight) return
+
+    try {
       const canvas = canvasRef.current
 
       // Size down for fast processing (640x480 max)

@@ -10,6 +10,7 @@
  */
 
 import Company from "../models/Company.js";
+import { evaluateShiftAttendance } from "../utils/shiftEvaluator.js";
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://localhost:8000";
 
@@ -294,22 +295,29 @@ export const verifyAndCheckInFace = async (req, res) => {
         attRecord.checkInTime = attRecord.checkInTime || now;
         actionType = "CHECK_IN";
       }
-      attRecord.status = "Present";
-      attRecord.verificationMethod = "Facial Recognition";
-      attRecord.confidence = verificationResult.confidence;
     } else {
       attRecord = {
         employeeId: matchedEmployeeId,
         date: today,
-        status: "Present",
-        verificationMethod: "Facial Recognition",
-        confidence: verificationResult.confidence,
         checkInTime: now,
         checkOutTime: null,
       };
       company.attendance.push(attRecord);
       actionType = "CHECK_IN";
     }
+
+    // Evaluate shift status, remarks, and work duration
+    const shiftEval = evaluateShiftAttendance(
+      attRecord.checkInTime,
+      attRecord.checkOutTime,
+      company.shiftSettings || {}
+    );
+
+    attRecord.status = shiftEval.status;
+    attRecord.remarks = shiftEval.remarks;
+    attRecord.workDurationMinutes = shiftEval.workDurationMinutes;
+    attRecord.verificationMethod = "Facial Recognition";
+    attRecord.confidence = verificationResult.confidence;
 
     // Update cooldown map
     scansCooldownMap.set(matchedEmployeeId, nowMs);

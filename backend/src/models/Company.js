@@ -82,8 +82,16 @@ const attendanceSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["Present", "Absent", "Leave"],
+    enum: ["Present", "Late", "Half Day", "Absent", "Leave"],
     default: "Present"
+  },
+  remarks: {
+    type: String,
+    default: ""
+  },
+  workDurationMinutes: {
+    type: Number,
+    default: null
   },
   verificationMethod: {
     type: String,
@@ -164,6 +172,21 @@ const companySchema = new mongoose.Schema(
       default: "Active",
     },
     
+    shiftSettings: {
+      startTime: {
+        type: String,
+        default: "09:00",
+      },
+      endTime: {
+        type: String,
+        default: "17:00",
+      },
+      gracePeriodMinutes: {
+        type: Number,
+        default: 15,
+      },
+    },
+
     // Embedded Sub-collections
     employees: [employeeSchema],
     attendance: [attendanceSchema],
