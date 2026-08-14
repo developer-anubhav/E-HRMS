@@ -18,6 +18,7 @@ from core.detection import detect_and_align
 from core.preprocessing import preprocess_face
 from core.facenet_model import get_model, get_device
 from core.quality import check_image_quality
+from core.liveness import check_liveness, check_eye_blink_liveness
 from core.recognition import identify_face_1toN, verify_face_1to1
 
 logger = logging.getLogger("face-service.verify")
@@ -26,8 +27,9 @@ router = APIRouter()
 
 
 class VerifyRequest(BaseModel):
-    """Request body containing a single captured image frame."""
-    image: str                          # base64 encoded image string
+    """Request body containing captured image frame(s)."""
+    image: str                          # base64 encoded image string (current frame)
+    prev_image: Optional[str] = None    # optional previous frame (~250ms prior) for eye blink check
     employee_id: Optional[str] = None   # optional employee MongoDB _id for 1:1 check
 
 
@@ -82,14 +84,52 @@ async def verify_face_1toN_endpoint(body: VerifyRequest):
 
     # 3. Detection & alignment
     try:
-        face_tensor = detect_and_align(img)
+        face_tensor, landmarks = detect_and_align(img)
     except ValueError as ve:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(ve),
         )
 
-    # 4. Preprocess & embed
+    # 4. Anti-Spoofing & Liveness Check
+    is_live, liveness_score, spoof_reason = check_liveness(img, landmarks)
+    if not is_live:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Anti-spoofing check failed: {spoof_reason}",
+        )
+
+    # 4b. Dual-frame Eye Blink & Motion Check (Required for Anti-Spoofing)
+    if not body.prev_image:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Anti-spoofing check failed: Dual-frame camera stream required for eye blink verification.",
+        )
+
+    try:
+        prev_img = _decode_base64(body.prev_image)
+        _, prev_landmarks = detect_and_align(prev_img)
+    except ValueError as ve:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Anti-spoofing check failed on frame 1: {str(ve)}",
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Anti-spoofing frame 1 error: {str(exc)}",
+        )
+
+    is_blink_live, blink_score, blink_reason = check_eye_blink_liveness(
+        img, prev_img, landmarks, prev_landmarks
+    )
+    if not is_blink_live:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=f"Anti-spoofing check failed: {blink_reason}",
+        )
+
+    # 5. Preprocess & embed
     model = get_model()
     device = get_device()
     face_tensor = preprocess_face(face_tensor)

@@ -33,13 +33,15 @@ export const deleteFaceProfile = (employeeMongoId) =>
   api.delete(`/face/profile/${employeeMongoId}`);
 
 /**
- * Verify a face image frame and record attendance for the recognized employee.
- * @param {string} image - Base64 encoded image frame
+ * Verify face image frame(s) and record attendance for the recognized employee.
+ * @param {string} image - Base64 encoded image frame (current)
  * @param {string} [employeeMongoId] - Optional employee MongoDB _id for 1:1 check
+ * @param {string} [prevImage] - Optional previous frame base64 (~250ms prior) for eye blink check
  */
-export const verifyAndCheckIn = (image, employeeMongoId = null) =>
+export const verifyAndCheckIn = (image, employeeMongoId = null, prevImage = null) =>
   api.post("/face/verify-checkin", {
     image,
+    prevImage,
     employeeId: employeeMongoId,
   });
 

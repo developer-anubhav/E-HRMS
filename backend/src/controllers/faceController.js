@@ -206,7 +206,7 @@ export const deleteFaceProfile = async (req, res) => {
 // ---------------------------------------------------------------------------
 export const verifyAndCheckInFace = async (req, res) => {
   try {
-    const { image, employeeId } = req.body; // image: base64, employeeId optional for 1:1
+    const { image, prevImage, employeeId } = req.body; // image: base64, prevImage: base64 (~250ms prior)
 
     if (!image) {
       return res.status(400).json({ message: "No image frame provided for verification" });
@@ -214,6 +214,9 @@ export const verifyAndCheckInFace = async (req, res) => {
 
     // 1. Call Python face-service /face/verify
     const pyPayload = { image };
+    if (prevImage) {
+      pyPayload.prev_image = prevImage;
+    }
     if (employeeId) {
       pyPayload.employee_id = employeeId;
     }

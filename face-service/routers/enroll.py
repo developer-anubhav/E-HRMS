@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from core.detection import detect_and_align
 from core.preprocessing import preprocess_face
 from core.facenet_model import get_model, get_device
+from core.liveness import check_liveness
 from core.embedding_store import (
     save_profile,
     load_profile,
@@ -135,9 +136,16 @@ async def enroll_face(employee_id: str, body: EnrollRequest):
                 continue
 
             # 3. Face detection + alignment
-            face_tensor = detect_and_align(img)
+            face_tensor, landmarks = detect_and_align(img)
 
-            # 4. Preprocess
+            # 4. Anti-spoofing check
+            is_live, liveness_score, spoof_reason = check_liveness(img, landmarks)
+            if not is_live:
+                rejected.append(f"{image_label}: {spoof_reason}")
+                logger.warning(f"[{employee_id}] {image_label} rejected — {spoof_reason}")
+                continue
+
+            # 5. Preprocess
             face_tensor = preprocess_face(face_tensor)
 
             # 5. FaceNet embedding

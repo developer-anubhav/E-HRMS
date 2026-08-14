@@ -29,6 +29,7 @@ export default function KioskMode() {
   const canvasRef = useRef(null)
   const streamRef = useRef(null)
   const autoScanTimerRef = useRef(null)
+  const lastFrameRef = useRef(null)
 
   /* ---------------------------------------------------------------- state */
   const [cameraReady, setCameraReady] = useState(false)
@@ -132,17 +133,27 @@ export default function KioskMode() {
       canvas.width = w
       canvas.height = h
 
+      // Frame 1 (prevFrame)
       const ctx = canvas.getContext("2d")
       ctx.translate(canvas.width, 0)
       ctx.scale(-1, 1)
       ctx.drawImage(video, 0, 0, w, h)
+      const prevFrame = canvas.toDataURL("image/jpeg", 0.80)
 
-      const b64Frame = canvas.toDataURL("image/jpeg", 0.80)
+      // Wait 250ms for eye blink / facial movement
+      await new Promise(r => setTimeout(r, 250))
+
+      // Frame 2 (currentFrame)
+      ctx.setTransform(1, 0, 0, 1, 0, 0)
+      ctx.translate(canvas.width, 0)
+      ctx.scale(-1, 1)
+      ctx.drawImage(video, 0, 0, w, h)
+      const currentFrame = canvas.toDataURL("image/jpeg", 0.80)
 
       setFramesProcessed(prev => prev + 1)
 
-      // Send to backend verification
-      const res = await verifyAndCheckIn(b64Frame, null)
+      // Send to backend verification with prevFrame for eye blink check
+      const res = await verifyAndCheckIn(currentFrame, null, prevFrame)
       const data = res.data
 
       if (data.matched && data.actionType !== "COOLDOWN") {

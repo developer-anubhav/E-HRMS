@@ -70,8 +70,8 @@ def detect_and_align(img_bgr: np.ndarray) -> torch.Tensor:
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(img_rgb)
 
-    # Detect all faces + probabilities + bounding boxes
-    boxes, probs = mtcnn.detect(pil_image)
+    # Detect all faces + probabilities + bounding boxes + landmarks
+    boxes, probs, landmarks = mtcnn.detect(pil_image, landmarks=True)
 
     # -----------------------------------------------------------------------
     # Validation: face count
@@ -110,8 +110,6 @@ def detect_and_align(img_bgr: np.ndarray) -> torch.Tensor:
 
     # -----------------------------------------------------------------------
     # Extract aligned face tensor
-    # Use a single-face MTCNN (keep_all=False) for the actual extraction
-    # to get the properly aligned 160×160 output tensor.
     # -----------------------------------------------------------------------
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     mtcnn_single = MTCNN(
@@ -133,9 +131,11 @@ def detect_and_align(img_bgr: np.ndarray) -> torch.Tensor:
             "Please try again with better lighting."
         )
 
+    first_landmarks = landmarks[0] if (landmarks is not None and len(landmarks) > 0) else None
+
     logger.debug(
         f"Face detected — bbox=({int(x1)},{int(y1)},{int(x2)},{int(y2)}), "
         f"size={int(face_w)}×{int(face_h)}, confidence={confidence:.3f}"
     )
 
-    return face_tensor  # shape: (3, 160, 160), values in [0, 255]
+    return face_tensor, first_landmarks

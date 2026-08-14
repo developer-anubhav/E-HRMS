@@ -104,14 +104,24 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
       canvas.width = w
       canvas.height = h
 
+      // Capture Frame 1
       const ctx = canvas.getContext("2d")
       ctx.translate(canvas.width, 0)
       ctx.scale(-1, 1)
       ctx.drawImage(video, 0, 0, w, h)
+      const prevFrame = canvas.toDataURL("image/jpeg", 0.80)
 
-      const b64Frame = canvas.toDataURL("image/jpeg", 0.80)
+      // Wait 250ms for eye blink / natural motion
+      await new Promise(r => setTimeout(r, 250))
 
-      const response = await verifyAndCheckIn(b64Frame, selectedEmployeeId || null)
+      // Capture Frame 2
+      ctx.setTransform(1, 0, 0, 1, 0, 0) // reset transform
+      ctx.translate(canvas.width, 0)
+      ctx.scale(-1, 1)
+      ctx.drawImage(video, 0, 0, w, h)
+      const currentFrame = canvas.toDataURL("image/jpeg", 0.80)
+
+      const response = await verifyAndCheckIn(currentFrame, selectedEmployeeId || null, prevFrame)
       setResult(response.data)
       onAttendanceMarked?.(response.data)
     } catch (err) {
@@ -175,7 +185,7 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
                 </span>
               </h2>
               <p className="text-xs text-slate-400">
-                Stand in front of the camera for instant face verification & check-in
+                Face the camera directly and blink your eyes to check in
               </p>
             </div>
           </div>
