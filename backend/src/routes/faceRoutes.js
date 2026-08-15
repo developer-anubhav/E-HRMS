@@ -4,6 +4,7 @@ import {
   getFaceProfile,
   deleteFaceProfile,
   verifyAndCheckInFace,
+  mobileCheckIn,
   getFacialAnalytics,
   getFacialAuditLogs,
 } from "../controllers/faceController.js";
@@ -20,7 +21,8 @@ router.post("/enroll/:employeeId", protect, enrollFace);
 router.get("/profile/:employeeId", protect, getFaceProfile);
 router.delete("/profile/:employeeId", protect, deleteFaceProfile);
 
-// Facial Attendance Verification Check-In
+// Facial Attendance Verification Check-In & Mobile Check-In
 router.post("/verify-checkin", protect, verifyAndCheckInFace);
+router.post("/mobile-checkin", protect, mobileCheckIn);
 
 export default router;

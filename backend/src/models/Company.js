@@ -95,7 +95,7 @@ const attendanceSchema = new mongoose.Schema({
   },
   verificationMethod: {
     type: String,
-    enum: ["Manual", "Facial Recognition"],
+    enum: ["Manual", "Facial Recognition", "Mobile Self Check-In", "Camera Kiosk"],
     default: "Manual"
   },
   confidence: {
@@ -108,6 +108,27 @@ const attendanceSchema = new mongoose.Schema({
   },
   checkOutTime: {
     type: Date,
+    default: null
+  },
+  gpsLatitude: {
+    type: Number,
+    default: null
+  },
+  gpsLongitude: {
+    type: Number,
+    default: null
+  },
+  gpsAccuracy: {
+    type: Number,
+    default: null
+  },
+  geofenceStatus: {
+    type: String,
+    enum: ["PASSED", "FAILED", "NOT_REQUIRED"],
+    default: "NOT_REQUIRED"
+  },
+  distanceFromLocationMeters: {
+    type: Number,
     default: null
   }
 }, { timestamps: true });
@@ -184,6 +205,29 @@ const companySchema = new mongoose.Schema(
       gracePeriodMinutes: {
         type: Number,
         default: 15,
+      },
+    },
+
+    workLocation: {
+      name: {
+        type: String,
+        default: "Main Office / HQ",
+      },
+      latitude: {
+        type: Number,
+        default: 12.9716, // Default to Bangalore HQ coordinates (configurable)
+      },
+      longitude: {
+        type: Number,
+        default: 77.5946,
+      },
+      radiusMeters: {
+        type: Number,
+        default: 200, // Allowed radius in meters
+      },
+      enabled: {
+        type: Boolean,
+        default: true,
       },
     },
 

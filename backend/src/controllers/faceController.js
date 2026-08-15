@@ -11,6 +11,7 @@
 
 import Company from "../models/Company.js";
 import { evaluateShiftAttendance } from "../utils/shiftEvaluator.js";
+import { validateGeofence } from "../utils/geofenceValidator.js";
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://localhost:8000";
 
@@ -368,6 +369,190 @@ export const verifyAndCheckInFace = async (req, res) => {
 };
 
 // ---------------------------------------------------------------------------
+// POST /api/face/mobile-checkin
+// Mobile selfie check-in with GPS Geofencing & Face Verification
+// ---------------------------------------------------------------------------
+export const mobileCheckIn = async (req, res) => {
+  try {
+    const { image, prevImage, latitude, longitude, accuracy, employeeId } = req.body;
+
+    if (!image) {
+      return res.status(400).json({ message: "No selfie camera frame provided" });
+    }
+
+    let company;
+    if (req.user?.companyId) {
+      company = await Company.findById(req.user.companyId);
+    }
+    if (!company) {
+      company = await Company.findOne();
+    }
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
+
+    // 1. Geofence Verification Check
+    const geofenceResult = validateGeofence(
+      { latitude, longitude, accuracy },
+      company.workLocation || {}
+    );
+
+    if (!geofenceResult.insideGeofence) {
+      return res.status(422).json({
+        success: false,
+        matched: false,
+        geofencePassed: false,
+        geofenceResult,
+        message: geofenceResult.message || "Attendance rejected: Device is outside approved workplace geofence radius.",
+      });
+    }
+
+    // 2. Call Face Recognition Service (FaceNet + Eye Blink Liveness)
+    const pyPayload = { image };
+    if (prevImage) pyPayload.prev_image = prevImage;
+    if (employeeId) pyPayload.employee_id = employeeId;
+
+    const verificationResult = await callFaceService("/face/verify", {
+      method: "POST",
+      body: JSON.stringify(pyPayload),
+    });
+
+    if (!verificationResult.matched || !verificationResult.employee_id) {
+      return res.status(422).json({
+        success: false,
+        matched: false,
+        geofencePassed: true,
+        geofenceResult,
+        message: verificationResult.message || "Face not recognized. Please capture a clear selfie.",
+      });
+    }
+
+    const matchedEmployeeId = verificationResult.employee_id;
+    const employee = company.employees.id(matchedEmployeeId);
+    if (!employee) {
+      return res.status(404).json({
+        message: "Matched employee does not belong to your company",
+      });
+    }
+
+    // 3. Attendance Cooldown Check (10 seconds)
+    const nowMs = Date.now();
+    const COOLDOWN_MS = 10 * 1000;
+    const lastScanMs = scansCooldownMap.get(matchedEmployeeId) || 0;
+
+    if (nowMs - lastScanMs < COOLDOWN_MS) {
+      return res.json({
+        success: true,
+        matched: true,
+        actionType: "COOLDOWN",
+        employee: {
+          _id: employee._id,
+          employeeId: employee.employeeId,
+          name: employee.name,
+          department: employee.department,
+          role: employee.role,
+        },
+        message: `Cooldown active for ${employee.name}. Please wait a few seconds before checking in again.`,
+      });
+    }
+
+    // 4. Update or Record Attendance in Company DB
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const existingAttIndex = company.attendance.findIndex(
+      (att) =>
+        att.employeeId.toString() === matchedEmployeeId.toString() &&
+        new Date(att.date).setUTCHours(0, 0, 0, 0) === today.getTime()
+    );
+
+    let attRecord;
+    const now = new Date();
+    let actionType = "CHECK_IN";
+
+    if (existingAttIndex >= 0) {
+      attRecord = company.attendance[existingAttIndex];
+      const checkInMs = attRecord.checkInTime ? new Date(attRecord.checkInTime).getTime() : 0;
+
+      if (attRecord.checkInTime && (!attRecord.checkOutTime || (now.getTime() - checkInMs > 60000))) {
+        attRecord.checkOutTime = now;
+        actionType = "CHECK_OUT";
+      } else {
+        attRecord.checkInTime = attRecord.checkInTime || now;
+        actionType = "CHECK_IN";
+      }
+    } else {
+      attRecord = {
+        employeeId: matchedEmployeeId,
+        date: today,
+        checkInTime: now,
+        checkOutTime: null,
+      };
+      company.attendance.push(attRecord);
+      actionType = "CHECK_IN";
+    }
+
+    // Evaluate shift timings
+    const shiftEval = evaluateShiftAttendance(
+      attRecord.checkInTime,
+      attRecord.checkOutTime,
+      company.shiftSettings || {}
+    );
+
+    attRecord.status = shiftEval.status;
+    attRecord.remarks = shiftEval.remarks;
+    attRecord.workDurationMinutes = shiftEval.workDurationMinutes;
+    attRecord.verificationMethod = "Mobile Self Check-In";
+    attRecord.confidence = verificationResult.confidence;
+    attRecord.gpsLatitude = Number(latitude) || null;
+    attRecord.gpsLongitude = Number(longitude) || null;
+    attRecord.gpsAccuracy = Number(accuracy) || null;
+    attRecord.geofenceStatus = geofenceResult.geofenceStatus;
+    attRecord.distanceFromLocationMeters = geofenceResult.distanceMeters;
+
+    scansCooldownMap.set(matchedEmployeeId, nowMs);
+    await company.save();
+
+    const savedRecord = company.attendance[existingAttIndex >= 0 ? existingAttIndex : company.attendance.length - 1];
+    const actionText = actionType === "CHECK_OUT" ? "Mobile Check-Out" : "Mobile Check-In";
+
+    return res.json({
+      success: true,
+      matched: true,
+      actionType,
+      employee: {
+        _id: employee._id,
+        employeeId: employee.employeeId,
+        name: employee.name,
+        department: employee.department,
+        role: employee.role,
+        email: employee.email,
+      },
+      verification: {
+        confidence: verificationResult.confidence,
+        similarity: verificationResult.similarity,
+        distance: verificationResult.distance,
+        liveness: verificationResult.liveness,
+      },
+      geofence: geofenceResult,
+      attendance: savedRecord,
+      message: `${actionText} verified for ${employee.name}! (${geofenceResult.distanceMeters}m from ${company.workLocation?.name || 'office'})`,
+    });
+  } catch (err) {
+    console.error("[FaceController] mobileCheckIn error:", err.message);
+    if (err.status === 422) {
+      return res.status(422).json({ matched: false, message: err.message });
+    }
+    if (err.code === "ECONNREFUSED" || err.cause?.code === "ECONNREFUSED") {
+      return res.status(503).json({
+        message: "Face recognition service is unavailable. Please check if face-service is running.",
+      });
+    }
+    return res.status(500).json({ message: err.message || "Internal server error" });
+  }
+};
+
+// ---------------------------------------------------------------------------
 // GET /api/face/analytics
 // Aggregate facial recognition attendance metrics for HR Dashboard
 // ---------------------------------------------------------------------------
@@ -391,14 +576,23 @@ export const getFacialAnalytics = async (req, res) => {
     let confidenceCount = 0;
 
     const confDist = { high: 0, normal: 0, borderline: 0 };
-    const methodBreakdown = { facial: 0, manual: 0 };
+    const methodBreakdown = { facial: 0, mobile: 0, manual: 0 };
     const hourlyCounts = Array(24).fill(0);
+    let geofencePassedCount = 0;
 
     allRecords.forEach(att => {
-      const isFacial = att.verificationMethod === "Facial Recognition";
-      if (isFacial) {
+      const isFacial = att.verificationMethod === "Facial Recognition" || att.verificationMethod === "Camera Kiosk";
+      const isMobile = att.verificationMethod === "Mobile Self Check-In";
+
+      if (isFacial || isMobile) {
         facialTotal++;
-        methodBreakdown.facial++;
+        if (isMobile) methodBreakdown.mobile++;
+        else methodBreakdown.facial++;
+
+        if (att.geofenceStatus === "PASSED") {
+          geofencePassedCount++;
+        }
+
         if (att.confidence) {
           confidenceSum += att.confidence;
           confidenceCount++;
@@ -417,12 +611,13 @@ export const getFacialAnalytics = async (req, res) => {
       }
 
       if (new Date(att.date).toDateString() === todayStr) {
-        if (isFacial) facialToday++;
+        if (isFacial || isMobile) facialToday++;
         else manualToday++;
       }
     });
 
     const totalToday = facialToday + manualToday;
+    const roundNumber = (num, decimals) => Number(Math.round(num + "e" + decimals) + "e-" + decimals);
     const adoptionRate = totalToday > 0 ? roundNumber((facialToday / totalToday) * 100, 1) : 0;
     const avgConfidence = confidenceCount > 0 ? roundNumber(confidenceSum / confidenceCount, 1) : 0;
 
@@ -442,7 +637,9 @@ export const getFacialAnalytics = async (req, res) => {
         enrolledEmployees,
         totalEmployees,
         enrollmentPercentage: totalEmployees > 0 ? roundNumber((enrolledEmployees / totalEmployees) * 100, 1) : 0,
+        geofencePassedCount,
       },
+      workLocation: company.workLocation || {},
       confidenceDistribution: confDist,
       methodBreakdown,
       hourlyCheckIns: hourlyCounts,

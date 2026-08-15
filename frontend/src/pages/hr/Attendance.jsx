@@ -18,7 +18,8 @@ import EditAttendanceForm from "../../components/hr/EditAttendanceForm"
 import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
 import ShiftSettingsModal from "../../components/hr/ShiftSettingsModal"
 import FacialAnalyticsModal from "../../components/hr/FacialAnalyticsModal"
-import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info, Activity } from "lucide-react"
+import WorkLocationModal from "../../components/WorkLocationModal"
+import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info, Activity, MapPin, Smartphone, Navigation } from "lucide-react"
 
 export default function Attendance() {
   const navigate = useNavigate()
@@ -38,6 +39,7 @@ export default function Attendance() {
   const [openFacialCheckIn, setOpenFacialCheckIn] = useState(false)
   const [openShiftModal, setOpenShiftModal] = useState(false)
   const [openAnalyticsModal, setOpenAnalyticsModal] = useState(false)
+  const [openLocationModal, setOpenLocationModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // =========================
@@ -174,6 +176,15 @@ export default function Attendance() {
 
         <div className="flex items-center gap-3">
           <button
+            onClick={() => setOpenLocationModal(true)}
+            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            title="Configure Work Location GPS & Geofence Radius"
+          >
+            <MapPin size={18} className="text-emerald-400" />
+            <span>Geofence Settings</span>
+          </button>
+
+          <button
             onClick={() => setOpenAnalyticsModal(true)}
             className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
             title="View Biometric Facial Analytics & Audit Trail"
@@ -189,6 +200,15 @@ export default function Attendance() {
           >
             <Clock size={18} className="text-cyan-400" />
             <span>Shift Settings</span>
+          </button>
+
+          <button
+            onClick={() => navigate("/mobile-checkin")}
+            className="flex items-center gap-2 rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 font-bold text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all"
+            title="Open Mobile Self Check-In Page"
+          >
+            <Smartphone size={18} className="text-blue-400" />
+            <span>Mobile Check-In</span>
           </button>
 
           <button
@@ -386,7 +406,16 @@ export default function Attendance() {
 
                       <td className="p-4 text-xs whitespace-nowrap">
                         <div className="flex flex-col gap-0.5">
-                          {item.verificationMethod === "Facial Recognition" ? (
+                          {item.verificationMethod === "Mobile Self Check-In" ? (
+                            <div className="flex flex-col gap-0.5">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400">
+                                <Smartphone size={12} /> Mobile Selfie {item.confidence ? `(${item.confidence}%)` : ""}
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
+                                <MapPin size={10} /> Geofence Passed {item.distanceFromLocationMeters !== null ? `(${item.distanceFromLocationMeters}m)` : ""}
+                              </span>
+                            </div>
+                          ) : item.verificationMethod === "Facial Recognition" || item.verificationMethod === "Camera Kiosk" ? (
                             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
                               <ShieldCheck size={12} /> Face ID {item.confidence ? `(${item.confidence}%)` : ""}
                             </span>
@@ -459,6 +488,15 @@ export default function Attendance() {
       <FacialAnalyticsModal
         isOpen={openAnalyticsModal}
         onClose={() => setOpenAnalyticsModal(false)}
+      />
+
+      {/* WORK LOCATION & GEOFENCE MODAL */}
+      <WorkLocationModal
+        isOpen={openLocationModal}
+        onClose={() => setOpenLocationModal(false)}
+        onSaveSuccess={() => {
+          fetchAttendance()
+        }}
       />
         </>
       )}

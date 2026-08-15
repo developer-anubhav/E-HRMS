@@ -46,6 +46,23 @@ export const verifyAndCheckIn = (image, employeeMongoId = null, prevImage = null
   });
 
 /**
+ * Perform Mobile Selfie Check-In with GPS Geofencing verification.
+ * @param {object} payload - { image, prevImage, latitude, longitude, accuracy, employeeId }
+ */
+export const mobileCheckIn = (payload) => api.post("/face/mobile-checkin", payload);
+
+/**
+ * Fetch company work location & geofence settings.
+ */
+export const getWorkLocation = () => api.get("/admin/work-location");
+
+/**
+ * Update company work location & geofence settings.
+ * @param {object} locationData - { name, latitude, longitude, radiusMeters, enabled }
+ */
+export const updateWorkLocation = (locationData) => api.put("/admin/work-location", locationData);
+
+/**
  * Fetch aggregate facial attendance metrics for HR Analytics Dashboard.
  */
 export const getFacialAnalytics = () => api.get("/face/analytics");

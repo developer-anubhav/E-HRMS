@@ -25,6 +25,9 @@ app.use("/api/search", searchRoutes)
 import faceRoutes from "./routes/faceRoutes.js"
 app.use("/api/face", faceRoutes)
 
+import adminRoutes from "./routes/adminRoutes.js"
+app.use("/api/admin", adminRoutes)
+
 const PORT = process.env.PORT || 5000
 
 // We wrap startup in an async function to ensure DB is ready before server accepts requests
