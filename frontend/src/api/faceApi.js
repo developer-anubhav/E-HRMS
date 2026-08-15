@@ -73,3 +73,20 @@ export const getFacialAnalytics = () => api.get("/face/analytics");
  */
 export const getFacialAuditLogs = (params = {}) => api.get("/face/audit-logs", { params });
 
+/**
+ * Fetch biometric security & model calibration settings.
+ */
+export const getBiometricSettings = () => api.get("/face/settings");
+
+/**
+ * Update face recognition match threshold settings.
+ * @param {object} settings - { matchThreshold }
+ */
+export const updateBiometricSettings = (settings) => api.post("/face/settings", settings);
+
+/**
+ * Purge old facial audit log records older than N days.
+ * @param {object} payload - { retentionDays }
+ */
+export const cleanupAuditLogs = (payload) => api.post("/face/cleanup-audit", payload);
+

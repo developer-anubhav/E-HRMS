@@ -19,7 +19,7 @@ from core.preprocessing import preprocess_face
 from core.facenet_model import get_model, get_device
 from core.quality import check_image_quality
 from core.liveness import check_liveness, check_eye_blink_liveness
-from core.recognition import identify_face_1toN, verify_face_1to1
+from core.recognition import identify_face_1toN, verify_face_1to1, get_match_threshold, set_match_threshold
 
 logger = logging.getLogger("face-service.verify")
 
@@ -180,3 +180,18 @@ async def verify_face_1toN_endpoint(body: VerifyRequest):
 async def verify_face_1to1_endpoint(employee_id: str, body: VerifyRequest):
     body.employee_id = employee_id
     return await verify_face_1toN_endpoint(body)
+
+
+class ThresholdRequest(BaseModel):
+    threshold: float
+
+
+@router.get("/threshold", summary="Get current face recognition similarity threshold")
+async def get_threshold_endpoint():
+    return {"threshold": get_match_threshold()}
+
+
+@router.post("/threshold", summary="Update face recognition similarity threshold")
+async def update_threshold_endpoint(body: ThresholdRequest):
+    new_val = set_match_threshold(body.threshold)
+    return {"success": True, "threshold": new_val, "message": f"Match threshold updated to {new_val}"}

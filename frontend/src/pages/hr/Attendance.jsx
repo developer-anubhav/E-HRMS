@@ -19,7 +19,8 @@ import FacialCheckInModal from "../../components/hr/FacialCheckInModal"
 import ShiftSettingsModal from "../../components/hr/ShiftSettingsModal"
 import FacialAnalyticsModal from "../../components/hr/FacialAnalyticsModal"
 import WorkLocationModal from "../../components/WorkLocationModal"
-import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info, Activity, MapPin, Smartphone, Navigation } from "lucide-react"
+import BiometricSettingsModal from "../../components/hr/BiometricSettingsModal"
+import { ScanFace, Sparkles, ShieldCheck, Clock, CheckCircle2, AlertCircle, Info, Activity, MapPin, Smartphone, Navigation, ShieldAlert } from "lucide-react"
 
 export default function Attendance() {
   const navigate = useNavigate()
@@ -40,6 +41,7 @@ export default function Attendance() {
   const [openShiftModal, setOpenShiftModal] = useState(false)
   const [openAnalyticsModal, setOpenAnalyticsModal] = useState(false)
   const [openLocationModal, setOpenLocationModal] = useState(false)
+  const [openSecurityModal, setOpenSecurityModal] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // =========================
@@ -175,6 +177,15 @@ export default function Attendance() {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setOpenSecurityModal(true)}
+            className="flex items-center gap-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 font-bold text-indigo-300 hover:bg-indigo-500/20 hover:text-white transition-all"
+            title="Biometric Security, Encryption & Threshold Calibration"
+          >
+            <ShieldCheck size={18} className="text-indigo-400" />
+            <span>Biometric Protection</span>
+          </button>
+
           <button
             onClick={() => setOpenLocationModal(true)}
             className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
@@ -497,6 +508,12 @@ export default function Attendance() {
         onSaveSuccess={() => {
           fetchAttendance()
         }}
+      />
+
+      {/* BIOMETRIC SECURITY & THRESHOLD MODAL */}
+      <BiometricSettingsModal
+        isOpen={openSecurityModal}
+        onClose={() => setOpenSecurityModal(false)}
       />
         </>
       )}

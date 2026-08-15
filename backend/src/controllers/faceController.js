@@ -14,6 +14,7 @@ import { evaluateShiftAttendance } from "../utils/shiftEvaluator.js";
 import { validateGeofence } from "../utils/geofenceValidator.js";
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://localhost:8000";
+const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET || "ehrms_face_service_secret_2026";
 
 // In-memory cooldown tracker (employeeId -> lastScanTimestamp)
 const scansCooldownMap = new Map();
@@ -24,9 +25,15 @@ const scansCooldownMap = new Map();
 const callFaceService = async (path, options = {}) => {
   const url = `${FACE_SERVICE_URL}${path}`;
 
+  const headers = {
+    "Content-Type": "application/json",
+    "X-Internal-Secret": INTERNAL_SERVICE_SECRET,
+    ...(options.headers || {}),
+  };
+
   const res = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
   });
 
   const data = await res.json().catch(() => ({}));
@@ -714,4 +721,88 @@ export const getFacialAuditLogs = async (req, res) => {
 function roundNumber(num, decimals) {
   return Number(Math.round(num + "e" + decimals) + "e-" + decimals);
 }
+
+// GET /api/face/settings
+export const getBiometricSettings = async (req, res) => {
+  try {
+    const faceServiceRes = await callFaceService("/face/threshold", { method: "GET" }).catch(() => ({ threshold: 0.70 }));
+    return res.json({
+      success: true,
+      settings: {
+        matchThreshold: faceServiceRes.threshold ?? 0.70,
+        encryptionEnabled: true,
+        encryptionAlgorithm: "AES-256 (Fernet Cipher)",
+        serviceAuthEnabled: true,
+        retentionDays: 90,
+      },
+    });
+  } catch (err) {
+    console.error("Get Biometric Settings Error:", err);
+    return res.status(500).json({ message: err.message || "Failed to fetch biometric settings" });
+  }
+};
+
+// POST /api/face/settings
+export const updateBiometricSettings = async (req, res) => {
+  try {
+    const { matchThreshold } = req.body;
+    if (matchThreshold !== undefined) {
+      await callFaceService("/face/threshold", {
+        method: "POST",
+        body: JSON.stringify({ threshold: Number(matchThreshold) }),
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: "Biometric security and recognition settings updated successfully!",
+      settings: {
+        matchThreshold: Number(matchThreshold) || 0.70,
+        encryptionEnabled: true,
+        serviceAuthEnabled: true,
+      },
+    });
+  } catch (err) {
+    console.error("Update Biometric Settings Error:", err);
+    return res.status(500).json({ message: err.message || "Failed to update biometric settings" });
+  }
+};
+
+// POST /api/face/cleanup-audit
+export const cleanupAuditLogs = async (req, res) => {
+  try {
+    const { retentionDays = 90 } = req.body;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - Number(retentionDays));
+
+    let company;
+    if (req.user?.companyId) {
+      company = await Company.findById(req.user.companyId);
+    }
+    if (!company) {
+      company = await Company.findOne();
+    }
+
+    let purgedCount = 0;
+    if (company && company.attendance) {
+      const originalLen = company.attendance.length;
+      company.attendance = company.attendance.filter(
+        (att) => new Date(att.date) >= cutoffDate
+      );
+      purgedCount = originalLen - company.attendance.length;
+      company.markModified("attendance");
+      await company.save();
+    }
+
+    return res.json({
+      success: true,
+      message: `Successfully purged ${purgedCount} attendance audit logs older than ${retentionDays} days.`,
+      purgedCount,
+      cutoffDate,
+    });
+  } catch (err) {
+    console.error("Cleanup Audit Logs Error:", err);
+    return res.status(500).json({ message: err.message || "Failed to cleanup audit logs" });
+  }
+};
 

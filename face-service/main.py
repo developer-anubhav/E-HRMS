@@ -58,13 +58,35 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+import os
+from fastapi import Request, HTTPException, status, Depends
+from fastapi.security import APIKeyHeader
+
+INTERNAL_SERVICE_SECRET = os.getenv("INTERNAL_SERVICE_SECRET", "ehrms_face_service_secret_2026")
+api_key_header = APIKeyHeader(name="X-Internal-Secret", auto_error=False)
+
+
+async def verify_internal_secret(request: Request, key: str = Depends(api_key_header)):
+    if request.url.path in ["/", "/health", "/docs", "/openapi.json"]:
+        return key
+    if INTERNAL_SERVICE_SECRET == "off":
+        return key
+    if not key or key != INTERNAL_SERVICE_SECRET:
+        logger.warning(f"Unauthorized service attempt to {request.url.path}")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Unauthorized service-to-service request. Invalid or missing X-Internal-Secret header.",
+        )
+    return key
+
+
 # ---------------------------------------------------------------------------
 # Routers
 # ---------------------------------------------------------------------------
 from routers import enroll, verify
 
-app.include_router(enroll.router, prefix="/face", tags=["enrollment"])
-app.include_router(verify.router, prefix="/face", tags=["verification"])
+app.include_router(enroll.router, prefix="/face", tags=["enrollment"], dependencies=[Depends(verify_internal_secret)])
+app.include_router(verify.router, prefix="/face", tags=["verification"], dependencies=[Depends(verify_internal_secret)])
 
 
 @app.get("/", tags=["Health"])

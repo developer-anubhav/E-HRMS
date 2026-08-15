@@ -25,6 +25,18 @@ logger = logging.getLogger("face-service.recognition")
 MATCH_THRESHOLD = 0.70
 
 
+def get_match_threshold() -> float:
+    return float(MATCH_THRESHOLD)
+
+
+def set_match_threshold(new_threshold: float) -> float:
+    global MATCH_THRESHOLD
+    clamped = max(0.50, min(0.95, round(float(new_threshold), 2)))
+    MATCH_THRESHOLD = clamped
+    logger.info(f"Updated FaceNet recognition match threshold to {clamped}")
+    return clamped
+
+
 def compute_cosine_similarity(emb1: List[float], emb2: List[float]) -> float:
     """Compute cosine similarity between two 512-dim embedding vectors."""
     vec1 = np.array(emb1, dtype=np.float32)

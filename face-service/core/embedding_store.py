@@ -70,6 +70,57 @@ def _save_store(data: Dict[str, Any]) -> None:
         json.dump(data, f, indent=2)
 
 
+import base64
+import hashlib
+import json
+import logging
+import os
+
+_SECRET_KEY = os.getenv("EMBEDDING_ENCRYPTION_KEY", "E_HRMS_SECRET_BIOMETRIC_KEY_2026")
+
+
+def _get_cipher_key() -> bytes:
+    return hashlib.sha256(_SECRET_KEY.encode("utf-8")).digest()
+
+
+def _encrypt_vectors(embeddings: List[List[float]]) -> str:
+    """Serialize float matrix to JSON, then encrypt into base64 ciphertext string."""
+    raw_bytes = json.dumps(embeddings).encode("utf-8")
+    key = _get_cipher_key()
+
+    encrypted = bytearray()
+    for i, b in enumerate(raw_bytes):
+        key_byte = key[i % len(key)]
+        encrypted.append(b ^ key_byte)
+
+    return "enc_v1:" + base64.b64encode(bytes(encrypted)).decode("utf-8")
+
+
+def _decrypt_vectors(data_val: Any) -> List[List[float]]:
+    """Decrypt base64 ciphertext string back to float matrix."""
+    if isinstance(data_val, list):
+        # Plaintext fallback for existing legacy profiles
+        return data_val
+
+    if not isinstance(data_val, str) or not data_val.startswith("enc_v1:"):
+        return []
+
+    try:
+        raw_b64 = data_val.replace("enc_v1:", "", 1)
+        encrypted = base64.b64decode(raw_b64.encode("utf-8"))
+        key = _get_cipher_key()
+
+        decrypted = bytearray()
+        for i, b in enumerate(encrypted):
+            key_byte = key[i % len(key)]
+            decrypted.append(b ^ key_byte)
+
+        return json.loads(decrypted.decode("utf-8"))
+    except Exception as e:
+        logger.error(f"Failed to decrypt embedding vectors: {e}")
+        return []
+
+
 def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
@@ -85,10 +136,7 @@ def save_profile(
     model_version: str = "vggface2",
 ) -> None:
     """
-    Save (or replace) the face profile for the given employee.
-    employee_id      : MongoDB _id string (used as key)
-    employee_id_str  : Human-readable ID like "EMP102" (stored as metadata)
-    embeddings       : List of 512-dim float lists
+    Save (or replace) the face profile for the given employee with encryption.
     """
     with _lock:
         store = _load_store()
@@ -99,7 +147,9 @@ def save_profile(
 
         store[employee_id] = {
             "employee_id_str": employee_id_str,
-            "embeddings": embeddings,
+            "encrypted": True,
+            "embeddings": _encrypt_vectors(embeddings),
+            "embedding_count": len(embeddings),
             "model_version": model_version,
             "created_at": created_at,
             "updated_at": now,
@@ -108,14 +158,20 @@ def save_profile(
         _save_store(store)
 
     logger.info(
-        f"Saved {len(embeddings)} embedding(s) for employee {employee_id} ({employee_id_str})"
+        f"Encrypted & saved {len(embeddings)} embedding(s) for employee {employee_id} ({employee_id_str})"
     )
 
 
 def load_profile(employee_id: str) -> Optional[Dict[str, Any]]:
-    """Return the full profile dict for the given employee, or None if not found."""
+    """Return the full profile dict for the given employee with decrypted embeddings."""
     store = _load_store()
-    return store.get(employee_id)
+    prof = store.get(employee_id)
+    if not prof:
+        return None
+
+    decrypted_prof = dict(prof)
+    decrypted_prof["embeddings"] = _decrypt_vectors(prof.get("embeddings"))
+    return decrypted_prof
 
 
 def profile_exists(employee_id: str) -> bool:
@@ -127,7 +183,6 @@ def profile_exists(employee_id: str) -> bool:
 def delete_profile(employee_id: str) -> bool:
     """
     Delete the face profile for the given employee.
-    Returns True if deleted, False if it did not exist.
     """
     with _lock:
         store = _load_store()
@@ -141,5 +196,11 @@ def delete_profile(employee_id: str) -> bool:
 
 
 def load_all_profiles() -> Dict[str, Any]:
-    """Return the full embedding store (used for batch recognition in Phase 3)."""
-    return _load_store()
+    """Return all profiles with decrypted embeddings."""
+    raw_store = _load_store()
+    decrypted_store = {}
+    for emp_id, prof in raw_store.items():
+        copy_prof = dict(prof)
+        copy_prof["embeddings"] = _decrypt_vectors(prof.get("embeddings"))
+        decrypted_store[emp_id] = copy_prof
+    return decrypted_store
