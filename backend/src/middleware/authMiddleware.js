@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken"
+import Company from "../models/Company.js"
 
 export const protect = async (req, res, next) => {
 
@@ -15,7 +16,6 @@ export const protect = async (req, res, next) => {
     
     // Check if company is active
     if (req.user.role === "ADMIN" && req.user.companyId) {
-      const Company = require("../models/Company.js")
       const company = await Company.findById(req.user.companyId)
       if (!company) {
         return res.status(403).json({ message: "Company not found" })
