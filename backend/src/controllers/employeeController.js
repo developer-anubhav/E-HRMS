@@ -11,6 +11,9 @@ const getOwnCompany = async (companyId) => {
 
 export const createEmployee = async (req, res) => {
   try {
+    if (req.user.role === "ADMIN") {
+        return res.status(403).json({ message: "Admins cannot manage regular employees. Use the Manage Staff portal to manage HR and Managers." });
+    }
     const company = await getOwnCompany(req.user.companyId);
     
     // Check for duplicate employeeId within THIS company
@@ -139,6 +142,9 @@ export const getEmployeeById = async (req, res) => {
 
 export const updateEmployee = async (req, res) => {
   try {
+    if (req.user.role === "ADMIN") {
+        return res.status(403).json({ message: "Admins cannot manage regular employees." });
+    }
     const company = await Company.findById(req.user.companyId);
     const employee = company.employees.id(req.params.id);
 
@@ -158,6 +164,9 @@ export const updateEmployee = async (req, res) => {
 
 export const deleteEmployee = async (req, res) => {
   try {
+    if (req.user.role === "ADMIN") {
+        return res.status(403).json({ message: "Admins cannot manage regular employees." });
+    }
     const company = await Company.findById(req.user.companyId);
     
     // Remove the employee subdocument

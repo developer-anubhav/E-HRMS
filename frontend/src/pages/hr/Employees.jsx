@@ -7,6 +7,7 @@ import Select from "../../components/ui/Select"
 import Modal from "../../components/ui/Modal"
 import Loader from "../../components/ui/Loader"
 import { Edit2, MoreHorizontal, Trash2 } from "lucide-react"
+import { useAuth } from "../../context/AuthContext"
 
 import AddEmployeeForm from "../../components/hr/AddEmployeeForm"
 import EditEmployeeForm from "../../components/hr/EditEmployeeForm"
@@ -20,6 +21,7 @@ import {
 } from "../../api/employeeApi"
 
 export default function Employees() {
+  const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const initialSearch = searchParams.get("search") || ""
 
@@ -120,12 +122,14 @@ export default function Employees() {
       {actionLoading && <div className="fixed inset-0 z-[100]"><Loader fullScreen={true} /></div>}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-white tracking-tight">Employees</h1>
-        <button
-          onClick={() => setOpen(true)}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          Add Employee
-        </button>
+        {user?.role !== "ADMIN" && (
+          <button
+            onClick={() => setOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Add Employee
+          </button>
+        )}
       </div>
 
       <Card>
@@ -153,14 +157,20 @@ export default function Employees() {
                 {columns.map((col, idx) => (
                   <th
                     key={col}
-                    className={`p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 ${idx === 0 ? "rounded-tl-[2rem]" : ""}`}
+                    className={`p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 ${
+                      idx === 0 ? "rounded-tl-[2rem]" : ""
+                    } ${
+                      idx === columns.length - 1 && user?.role === "ADMIN" ? "rounded-tr-[2rem]" : ""
+                    }`}
                   >
                     {col}
                   </th>
                 ))}
-                <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 text-right rounded-tr-[2rem]">
-                  Actions
-                </th>
+                {user?.role !== "ADMIN" && (
+                  <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 text-right rounded-tr-[2rem]">
+                    Actions
+                  </th>
+                )}
               </tr>
             </thead>
 
@@ -196,24 +206,26 @@ export default function Employees() {
                       {emp.status || "N/A"}
                     </span>
                   </td>
-                  <td className="p-6 text-right whitespace-nowrap">
-                    <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => handleEditClick(emp)}
-                        className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all"
-                        title="Edit Record"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEmployee(emp._id)}
-                        className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
-                        title="Delete Record"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
-                  </td>
+                  {user?.role !== "ADMIN" && (
+                    <td className="p-6 text-right whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => handleEditClick(emp)}
+                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all"
+                          title="Edit Record"
+                        >
+                          <Edit2 size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteEmployee(emp._id)}
+                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                          title="Delete Record"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>
