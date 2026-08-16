@@ -14,6 +14,8 @@ const Employees = lazy(() => import("./pages/hr/Employees"))
 const Attendance = lazy(() => import("./pages/hr/Attendance"))
 const KioskMode = lazy(() => import("./pages/hr/KioskMode"))
 const MobileCheckIn = lazy(() => import("./pages/employee/MobileCheckIn"))
+const EmployeeLogin = lazy(() => import("./pages/employee/EmployeeLogin"))
+const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"))
 const Payroll = lazy(() => import("./pages/hr/Payroll"))
 const Reports = lazy(() => import("./pages/hr/Reports"))
 const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"))
@@ -34,6 +36,16 @@ export default function App() {
           <Route path="/signup" element={<OrganizationSignup />} />
           <Route path="/super-login" element={<SuperLogin />} />
           <Route path="/" element={<LandingPage />} />
+
+          <Route path="/employee/login" element={<EmployeeLogin />} />
+          <Route
+            path="/employee/dashboard"
+            element={
+              <ProtectedRoute roles={["EMPLOYEE"]}>
+                <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/dashboard"
