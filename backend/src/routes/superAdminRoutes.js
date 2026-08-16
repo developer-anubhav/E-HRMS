@@ -9,7 +9,9 @@ import {
     getActiveAnnouncements,
     deleteAnnouncement,
     exportCompanyData,
-    purgeCompanyData
+    purgeCompanyData,
+    approveCompany,
+    rejectCompany
 } from "../controllers/superAdminController.js";
 
 const router = express.Router();
