@@ -16,6 +16,7 @@ export default function OrganizationSignup() {
     const [success, setSuccess] = useState(false)
     const [pending, setPending] = useState(false)
     const [approved, setApproved] = useState(false)
+    const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
@@ -29,7 +30,7 @@ export default function OrganizationSignup() {
             setPending(true)
             // Don't auto-login; wait for super admin approval
             setTimeout(() => {
-                navigate("/organization-pending")
+                navigate("/login")
             }, 3000)
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed. Please try again.")
