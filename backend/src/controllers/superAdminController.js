@@ -56,6 +56,52 @@ export const getCompanyDetails = async (req, res) => {
     }
 };
 
+// Approve a company (change status from Pending to Active)
+export const approveCompany = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const company = await Company.findById(id);
+        if (!company) {
+            return res.status(404).json({ success: false, message: "Company not found" });
+        }
+        
+        if (company.status !== "Pending") {
+            return res.status(400).json({ success: false, message: "Company is not in Pending status" });
+        }
+        
+        company.status = "Active";
+        await company.save();
+        
+        res.json({ success: true, message: "Company approved and activated", data: company });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Approval failed", error: error.message });
+    }
+};
+
+// Reject a company (set status to Inactive/Suspended)
+export const rejectCompany = async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const company = await Company.findById(id);
+        if (!company) {
+            return res.status(404).json({ success: false, message: "Company not found" });
+        }
+        
+        if (company.status !== "Pending") {
+            return res.status(400).json({ success: false, message: "Company is not in Pending status" });
+        }
+        
+        company.status = "Inactive";
+        await company.save();
+        
+        res.json({ success: true, message: "Company rejected and set to Inactive", data: company });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Rejection failed", error: error.message });
+    }
+};
+
 // Global system health monitoring
 export const getSystemHealth = async (req, res) => {
     try {

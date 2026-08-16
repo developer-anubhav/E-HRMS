@@ -14,8 +14,8 @@ export default function OrganizationSignup() {
     })
     const [error, setError] = useState("")
     const [success, setSuccess] = useState(false)
-    const [loading, setLoading] = useState(false)
-
+    const [pending, setPending] = useState(false)
+    const [approved, setApproved] = useState(false)
     const navigate = useNavigate()
 
     const handleSubmit = async (e) => {
@@ -24,10 +24,12 @@ export default function OrganizationSignup() {
         setLoading(true)
 
         try {
-            await organizationSignup(formData)
-            setSuccess(true)
+            const response = await organizationSignup(formData)
+            // After signup, show pending state instead of immediate login
+            setPending(true)
+            // Don't auto-login; wait for super admin approval
             setTimeout(() => {
-                navigate("/login")
+                navigate("/organization-pending")
             }, 3000)
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed. Please try again.")
@@ -59,6 +61,36 @@ export default function OrganizationSignup() {
                             className="h-full bg-emerald-500"
                         />
                     </div>
+                </motion.div>
+            </div>
+        )
+    }
+
+    if (pending) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-background p-6">
+                <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-[#111113]/50 backdrop-blur-3xl p-12 rounded-[3.5rem] border border-white/[0.05] shadow-2xl text-center max-w-md w-full"
+                >
+                    <div className="w-20 h-20 bg-amber-500/20 rounded-full flex items-center justify-center mx-auto mb-8 text-amber-400">
+                        <Clock size={48} />
+                    </div>
+                    <h2 className="text-3xl font-heading font-bold text-white mb-4">Pending Approval</h2>
+                    <p className="text-slate-400 font-medium mb-8">
+                        Your organization has been registered and is awaiting super admin approval. 
+                        Once approved, you will be able to access your workspace.
+                    </p>
+                    <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: "100%" }}
+                            transition={{ duration: 3 }}
+                            className="h-full bg-amber-500"
+                        />
+                    </div>
+                    <p className="text-slate-500 text-sm mb-4">You will be redirected to the login page in a moment...</p>
                 </motion.div>
             </div>
         )
