@@ -29,6 +29,16 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Company",
     required: false // Optional for superadmins, required for HR/Managers
+  },
+
+  resetPasswordToken: {
+    type: String,
+    select: false
+  },
+
+  resetPasswordExpiry: {
+    type: Date,
+    select: false
   }
 }, {
   timestamps: true

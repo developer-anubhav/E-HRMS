@@ -1,6 +1,7 @@
 import { useState } from "react"
 import Input from "../ui/Input"
 import Select from "../ui/Select"
+import { Eye, EyeOff, Lock, Info, AlertCircle } from "lucide-react"
 
 export default function EditEmployeeForm({ initial, onSubmit }) {
 
@@ -12,9 +13,11 @@ export default function EditEmployeeForm({ initial, onSubmit }) {
     department: initial.department,
     role: initial.role,
     monthlySalary: initial.monthlySalary ?? "",
-    status: initial.status
+    status: initial.status,
+    password: ""
   })
 
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState("")
 
   const handleChange = (e) => {
@@ -36,7 +39,8 @@ export default function EditEmployeeForm({ initial, onSubmit }) {
     <form onSubmit={handleSubmit} className="space-y-4">
 
       {error && (
-        <div className="bg-red-100 text-red-700 p-2 rounded">
+        <div className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-xl flex items-center gap-3 text-sm font-medium">
+          <AlertCircle size={18} />
           {error}
         </div>
       )}
@@ -100,11 +104,41 @@ export default function EditEmployeeForm({ initial, onSubmit }) {
         <option value="Inactive">Inactive</option>
       </Select>
 
+      <div className="space-y-2">
+        <label className="block text-xs font-bold uppercase tracking-widest text-slate-500 ml-1 flex items-center gap-2">
+          <Lock size={14} className="text-slate-500" />
+          Reset Password
+        </label>
+        <div className="relative group">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            placeholder="Leave blank to keep current password"
+            className="w-full bg-white/5 border border-white/[0.08] text-white placeholder-slate-600 pl-4 pr-12 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-medium"
+            value={form.password}
+            onChange={handleChange}
+            autoComplete="new-password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          <Info size={12} />
+          <span>Leave blank to keep current password</span>
+        </div>
+      </div>
+
       <button
         type="submit"
-        className="w-full bg-green-600 text-white py-2 rounded"
+        className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl hover:bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] transition-all flex items-center justify-center gap-2"
       >
-        Update Employee
+        <span>Update Employee</span>
       </button>
 
     </form>

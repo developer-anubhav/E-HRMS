@@ -2,6 +2,8 @@ import User from "../models/userModel.js"
 import Company from "../models/Company.js"
 import bcrypt from "bcryptjs"
 import jwt from "jsonwebtoken"
+import crypto from "crypto"
+import sendEmail from "../utils/sendEmail.js"
 
 export const loginUser = async (req, res) => {
   const { email, password } = req.body
@@ -66,7 +68,7 @@ export const organizationSignup = async (req, res) => {
       return res.status(400).json({ message: "Company name already registered" })
     }
 
-// 1. Create Company with Pending status
+ // 1. Create Company with Pending status
     const newCompany = new Company({
       name: normalizedCompanyName,
       email: normalizedEmail,
@@ -100,6 +102,89 @@ export const organizationSignup = async (req, res) => {
   } catch (err) {
     console.error("Org Signup Error:", err)
     res.status(500).json({ message: err.message })
+  }
+}
+
+export const forgotPassword = async (req, res) => {
+  const { email } = req.body
+
+  try {
+    const normalizedEmail = email.toLowerCase().trim()
+    const user = await User.findOne({ email: normalizedEmail })
+    
+    if (!user) {
+      // Don't reveal if user exists or not for security
+      return res.json({ message: "If the email exists, a password reset link has been sent." })
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString("hex")
+    const resetTokenHash = crypto.createHash("sha256").update(resetToken).digest("hex")
+    const resetTokenExpiry = Date.now() + 3600000 // 1 hour
+
+    user.resetPasswordToken = resetTokenHash
+    user.resetPasswordExpiry = resetTokenExpiry
+    await user.save()
+
+    // Send reset email
+    const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}&email=${encodeURIComponent(normalizedEmail)}`
+    
+    const emailSubject = "WorkSphere - Password Reset Request"
+    const emailMessage = `Dear ${user.name},
+
+You requested a password reset for your WorkSphere account.
+
+Click the link below to reset your password (valid for 1 hour):
+${resetUrl}
+
+If you didn't request this, please ignore this email.
+
+Best regards,
+WorkSphere Team`
+
+    await sendEmail({
+      email: normalizedEmail,
+      subject: emailSubject,
+      message: emailMessage
+    })
+
+    res.json({ message: "If the email exists, a password reset link has been sent." })
+  } catch (err) {
+    console.error("Forgot password error:", err)
+    res.status(500).json({ message: "Failed to process request. Please try again." })
+  }
+}
+
+export const resetPassword = async (req, res) => {
+  const { token, email, password } = req.body
+
+  try {
+    const normalizedEmail = email.toLowerCase().trim()
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex")
+    
+    const user = await User.findOne({
+      email: normalizedEmail,
+      resetPasswordToken: tokenHash,
+      resetPasswordExpiry: { $gt: Date.now() }
+    })
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid or expired reset token" })
+    }
+
+    // Hash new password
+    const salt = await bcrypt.genSalt(10)
+    const hashedPassword = await bcrypt.hash(password, salt)
+
+    user.password = hashedPassword
+    user.resetPasswordToken = undefined
+    user.resetPasswordExpiry = undefined
+    await user.save()
+
+    res.json({ message: "Password reset successful. You can now log in with your new password." })
+  } catch (err) {
+    console.error("Reset password error:", err)
+    res.status(500).json({ message: "Failed to reset password. Please try again." })
   }
 }
 
