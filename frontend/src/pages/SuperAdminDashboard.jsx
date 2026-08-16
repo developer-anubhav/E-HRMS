@@ -138,7 +138,7 @@ export default function SuperAdminDashboard() {
         }
     }
 
-    const handlePurgeData = async (id) => {
+const handlePurgeData = async (id) => {
         // We keep purge alert because it is DESTRUCTIVE and IRREVERSIBLE
         if (!confirm("CRITICAL: Permanent Purge will IRREVERSIBLY DELETE all records for this organization. System recovery is NOT possible. Proceed?")) return
 
@@ -154,12 +154,38 @@ export default function SuperAdminDashboard() {
         }
     }
 
-    const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    const handleApproveCompany = async (id) => {
+        setActionLoading(id)
+        try {
+            await api.post(`/superadmin/company/${id}/approve`)
+            await fetchAllData()
+        } catch (err) {
+            console.error("Approval failed", err)
+        } finally {
+            setActionLoading(null)
+        }
+    }
+
+    const handleRejectCompany = async (id) => {
+        if (!confirm("Are you sure you want to reject this organization? This will set their status to Inactive.")) return
+        setActionLoading(id)
+        try {
+            await api.post(`/superadmin/company/${id}/reject`)
+            await fetchAllData()
+        } catch (err) {
+            console.error("Rejection failed", err)
+        } finally {
+            setActionLoading(null)
+        }
+    }
+
+const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()))
 
     const stats = {
         total: companies.length,
         active: companies.filter(c => c.status === 'Active').length,
-        suspended: companies.filter(c => c.status === 'Suspended').length
+        suspended: companies.filter(c => c.status === 'Suspended').length,
+        pending: companies.filter(c => c.status === 'Pending').length
     }
 
     if (loading) return <Loader fullScreen={true} />

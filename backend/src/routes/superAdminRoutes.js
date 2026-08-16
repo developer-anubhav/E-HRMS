@@ -15,6 +15,8 @@ import {
 const router = express.Router();
 
 router.get("/companies", getCompanies);
+router.post("/company/:id/approve", approveCompany);
+router.post("/company/:id/reject", rejectCompany);
 router.patch("/company-status/:id", updateCompanyStatus);
 router.get("/company-details/:id", getCompanyDetails);
 router.get("/health-stats", getSystemHealth);

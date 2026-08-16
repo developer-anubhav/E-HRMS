@@ -66,12 +66,12 @@ export const organizationSignup = async (req, res) => {
       return res.status(400).json({ message: "Company name already registered" })
     }
 
-    // 1. Create Company
+// 1. Create Company with Pending status
     const newCompany = new Company({
       name: normalizedCompanyName,
       email: normalizedEmail,
       adminName: name,
-      status: "Active"
+      status: "Pending"
     })
     await newCompany.save()
 

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken"
 
-export const protect = (req, res, next) => {
+export const protect = async (req, res, next) => {
 
   const token = req.headers.authorization?.split(" ")[1]
 
@@ -12,6 +12,19 @@ export const protect = (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
     req.user = decoded
+    
+    // Check if company is active
+    if (req.user.role === "ADMIN" && req.user.companyId) {
+      const Company = require("../models/Company.js")
+      const company = await Company.findById(req.user.companyId)
+      if (!company) {
+        return res.status(403).json({ message: "Company not found" })
+      }
+      if (company.status !== "Active") {
+        return res.status(403).json({ message: "Your organization is pending approval. Please wait for super admin approval." })
+      }
+    }
+    
     next()
   } catch (err) {
     console.error(`[Auth] Rejected: Invalid token. Error: ${err.message}`);
