@@ -5,7 +5,8 @@ import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import Loader from "./components/ui/Loader"
 
-const Login = lazy(() => import("./pages/auth/Login"))
+const UnifiedLogin = lazy(() => import("./pages/auth/UnifiedLogin"))
+const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"))
 const OrganizationSignup = lazy(() => import("./pages/auth/OrganizationSignup"))
 const LandingPage = lazy(() => import("./pages/LandingPage"))
 
@@ -14,7 +15,6 @@ const Employees = lazy(() => import("./pages/hr/Employees"))
 const Attendance = lazy(() => import("./pages/hr/Attendance"))
 const KioskMode = lazy(() => import("./pages/hr/KioskMode"))
 const MobileCheckIn = lazy(() => import("./pages/employee/MobileCheckIn"))
-const EmployeeLogin = lazy(() => import("./pages/employee/EmployeeLogin"))
 const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"))
 const Payroll = lazy(() => import("./pages/hr/Payroll"))
 const Reports = lazy(() => import("./pages/hr/Reports"))
@@ -29,15 +29,13 @@ export default function App() {
 
       <Router>
         <Suspense fallback={<Loader fullScreen={true} />}>
-
         <Routes>
-
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<UnifiedLogin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/signup" element={<OrganizationSignup />} />
           <Route path="/super-login" element={<SuperLogin />} />
           <Route path="/" element={<LandingPage />} />
 
-          <Route path="/employee/login" element={<EmployeeLogin />} />
           <Route
             path="/employee/dashboard"
             element={
@@ -50,7 +48,7 @@ export default function App() {
           <Route
             path="/dashboard"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
                 <Dashboard />
               </ProtectedRoute>
             }
@@ -59,7 +57,7 @@ export default function App() {
           <Route
             path="/employees"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR"]}>
                 <Employees />
               </ProtectedRoute>
             }
@@ -68,7 +66,7 @@ export default function App() {
           <Route
             path="/attendance"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
                 <Attendance />
               </ProtectedRoute>
             }
@@ -77,7 +75,7 @@ export default function App() {
           <Route
             path="/kiosk"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
                 <KioskMode />
               </ProtectedRoute>
             }
@@ -86,7 +84,7 @@ export default function App() {
           <Route
             path="/mobile-checkin"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["EMPLOYEE"]}>
                 <MobileCheckIn />
               </ProtectedRoute>
             }
@@ -95,7 +93,7 @@ export default function App() {
           <Route
             path="/payroll"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR"]}>
                 <Payroll />
               </ProtectedRoute>
             }
@@ -104,7 +102,7 @@ export default function App() {
           <Route
             path="/reports"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["ADMIN", "HR"]}>
                 <Reports />
               </ProtectedRoute>
             }

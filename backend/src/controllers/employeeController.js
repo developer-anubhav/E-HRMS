@@ -1,6 +1,7 @@
 import Company from "../models/Company.js";
 import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
+import sendEmail from "../utils/sendEmail.js";
 
 // Helper to get company with correct context
 const getOwnCompany = async (companyId) => {
@@ -16,17 +17,95 @@ export const createEmployee = async (req, res) => {
     }
     const company = await getOwnCompany(req.user.companyId);
     
+    const { employeeId, name, email, phoneNumber, department, role, monthlySalary, status, password } = req.body;
+    
     // Check for duplicate employeeId within THIS company
-    const existing = company.employees.find(emp => emp.employeeId === req.body.employeeId);
+    const existing = company.employees.find(emp => emp.employeeId === employeeId);
     if (existing) {
         return res.status(400).json({ message: "Employee ID already exists in your company" });
     }
 
-    company.employees.push(req.body);
+    // Check for duplicate email within THIS company
+    const existingEmail = company.employees.find(emp => emp.email === email.toLowerCase().trim());
+    if (existingEmail) {
+        return res.status(400).json({ message: "Email already exists in your company" });
+    }
+
+    // Check if user already exists in Auth collection
+    const normalizedEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+        return res.status(400).json({ message: "A user with this email already exists in the system" });
+    }
+
+    // Generate default password: username@WorkSphere (username = email prefix)
+    const username = normalizedEmail.split('@')[0];
+    const defaultPassword = `${username}@WorkSphere`;
+    const finalPassword = password || defaultPassword;
+
+    // Hash password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(finalPassword, salt);
+
+    // 1. Add to Company Employees array
+    const newEmployee = {
+        employeeId,
+        name,
+        email: normalizedEmail,
+        phoneNumber,
+        department,
+        role: "EMPLOYEE",
+        monthlySalary,
+        status: status || "Active"
+    };
+    company.employees.push(newEmployee);
     await company.save();
+
+    // 2. Create User record for login
+    const newUser = new User({
+        name,
+        email: normalizedEmail,
+        password: hashedPassword,
+        role: "EMPLOYEE",
+        companyId: req.user.companyId
+    });
+    await newUser.save();
+
+    // 3. Send credentials email to employee
+    try {
+      const emailSubject = "Welcome to WorkSphere - Your Login Credentials";
+      const emailMessage = `Dear ${name},
+
+Welcome to WorkSphere! Your employee account has been created by your HR department.
+
+Your login credentials are:
+- Email: ${normalizedEmail}
+- Password: ${finalPassword}
+- Portal: Employee Portal
+
+Please log in at the WorkSphere Employee Portal and change your password after first login for security.
+
+Best regards,
+HR Team
+WorkSphere`;
+
+      await sendEmail({
+        email: normalizedEmail,
+        subject: emailSubject,
+        message: emailMessage
+      });
+    } catch (emailError) {
+      console.error("Failed to send credentials email:", emailError);
+      // Don't fail the request if email fails
+    }
     
     // Return the newly created employee (last one in array)
-    res.status(201).json(company.employees[company.employees.length - 1]);
+    const createdEmployee = company.employees[company.employees.length - 1];
+    res.status(201).json({
+      ...createdEmployee.toObject ? createdEmployee.toObject() : createdEmployee,
+      credentialsSent: true,
+      defaultPasswordUsed: !password
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
