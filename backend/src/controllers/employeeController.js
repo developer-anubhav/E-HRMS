@@ -43,9 +43,12 @@ export const createEmployee = async (req, res) => {
     const defaultPassword = `${username}@WorkSphere`;
     const finalPassword = password || defaultPassword;
 
+    console.log(`[CREATE_EMPLOYEE] Email: ${normalizedEmail}, Username: ${username}, DefaultPassword: ${defaultPassword}, FinalPassword: ${finalPassword}, ProvidedPassword: ${password ? "YES" : "NO"}`)
+
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(finalPassword, salt);
+    console.log(`[CREATE_EMPLOYEE] Hashed password starts with: ${hashedPassword.substring(0, 20)}`)
 
     // 1. Add to Company Employees array
     const newEmployee = {

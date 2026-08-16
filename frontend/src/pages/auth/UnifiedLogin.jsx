@@ -36,7 +36,11 @@ export default function UnifiedLogin() {
     setError("")
     setLoading(true)
     try {
-      const res = await loginUser({ email, password })
+      // Trim email and password to avoid whitespace issues
+      const trimmedEmail = email.trim()
+      const trimmedPassword = password.trim()
+      console.log('[FRONTEND] Login attempt:', { email: trimmedEmail, passwordLength: trimmedPassword.length, passwordChars: Array.from(trimmedPassword).map(c => c.charCodeAt(0)) })
+      const res = await loginUser({ email: trimmedEmail, password: trimmedPassword })
       if (res.data.role !== selectedRole) {
         setError(`Invalid credentials for ${currentRole.label}. Please select the correct role.`)
         setLoading(false)
