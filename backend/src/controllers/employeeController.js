@@ -19,6 +19,21 @@ export const createEmployee = async (req, res) => {
     
     const { employeeId, name, email, phoneNumber, department, role, monthlySalary, status, password } = req.body;
     
+    // Validate required fields
+    if (!employeeId || !name || !email) {
+        return res.status(400).json({ message: "employeeId, name, and email are required" });
+    }
+
+    // Validate role (from request body, default to EMPLOYEE)
+    const allowedRoles = ["EMPLOYEE", "HR", "MANAGER"];
+    const employeeRole = (role || "EMPLOYEE").toUpperCase();
+    if (!allowedRoles.includes(employeeRole)) {
+        return res.status(400).json({ message: "Invalid role. Allowed: EMPLOYEE, HR, MANAGER" });
+    }
+
+    // Normalize email once
+    const normalizedEmail = email.toLowerCase().trim();
+    
     // Check for duplicate employeeId within THIS company
     const existing = company.employees.find(emp => emp.employeeId === employeeId);
     if (existing) {
@@ -26,13 +41,12 @@ export const createEmployee = async (req, res) => {
     }
 
     // Check for duplicate email within THIS company
-    const existingEmail = company.employees.find(emp => emp.email === email.toLowerCase().trim());
+    const existingEmail = company.employees.find(emp => emp.email === normalizedEmail);
     if (existingEmail) {
         return res.status(400).json({ message: "Email already exists in your company" });
     }
 
     // Check if user already exists in Auth collection
-    const normalizedEmail = email.toLowerCase().trim();
     const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
         return res.status(400).json({ message: "A user with this email already exists in the system" });
@@ -43,12 +57,9 @@ export const createEmployee = async (req, res) => {
     const defaultPassword = `${username}@WorkSphere`;
     const finalPassword = password || defaultPassword;
 
-    console.log(`[CREATE_EMPLOYEE] Email: ${normalizedEmail}, Username: ${username}, DefaultPassword: ${defaultPassword}, FinalPassword: ${finalPassword}, ProvidedPassword: ${password ? "YES" : "NO"}`)
-
     // Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(finalPassword, salt);
-    console.log(`[CREATE_EMPLOYEE] Hashed password starts with: ${hashedPassword.substring(0, 20)}`)
 
     // 1. Add to Company Employees array
     const newEmployee = {
@@ -57,24 +68,32 @@ export const createEmployee = async (req, res) => {
         email: normalizedEmail,
         phoneNumber,
         department,
-        role: "EMPLOYEE",
+        role: employeeRole,
         monthlySalary,
         status: status || "Active"
     };
     company.employees.push(newEmployee);
     await company.save();
 
-    // 2. Create User record for login
-    const newUser = new User({
-        name,
-        email: normalizedEmail,
-        password: hashedPassword,
-        role: "EMPLOYEE",
-        companyId: req.user.companyId
-    });
-    await newUser.save();
+    // 2. Create User record for login (with compensating rollback on failure)
+    let newUser;
+    try {
+        newUser = new User({
+            name,
+            email: normalizedEmail,
+            password: hashedPassword,
+            role: employeeRole,
+            companyId: req.user.companyId
+        });
+        await newUser.save();
+    } catch (userError) {
+        // COMPENSATING TRANSACTION: Remove employee from Company array
+        company.employees.pull({ employeeId });
+        await company.save();
+        throw userError;
+    }
 
-    // 3. Send credentials email to employee
+    // 3. Send credentials email to employee (non-blocking)
     try {
       const emailSubject = "Welcome to WorkSphere - Your Login Credentials";
       const emailMessage = `Dear ${name},
@@ -102,10 +121,11 @@ WorkSphere`;
       // Don't fail the request if email fails
     }
     
-    // Return the newly created employee (last one in array)
+    // Return the newly created employee with userId
     const createdEmployee = company.employees[company.employees.length - 1];
     res.status(201).json({
-      ...createdEmployee.toObject ? createdEmployee.toObject() : createdEmployee,
+      ...(createdEmployee.toObject ? createdEmployee.toObject() : createdEmployee),
+      userId: newUser._id,
       credentialsSent: true,
       defaultPasswordUsed: !password
     });
@@ -120,7 +140,8 @@ export const createStaff = async (req, res) => {
     if (typeof email !== "string" || email.trim() === "") {
         return res.status(400).json({ message: "Valid email is required" });
     }
-    const normalizedEmail = email.trim();
+    // Normalize email consistently: lowercase + trim
+    const normalizedEmail = email.toLowerCase().trim();
 
     if (req.user.role !== "ADMIN") {
         return res.status(403).json({ message: "Only Admins can create HR or Managers" });
@@ -139,7 +160,7 @@ export const createStaff = async (req, res) => {
     }
 
     // Check if user already exists in Auth collection
-    const existingUser = await User.findOne({ email: { $eq: normalizedEmail } });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
         return res.status(400).json({ message: "A user with this email already exists" });
     }
