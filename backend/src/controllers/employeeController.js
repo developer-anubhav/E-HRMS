@@ -22,11 +22,6 @@ export const createEmployee = async (req, res) => {
         return res.status(400).json({ message: "Employee ID already exists in your company" });
     }
 
-    // Restrict roles as per requirement: only HR or Manager for now
-    if (!["HR", "MANAGER"].includes(req.body.role)) {
-        return res.status(400).json({ message: "Only HR or Manager roles can be created at this time" });
-    }
-
     company.employees.push(req.body);
     await company.save();
     
