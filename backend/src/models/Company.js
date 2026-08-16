@@ -189,8 +189,8 @@ const companySchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Active", "Inactive", "Suspended"],
-      default: "Active",
+      enum: ["Active", "Inactive", "Suspended", "Pending"],
+      default: "Pending",
     },
     
     shiftSettings: {
