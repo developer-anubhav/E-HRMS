@@ -10,22 +10,14 @@ export const loginUser = async (req, res) => {
 
   try {
     const searchEmail = email.toLowerCase().trim()
-    console.log(`[AUTH] Login attempt - Raw email: "${email}", Normalized: "${searchEmail}", Password length: ${password?.length}`)
     const user = await User.findOne({ email: searchEmail })
     
     if (!user) {
-      console.warn(`[AUTH] User not found: ${searchEmail}`)
-      // Debug: List all users in DB
-      const allUsers = await User.find({}, 'email role').limit(10)
-      console.log('[AUTH] Sample users in DB:', allUsers.map(u => ({ email: u.email, role: u.role })))
       return res.status(400).json({ message: "User not found" })
     }
 
-    console.log(`[AUTH] User found: ${user.email}, Role: ${user.role}, Password hash starts with: ${user.password?.substring(0, 20)}`)
-
     // Check password
     const isMatch = await bcrypt.compare(password, user.password)
-    console.log(`[AUTH] Password match: ${isMatch}`)
     if (!isMatch)
       return res.status(400).json({ message: "Invalid credentials" })
 
