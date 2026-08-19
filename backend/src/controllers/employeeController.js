@@ -147,8 +147,8 @@ export const createStaff = async (req, res) => {
         return res.status(403).json({ message: "Only Admins can create HR or Managers" });
     }
 
-    if (!["HR", "MANAGER"].includes(role)) {
-        return res.status(400).json({ message: "Only HR or Manager roles can be created here" });
+    if (!["HR", "MANAGER", "EMPLOYEE"].includes(role)) {
+        return res.status(400).json({ message: "Only HR, Manager, or Employee roles can be created here" });
     }
 
     const company = await getOwnCompany(req.user.companyId);

@@ -10,6 +10,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   Camera, CheckCircle2, XCircle, Trash2,
   AlertTriangle, Loader2, ScanFace, RefreshCcw
@@ -151,9 +152,9 @@ export default function FaceEnrollModal({ employee, open, onClose, onEnrolled })
   /* -------------------------------------------------------------- render guard */
   if (!open || !employee) return null
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[10000] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md"
       onClick={onClose}
       role="presentation"
     >
@@ -338,4 +339,6 @@ export default function FaceEnrollModal({ employee, open, onClose, onEnrolled })
       </div>
     </div>
   )
+
+  return createPortal(modalContent, document.body)
 }

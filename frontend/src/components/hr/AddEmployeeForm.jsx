@@ -82,11 +82,15 @@ export default function AddEmployeeForm({ onSubmit }) {
         <option value="Finance">Finance</option>
       </Select>
 
-      <Input
+      <Select
         name="role"
-        placeholder="Role"
         onChange={handleChange}
-      />
+      >
+        <option value="">Select Role</option>
+        <option value="EMPLOYEE">Employee</option>
+        <option value="HR">HR</option>
+        <option value="MANAGER">Manager</option>
+      </Select>
 
       <Input
         type="number"

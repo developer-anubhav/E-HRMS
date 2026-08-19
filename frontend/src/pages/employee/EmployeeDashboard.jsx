@@ -92,7 +92,7 @@ export default function EmployeeDashboard() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <header className="h-16 flex-shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 w-full z-40">
+      <header className="relative h-16 flex-shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 w-full z-50">
         <div className="flex items-center gap-4">
           <div className="bg-emerald-600 px-3 py-1.5 rounded-xl text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center justify-center">
             <User size={18} />

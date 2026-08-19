@@ -141,11 +141,11 @@ export default function Employees() {
             onChange={e => setSearch(e.target.value)}
           />
 
-          <Select onChange={e => setDepartment(e.target.value)}>
+          <Select value={department} onChange={e => setDepartment(e.target.value)}>
             <option value="">All Departments</option>
-            <option>Engineering</option>
-            <option>HR</option>
-            <option>Finance</option>
+            {departments.map(dept => (
+              <option key={dept} value={dept}>{dept}</option>
+            ))}
           </Select>
 
         </div>

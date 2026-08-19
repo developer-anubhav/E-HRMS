@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   BadgeCheck, BriefcaseBusiness, Building2, CircleDot,
   Mail, Phone, IndianRupee, ScanFace, Trash2, ShieldCheck,
@@ -115,10 +116,10 @@ export default function EmployeeProfileModal({ employee, open, onClose }) {
   const isActive = ["active", "present"].includes(status.toLowerCase())
   const isEnrolled = faceProfile?.enrolled === true
 
-  return (
+  const modalContent = (
     <>
       <div
-        className="fixed inset-0 z-[70] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
         onClick={onClose}
         role="presentation"
       >
@@ -288,4 +289,6 @@ export default function EmployeeProfileModal({ employee, open, onClose }) {
       />
     </>
   )
+
+  return createPortal(modalContent, document.body)
 }

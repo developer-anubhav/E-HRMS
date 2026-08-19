@@ -27,8 +27,8 @@ export default function ManageStaff() {
     if (isInitial) setLoading(true)
     try {
       const res = await getEmployees()
-      // Filter for HR/Managers only
-      const staff = res.data.filter(emp => emp.role === "HR" || emp.role === "MANAGER")
+      // Filter for HR/Managers/Employees
+      const staff = res.data.filter(emp => emp.role === "HR" || emp.role === "MANAGER" || emp.role === "EMPLOYEE")
       setEmployees(staff)
     } catch (err) {
       console.error(err)
@@ -66,7 +66,7 @@ export default function ManageStaff() {
           <div className="flex justify-between items-center mb-6">
             <div>
                 <h1 className="text-3xl font-bold text-white tracking-tight">Manage Staff</h1>
-                <p className="text-slate-400 mt-1">Create and manage HR and Managers</p>
+                <p className="text-slate-400 mt-1">Create and manage HR, Managers, and Employees</p>
             </div>
             <button
               onClick={() => setOpen(true)}
@@ -138,6 +138,7 @@ export default function ManageStaff() {
                         >
                             <option value="HR">HR</option>
                             <option value="MANAGER">Manager</option>
+                            <option value="EMPLOYEE">Employee</option>
                         </select>
                     </div>
                 </div>
