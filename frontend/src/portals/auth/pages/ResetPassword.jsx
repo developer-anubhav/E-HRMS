@@ -52,10 +52,9 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="relative flex items-center justify-center min-h-screen bg-background overflow-hidden selection:bg-primary/30">
-      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary/20 rounded-full blur-[120px] animate-pulse-slow"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-600/10 rounded-full blur-[120px] animate-slow-drift"></div>
-      <div className="absolute inset-0 bg-dot-pattern opacity-[0.1] pointer-events-none"></div>
+    <div className="relative flex items-center justify-center min-h-screen bg-slate-50 overflow-hidden selection:bg-emerald-500/10 text-slate-700">
+      <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-emerald-500/[0.01] rounded-full blur-[120px]"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-600/[0.01] rounded-full blur-[120px]"></div>
 
       <AnimatePresence>
         {loading && (
@@ -63,7 +62,7 @@ export default function ResetPassword() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-md flex items-center justify-center"
+            className="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-md flex items-center justify-center"
           >
             <Loader fullScreen={false} />
           </motion.div>
@@ -76,42 +75,47 @@ export default function ResetPassword() {
         className="w-[90%] max-w-md relative z-10"
       >
         <div className="flex flex-col items-center mb-10">
-          <div className="bg-primary px-3 py-1.5 rounded-2xl text-white shadow-[0_0_20px_rgba(59,130,246,0.5)] flex items-center justify-center mb-6">
-            <span className="text-xl font-black font-heading leading-none">W</span>
-          </div>
-          <span className="text-3xl font-bold text-white tracking-tighter font-heading">WorkSphere</span>
+          <Link to="/" className="flex items-center gap-3 mb-4 group">
+            <div className="grid grid-cols-2 gap-0.5 w-7 h-7">
+              <div className="bg-rose-500 rounded-sm"></div>
+              <div className="bg-emerald-500 rounded-sm"></div>
+              <div className="bg-blue-500 rounded-sm"></div>
+              <div className="bg-amber-400 rounded-sm"></div>
+            </div>
+            <span className="text-3xl font-extrabold text-slate-800 tracking-tighter font-heading">WorkSphere</span>
+          </Link>
         </div>
 
-        <div className="bg-[#111113]/50 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-white/[0.05] shadow-2xl relative overflow-hidden">
+        <div className="bg-white border border-slate-200 p-10 rounded-[2.5rem] shadow-lg relative overflow-hidden">
           {!validToken ? (
             <div className="text-center">
-              <div className="w-16 h-16 bg-rose-500/10 border border-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertCircle size={32} className="text-rose-500" />
+              <div className="w-16 h-16 bg-rose-50 border border-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <AlertCircle size={32} className="text-rose-600" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Invalid Reset Link</h3>
-              <p className="text-slate-400 mb-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Invalid Reset Link</h3>
+              <p className="text-slate-500 mb-6">
                 This password reset link is invalid or has expired. 
                 Please request a new one.
               </p>
               <button
                 onClick={() => navigate("/login")}
-                className="w-full bg-primary text-white font-bold py-3 rounded-2xl hover:bg-blue-500 transition-all"
+                className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-2xl hover:bg-emerald-700 transition-all shadow-sm active:scale-95 text-sm"
               >
                 Request New Reset Link
               </button>
             </div>
           ) : success ? (
             <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle size={32} className="text-emerald-500" />
+              <div className="w-16 h-16 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle size={32} className="text-emerald-600" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Password Reset Successful!</h3>
-              <p className="text-slate-400 mb-6">
+              <h3 className="text-xl font-bold text-slate-800 mb-2">Password Reset Successful!</h3>
+              <p className="text-slate-500 mb-6">
                 Your password has been updated. You can now log in with your new password.
               </p>
               <button
                 onClick={() => navigate("/login")}
-                className="w-full bg-primary text-white font-bold py-3 rounded-2xl hover:bg-blue-500 transition-all"
+                className="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-2xl hover:bg-emerald-700 transition-all shadow-sm active:scale-95 text-sm"
               >
                 Go to Login
               </button>
@@ -119,18 +123,18 @@ export default function ResetPassword() {
           ) : (
             <>
               <div className="text-center mb-8">
-                <div className="w-14 h-14 bg-primary/10 border border-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Lock size={24} className="text-primary" />
+                <div className="w-14 h-14 bg-emerald-50 border border-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Lock size={24} className="text-emerald-600" />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Set New Password</h3>
-                <p className="text-slate-400">Enter your new password below.</p>
+                <h3 className="text-xl font-bold text-slate-800 mb-2">Set New Password</h3>
+                <p className="text-slate-500">Enter your new password below.</p>
               </div>
 
               {error && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-4 py-3 rounded-2xl flex items-center gap-3 mb-8 text-sm font-medium"
+                  className="bg-rose-50 border border-rose-100 text-rose-700 px-4 py-3 rounded-2xl flex items-center gap-3 mb-8 text-sm font-medium shadow-sm"
                 >
                   <AlertCircle size={18} />
                   {error}
@@ -141,11 +145,11 @@ export default function ResetPassword() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">New Password</label>
                   <div className="relative group">
-                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      className="w-full bg-white/5 border border-white/[0.08] text-white placeholder-slate-600 pl-12 pr-14 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-medium"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 pl-12 pr-14 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-medium shadow-sm"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
@@ -155,7 +159,7 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -167,11 +171,11 @@ export default function ResetPassword() {
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Confirm Password</label>
                   <div className="relative group">
-                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-primary transition-colors" />
+                    <Lock size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                     <input
                       type={showPassword ? "text" : "password"}
                       placeholder="••••••••"
-                      className="w-full bg-white/5 border border-white/[0.08] text-white placeholder-slate-600 pl-12 pr-14 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-medium"
+                      className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 pl-12 pr-14 py-4 rounded-2xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 transition-all font-medium shadow-sm"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       required
@@ -180,7 +184,7 @@ export default function ResetPassword() {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 transition-colors"
                       aria-label={showPassword ? "Hide password" : "Show password"}
                     >
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -192,7 +196,7 @@ export default function ResetPassword() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="w-full bg-primary text-white font-bold py-4 rounded-2xl hover:bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.3)] hover:shadow-[0_0_30px_rgba(59,130,246,0.5)] transition-all flex items-center justify-center gap-2 group overflow-hidden relative disabled:opacity-50"
+                    className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-700 shadow-sm transition-all flex items-center justify-center gap-2 group overflow-hidden relative disabled:opacity-50 active:scale-[0.98] text-sm"
                   >
                     <span className="relative z-10">{loading ? "Resetting..." : "Reset Password"}</span>
                     {loading ? (
@@ -208,7 +212,7 @@ export default function ResetPassword() {
               <div className="mt-8 text-center">
                 <button
                   onClick={() => navigate("/login")}
-                  className="text-slate-400 hover:text-white transition-colors text-sm font-medium"
+                  className="text-slate-500 hover:text-slate-800 transition-colors text-sm font-medium"
                 >
                   ← Back to Login
                 </button>

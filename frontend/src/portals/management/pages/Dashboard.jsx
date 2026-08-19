@@ -61,12 +61,12 @@ export default function Dashboard() {
                 <LayoutDashboard size={14} />
                 Overview
               </div>
-              <h1 className="text-4xl font-extrabold text-white tracking-tight">Dashboard</h1>
+              <h1 className="text-4xl font-extrabold text-slate-800 tracking-tight">Dashboard</h1>
               <p className="text-slate-500 font-medium">Welcome back! Here's what's happening today.</p>
             </div>
             
             <div className="flex items-center gap-3">
-               <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/5 text-xs font-bold text-slate-400">
+               <div className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-500 shadow-sm">
                   Last updated: Just now
                </div>
             </div>

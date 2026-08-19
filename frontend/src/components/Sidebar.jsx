@@ -41,13 +41,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
       {/* Sidebar Container */}
       <aside
-        className={`fixed inset-y-0 left-0 bg-[#0a0a0c]/80 backdrop-blur-2xl border-r border-white/5 text-slate-400 w-72 z-50 transform transition-transform duration-500 md:relative md:translate-x-0 flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 bg-[#161a29] border-r border-slate-800/80 text-slate-400 w-72 z-50 transform transition-transform duration-500 md:relative md:translate-x-0 flex flex-col ${isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
       >
-        <div className="p-8 pb-10 border-b border-white/5 flex justify-between items-center">
+        <div className="p-8 pb-10 border-b border-slate-800/80 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            <div className="bg-primary px-3 py-1.5 rounded-xl text-white shadow-[0_0_20px_rgba(59,130,246,0.5)] flex items-center justify-center">
-              <span className="text-xl font-black font-heading leading-none">W</span>
+            {/* Zoho-style 4-box logo mark */}
+            <div className="grid grid-cols-2 gap-0.5 w-6 h-6 p-0.5 bg-slate-800 rounded-md shadow-sm border border-slate-700">
+              <span className="w-2 h-2 bg-[#E53935] rounded-xs"></span>
+              <span className="w-2 h-2 bg-[#43A047] rounded-xs"></span>
+              <span className="w-2 h-2 bg-[#1E88E5] rounded-xs"></span>
+              <span className="w-2 h-2 bg-[#FDD835] rounded-xs"></span>
             </div>
             <span className="text-xl font-bold text-white tracking-tight font-heading">WorkSphere</span>
           </div>
@@ -66,30 +70,30 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                 to={item.path}
                 className={({ isActive }) =>
                   `group flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-300 ${isActive
-                    ? "bg-primary/10 text-primary shadow-[inset_0_0_10px_rgba(59,130,246,0.1)]"
-                    : "hover:bg-white/5 hover:text-white"
+                    ? "bg-primary/15 text-primary font-bold shadow-[inset_0_0_10px_rgba(59,130,246,0.05)]"
+                    : "hover:bg-white/5 hover:text-slate-200"
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
                     <div className="flex items-center gap-3">
-                      <item.icon size={20} className={`${isActive ? "text-primary" : "group-hover:text-white"} transition-colors`} />
+                      <item.icon size={20} className={`${isActive ? "text-primary" : "group-hover:text-slate-200"} transition-colors`} />
                       <span className="font-medium text-[14px]">{item.name}</span>
                     </div>
                     {isActive && <motion.div layoutId="activeInd" className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_10px_rgba(59,130,246,1)]" />}
-                    {!isActive && <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0" />}
+                    {!isActive && <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all -translate-x-2 group-hover:translate-x-0 text-slate-400 group-hover:text-slate-200" />}
                   </>
                 )}
               </NavLink>
             ))}
         </nav>
 
-        <div className="p-6 border-t border-white/5">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20">
+        <div className="p-6 border-t border-slate-800/80">
+          <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-800">
             <p className="text-xs font-semibold text-primary mb-1">Enterprise Pro</p>
-            <p className="text-[11px] text-slate-500领先 mb-3">Your company workspace is active.</p>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <p className="text-[11px] text-slate-500 mb-3 font-medium">Your company workspace is active.</p>
+            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
               <div className="h-full w-3/4 bg-primary rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
             </div>
           </div>

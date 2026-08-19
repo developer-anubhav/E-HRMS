@@ -42,7 +42,7 @@ export default function Employees() {
   const loadEmployees = (isInitial = false) => {
     if (isInitial) setLoading(true)
     return getEmployees()
-      .then(res => setEmployees(res.data))
+      .then(res => setEmployees(Array.isArray(res.data) ? res.data : res.data?.employees || []))
       .catch(err => console.error(err))
       .finally(() => { if (isInitial) setLoading(false) })
   }
@@ -108,9 +108,17 @@ export default function Employees() {
     }
   }
 
-  const filtered = employees.filter(emp =>
-    emp.name.toLowerCase().includes(search.toLowerCase()) &&
-    (department ? emp.department === department : true)
+  const defaultDepartments = ["Engineering", "HR", "Finance", "Sales", "Marketing", "Operations"]
+  const departments = Array.from(
+    new Set([
+      ...defaultDepartments,
+      ...(Array.isArray(employees) ? employees.map(e => e?.department).filter(Boolean) : [])
+    ])
+  )
+
+  const filtered = (Array.isArray(employees) ? employees : []).filter(emp =>
+    (emp?.name || "").toLowerCase().includes((search || "").toLowerCase()) &&
+    (department ? emp?.department === department : true)
   )
 
   return (
@@ -121,11 +129,11 @@ export default function Employees() {
         <>
       {actionLoading && <div className="fixed inset-0 z-[100]"><Loader fullScreen={true} /></div>}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-white tracking-tight">Employees</h1>
+        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Employees</h1>
         {user?.role !== "ADMIN" && (
           <button
             onClick={() => setOpen(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all active:scale-95 text-sm"
           >
             Add Employee
           </button>
@@ -150,14 +158,14 @@ export default function Employees() {
 
         </div>
 
-        <div className="w-full overflow-x-auto rounded-[2rem] border border-white/5 bg-white/[0.02]">
+        <div className="w-full overflow-x-auto rounded-[2rem] border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-left border-separate border-spacing-0">
             <thead>
-              <tr className="bg-white/5">
+              <tr className="bg-slate-50">
                 {columns.map((col, idx) => (
                   <th
                     key={col}
-                    className={`p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 ${
+                    className={`p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-slate-200 ${
                       idx === 0 ? "rounded-tl-[2rem]" : ""
                     } ${
                       idx === columns.length - 1 && user?.role === "ADMIN" ? "rounded-tr-[2rem]" : ""
@@ -167,41 +175,41 @@ export default function Employees() {
                   </th>
                 ))}
                 {user?.role !== "ADMIN" && (
-                  <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-white/5 text-right rounded-tr-[2rem]">
+                  <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-slate-200 text-right rounded-tr-[2rem]">
                     Actions
                   </th>
                 )}
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-white/[0.03]">
+            <tbody className="divide-y divide-slate-100">
               {filtered.map((emp) => (
-                <tr key={emp._id} className="group hover:bg-white/[0.03] transition-all duration-300">
+                <tr key={emp._id} className="group hover:bg-slate-50/50 transition-all duration-300">
                   <td className="p-6 text-sm font-mono text-primary font-bold whitespace-nowrap">{emp.employeeId}</td>
                   <td className="p-6 whitespace-nowrap">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/20 to-blue-600/20 flex items-center justify-center text-[10px] font-bold text-primary border border-primary/20">
-                        {emp.name.split(" ").map(n => n[0]).join("")}
+                      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-[10px] font-bold text-primary border border-blue-100">
+                        {(emp?.name || "E").split(" ").filter(Boolean).map(n => n[0]).join("")}
                       </div>
                       <button
                         type="button"
                         onClick={() => handleProfileOpen(emp)}
-                        className="rounded text-sm font-bold text-white transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/40"
-                        title={`View ${emp.name} profile`}
+                        className="rounded text-sm font-bold text-slate-800 transition-colors hover:text-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        title={`View ${emp?.name} profile`}
                       >
-                        {emp.name}
+                        {emp?.name}
                       </button>
                     </div>
                   </td>
-                  <td className="p-6 text-sm font-medium text-slate-400 whitespace-nowrap">{emp.department}</td>
-                  <td className="p-6 text-sm font-medium text-slate-400 whitespace-nowrap">{emp.role}</td>
+                  <td className="p-6 text-sm font-medium text-slate-500 whitespace-nowrap">{emp.department}</td>
+                  <td className="p-6 text-sm font-medium text-slate-500 whitespace-nowrap">{emp.role}</td>
                   <td className="p-6 whitespace-nowrap">
-                    <span className={`px-3 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border ${
+                    <span className={`px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${
                       emp.status?.toLowerCase() === "active" || emp.status?.toLowerCase() === "present"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                        ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
                         : emp.status?.toLowerCase() === "leave" || emp.status?.toLowerCase() === "absent"
-                          ? "bg-rose-500/10 text-rose-400 border-rose-500/20"
-                          : "bg-white/5 text-slate-500 border-white/10"
+                          ? "bg-rose-50 text-rose-600 border border-rose-100"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
                     }`}>
                       {emp.status || "N/A"}
                     </span>
@@ -211,14 +219,14 @@ export default function Employees() {
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => handleEditClick(emp)}
-                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-primary hover:bg-primary/10 transition-all"
+                          className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-primary hover:bg-primary/10 transition-all"
                           title="Edit Record"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => handleDeleteEmployee(emp._id)}
-                          className="p-2 rounded-lg bg-white/5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
+                          className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
                           title="Delete Record"
                         >
                           <Trash2 size={16} />

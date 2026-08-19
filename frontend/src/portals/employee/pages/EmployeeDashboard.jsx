@@ -1,377 +1,845 @@
 import { useState, useEffect, useRef } from "react"
 import { useAuth } from "../../../context/AuthContext"
 import { useNavigate } from "react-router-dom"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { 
   CalendarCheck, Clock, User, MapPin, 
   CheckCircle, XCircle, AlertCircle, 
   Loader2, LogOut, ChevronDown, 
-  Home, CreditCard, FileText, Settings, Mail, Shield
+  Home, CreditCard, FileText, Settings, Mail, Shield, 
+  Menu, X, Key, FileDown, Download, Building2, Phone, BadgePercent
 } from "lucide-react"
+import api from "../../../api/axios"
 
 export default function EmployeeDashboard() {
-  const profileRef = useRef(null)
   const { user, logout } = useAuth()
   const navigate = useNavigate()
-  const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const [attendanceData, setAttendanceData] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [todayStatus, setTodayStatus] = useState(null)
+  
+  // Navigation & UI states
+  const [activeTab, setActiveTab] = useState("dashboard") // dashboard, attendance, payroll, documents, settings
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  
+  // Data loading states
+  const [employeeProfile, setEmployeeProfile] = useState(null)
+  const [todayAttendance, setTodayAttendance] = useState(null)
+  const [attendanceHistory, setAttendanceHistory] = useState([])
+  const [payrollHistory, setPayrollHistory] = useState([])
+  
+  // Action states
+  const [loadingToday, setLoadingToday] = useState(true)
+  const [loadingHistory, setLoadingHistory] = useState(false)
+  const [loadingPayroll, setLoadingPayroll] = useState(false)
+  const [actionLoading, setActionLoading] = useState(false)
+  
+  // Settings tab states
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [settingsError, setSettingsError] = useState("")
+  const [settingsSuccess, setSettingsSuccess] = useState("")
+  const [settingsLoading, setSettingsLoading] = useState(false)
+
+  // Mobile time/date
+  const [timeStr, setTimeStr] = useState("")
+  const [dateStr, setDateStr] = useState("")
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const today = new Date()
+      setTimeStr(today.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }))
+      setDateStr(today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" }))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   useEffect(() => {
     if (!user || user.role !== "EMPLOYEE") {
-      navigate("/employee/login")
+      navigate("/login")
     }
-    fetchTodayAttendance()
   }, [user, navigate])
 
+  // 1. Fetch Today's Attendance on Mount
+  useEffect(() => {
+    fetchTodayAttendance()
+  }, [])
+
+  // 2. Fetch Employee Profile (to get internal employee subdocument _id)
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const res = await api.get("/employees")
+        // Find matching employee record by email
+        const profile = res.data.find(emp => emp.email.toLowerCase() === user.email.toLowerCase())
+        setEmployeeProfile(profile)
+      } catch (err) {
+        console.error("Failed to load employee profile:", err)
+      }
+    }
+    if (user?.email) {
+      loadProfile()
+    }
+  }, [user])
+
+  // 3. Load tab specific data
+  useEffect(() => {
+    if (!employeeProfile) return
+
+    if (activeTab === "attendance") {
+      fetchAttendanceHistory()
+    } else if (activeTab === "payroll") {
+      fetchPayrollHistory()
+    }
+  }, [activeTab, employeeProfile])
+
   const fetchTodayAttendance = async () => {
+    setLoadingToday(true)
     try {
-      const res = await fetch("/api/attendance/today", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setAttendanceData(data.data)
-        setTodayStatus(data.data?.status)
+      const res = await api.get("/attendance/today")
+      if (res.data?.success) {
+        setTodayAttendance(res.data.data)
       }
     } catch (err) {
-      console.error("Failed to fetch attendance:", err)
+      console.error("Failed to fetch today's attendance:", err)
     } finally {
-      setLoading(false)
+      setLoadingToday(false)
+    }
+  }
+
+  const fetchAttendanceHistory = async () => {
+    setLoadingHistory(true)
+    try {
+      const res = await api.get("/attendance")
+      // Filter records that belong to this employee
+      const filtered = res.data
+        .filter(att => att.employeeId.toString() === employeeProfile._id.toString())
+        .sort((a, b) => new Date(b.date) - new Date(a.date))
+      setAttendanceHistory(filtered)
+    } catch (err) {
+      console.error("Failed to fetch attendance history:", err)
+    } finally {
+      setLoadingHistory(false)
+    }
+  }
+
+  const fetchPayrollHistory = async () => {
+    setLoadingPayroll(true)
+    try {
+      const res = await api.get("/payroll")
+      // Filter payroll documents that belong to this employee
+      const filtered = res.data
+        .filter(pay => pay.employeeId.toString() === employeeProfile._id.toString())
+        .sort((a, b) => b.month.localeCompare(a.month))
+      setPayrollHistory(filtered)
+    } catch (err) {
+      console.error("Failed to fetch payroll history:", err)
+    } finally {
+      setLoadingPayroll(false)
     }
   }
 
   const handleCheckIn = async (type) => {
+    setActionLoading(true)
     try {
-      const res = await fetch("/api/attendance/checkin", {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`
-        },
-        body: JSON.stringify({ type })
-      })
-      const data = await res.json()
-      if (data.success) {
-        fetchTodayAttendance()
+      const res = await api.post("/attendance/checkin", { type })
+      if (res.data?.success) {
+        setTodayAttendance(res.data.data)
       }
     } catch (err) {
-      console.error("Check-in failed:", err)
+      console.error("Self check-in action failed:", err)
+    } finally {
+      setActionLoading(false)
     }
   }
 
   const handleLogout = () => {
     logout()
-    navigate("/employee/login")
+    navigate("/login")
   }
 
-  const today = new Date()
-  const dateStr = today.toLocaleDateString("en-US", { 
-    weekday: "long", 
-    year: "numeric", 
-    month: "long", 
-    day: "numeric" 
-  })
-  const timeStr = today.toLocaleTimeString("en-US", { 
-    hour: "2-digit", 
-    minute: "2-digit" 
-  })
+  const handlePasswordChange = async (e) => {
+    e.preventDefault()
+    setSettingsError("")
+    setSettingsSuccess("")
+    
+    if (newPassword !== confirmPassword) {
+      setSettingsError("New passwords do not match")
+      return
+    }
+    if (newPassword.length < 6) {
+      setSettingsError("Password must be at least 6 characters long")
+      return
+    }
 
+    setSettingsLoading(true)
+    try {
+      const res = await api.post("/auth/change-password", {
+        currentPassword,
+        newPassword
+      })
+      if (res.data?.success) {
+        setSettingsSuccess("Password updated successfully!")
+        setCurrentPassword("")
+        setNewPassword("")
+        setConfirmPassword("")
+      }
+    } catch (err) {
+      setSettingsError(err.response?.data?.message || "Failed to change password. Make sure current password is correct.")
+    } finally {
+      setSettingsLoading(false)
+    }
+  }
+
+  // Dashboard configuration mappings
+  const todayStatus = todayAttendance?.status || "NOT_CHECKED_IN"
   const statusConfig = {
-    PRESENT: { icon: CheckCircle, color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20", label: "Present" },
-    LATE: { icon: AlertCircle, color: "text-amber-500 bg-amber-500/10 border-amber-500/20", label: "Late" },
-    ABSENT: { icon: XCircle, color: "text-rose-500 bg-rose-500/10 border-rose-500/20", label: "Absent" },
-    CHECKED_OUT: { icon: Clock, color: "text-blue-500 bg-blue-500/10 border-blue-500/20", label: "Checked Out" },
+    Present: { icon: CheckCircle, color: "text-emerald-600 bg-emerald-50 border-emerald-100", label: "Present" },
+    Late: { icon: AlertCircle, color: "text-amber-600 bg-amber-50 border-amber-100", label: "Late" },
+    Absent: { icon: XCircle, color: "text-rose-600 bg-rose-50 border-rose-100", label: "Absent" },
+    "Half Day": { icon: Clock, color: "text-orange-655 bg-orange-50 border-orange-100", label: "Half Day" },
+    Leave: { icon: CalendarCheck, color: "text-blue-600 bg-blue-50 border-blue-100", label: "Leave Approved" },
+    NOT_CHECKED_IN: { icon: Clock, color: "text-slate-500 bg-slate-100 border-slate-205", label: "Not Checked In" },
   }
 
-  const currentStatus = todayStatus || "NOT_CHECKED_IN"
-  const StatusIcon = statusConfig[currentStatus]?.icon || Clock
-  const statusStyle = statusConfig[currentStatus]?.color || "text-slate-500 bg-slate-500/10 border-slate-500/20"
-  const statusLabel = statusConfig[currentStatus]?.label || "Not Checked In"
+  const currentStatusConfig = statusConfig[todayStatus] || statusConfig.NOT_CHECKED_IN
+  const StatusIcon = currentStatusConfig.icon
+  const statusStyle = currentStatusConfig.color
+  const statusLabel = currentStatusConfig.label
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
-      <header className="relative h-16 flex-shrink-0 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 flex items-center justify-between px-4 md:px-8 w-full z-50">
-        <div className="flex items-center gap-4">
-          <div className="bg-emerald-600 px-3 py-1.5 rounded-xl text-white shadow-[0_0_20px_rgba(16,185,129,0.5)] flex items-center justify-center">
-            <User size={18} />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-white">Employee Portal</h1>
-            <p className="text-[11px] text-slate-400">WorkSphere</p>
-          </div>
-        </div>
+  // Nav Items definition
+  const navItems = [
+    { id: "dashboard", name: "My Dashboard", icon: Home },
+    { id: "attendance", name: "Attendance", icon: CalendarCheck },
+    { id: "payroll", name: "Payroll", icon: CreditCard },
+    { id: "documents", name: "Documents", icon: FileText },
+    { id: "settings", name: "Settings", icon: Settings },
+  ]
 
-        <div className="flex items-center gap-4">
-          <div className="hidden md:flex flex-col items-end text-right">
-            <p className="text-sm font-medium text-white">{dateStr}</p>
-            <p className="text-[11px] text-slate-500 font-mono">{timeStr}</p>
-          </div>
-          
-          <div className="relative" ref={profileRef}>
-            <button 
-              onClick={() => setIsProfileOpen(!isProfileOpen)}
-              className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all border border-transparent hover:border-white/10"
-            >
-              <div className="text-right hidden sm:block">
-                <p className="text-sm font-semibold text-white leading-tight">{user?.name || "Employee"}</p>
-                <p className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.1em]">Employee</p>
-              </div>
-              <div className="relative">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 border border-white/10 flex items-center justify-center text-emerald-500">
-                  <User size={18} />
-                </div>
-                <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-slate-950 rounded-full"></div>
-              </div>
-              <ChevronDown size={14} className={`text-slate-500 transition-transform ${isProfileOpen ? "rotate-180" : ""}`} />
-            </button>
+  // Mock corporate documents
+  const mockDocuments = [
+    { name: "Employment Contract.pdf", type: "PDF", size: "2.4 MB", date: "Jan 12, 2026", status: "Signed" },
+    { name: "WorkSphere Employee Handbook 2026.pdf", type: "PDF", size: "5.8 MB", date: "Feb 01, 2026", status: "Reviewed" },
+    { name: "IT Security and Device Policies.pdf", type: "PDF", size: "1.1 MB", date: "Feb 10, 2026", status: "Signed" },
+    { name: "Leave Policy Guidelines.pdf", type: "PDF", size: "850 KB", date: "Mar 15, 2026", status: "Shared" },
+  ]
 
-            {isProfileOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-2 w-56 bg-slate-900 border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden z-50 backdrop-blur-2xl"
-              >
-                <div className="p-4 border-b border-white/5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500">
-                      <User size={20} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate">{user?.name}</p>
-                      <p className="text-[11px] text-emerald-400 font-bold uppercase tracking-widest">Employee</p>
-                    </div>
+  // Tab Rendering
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return (
+          <div className="space-y-8">
+            {/* Today's Stats Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Today's Status</p>
+                    <p className="text-xl font-bold text-slate-800 capitalize">{statusLabel}</p>
                   </div>
-                  <p className="text-[11px] text-slate-500 mt-2 truncate">{user?.email}</p>
+                  <div className={`p-3 rounded-2xl ${statusStyle} border`}>
+                    <StatusIcon size={24} />
+                  </div>
                 </div>
-                <div className="p-2">
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <Home size={18} />
-                    <span className="text-sm font-medium">My Dashboard</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <CalendarCheck size={18} />
-                    <span className="text-sm font-medium">Attendance</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <CreditCard size={18} />
-                    <span className="text-sm font-medium">Payroll</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <FileText size={18} />
-                    <span className="text-sm font-medium">Documents</span>
-                  </button>
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                    <Settings size={18} />
-                    <span className="text-sm font-medium">Settings</span>
-                  </button>
-                  <div className="h-[1px] bg-white/5 my-2 mx-2"></div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Check-In</p>
+                    <p className="text-2xl font-extrabold text-slate-800">
+                      {todayAttendance?.checkInTime 
+                        ? new Date(todayAttendance.checkInTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) 
+                        : "--:--"}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600">
+                    <Clock size={24} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Check-Out</p>
+                    <p className="text-2xl font-extrabold text-slate-800">
+                      {todayAttendance?.checkOutTime 
+                        ? new Date(todayAttendance.checkOutTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) 
+                        : "--:--"}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600">
+                    <Clock size={24} />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total Hours</p>
+                    <p className="text-2xl font-extrabold text-slate-800">
+                      {todayAttendance?.workDurationMinutes 
+                        ? `${(todayAttendance.workDurationMinutes / 60).toFixed(1)} hrs` 
+                        : "0.0 hrs"}
+                    </p>
+                  </div>
+                  <div className="p-3 rounded-2xl bg-amber-50 border border-amber-100 text-amber-600">
+                    <Clock size={24} />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions & Employee Info */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Quick Actions */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-3">
+                  <CalendarCheck size={22} className="text-emerald-600" />
+                  Attendance Portal
+                </h3>
+                <p className="text-sm text-slate-500 mb-8 leading-relaxed">
+                  Log your daily working hours directly. Choose mobile check-in to use the high-security geofenced facial recognition camera.
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {todayStatus === "NOT_CHECKED_IN" ? (
+                    <button
+                      onClick={() => handleCheckIn("CHECK_IN")}
+                      disabled={actionLoading}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 text-sm active:scale-95"
+                    >
+                      {actionLoading ? <Loader2 size={18} className="animate-spin" /> : <CalendarCheck size={18} />}
+                      <span>Regular Check In</span>
+                    </button>
+                  ) : !todayAttendance?.checkOutTime ? (
+                    <button
+                      onClick={() => handleCheckIn("CHECK_OUT")}
+                      disabled={actionLoading}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 disabled:opacity-50 text-sm active:scale-95"
+                    >
+                      {actionLoading ? <Loader2 size={18} className="animate-spin" /> : <Clock size={18} />}
+                      <span>Regular Check Out</span>
+                    </button>
+                  ) : (
+                    <div className="sm:col-span-2 py-3 px-4 rounded-xl bg-emerald-50 border border-emerald-100 text-center text-emerald-800 font-semibold text-sm">
+                      🎉 Shifts completed and logged for today!
+                    </div>
+                  )}
+
                   <button 
-                    onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-3 py-2.5 text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all"
+                    onClick={() => navigate("/mobile-checkin")}
+                    className="bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold py-4 px-6 rounded-2xl transition-all border border-slate-200 flex items-center justify-center gap-2 shadow-sm text-sm active:scale-95"
                   >
-                    <LogOut size={18} />
-                    <span className="text-sm font-semibold">Sign Out</span>
+                    <MapPin size={18} className="text-emerald-600" />
+                    <span>Selfie Check-In</span>
                   </button>
                 </div>
-              </motion.div>
+              </div>
+
+              {/* Employee Info Card */}
+              <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-6 flex items-center gap-3">
+                  <User size={22} className="text-emerald-600" />
+                  Staff Profile Summary
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Employee ID</p>
+                    <p className="font-bold text-slate-800 truncate">{employeeProfile?.employeeId || "WS-PENDING"}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Department</p>
+                    <p className="font-bold text-slate-800 truncate">{employeeProfile?.department || "General"}</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Office Location</p>
+                    <p className="font-bold text-slate-800 truncate">Main Office / HQ</p>
+                  </div>
+                  <div className="p-4 bg-slate-50 border border-slate-200/60 rounded-2xl">
+                    <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Shift Start</p>
+                    <p className="font-bold text-emerald-600 truncate">09:00 AM</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )
+
+      case "attendance":
+        return (
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                  <CalendarCheck size={22} className="text-emerald-600" />
+                  Attendance Log
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">Review your monthly check-in times and statuses.</p>
+              </div>
+              <button 
+                onClick={fetchAttendanceHistory}
+                className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 flex items-center gap-2 transition-all self-start sm:self-center shadow-sm active:scale-95"
+              >
+                <Clock size={14} /> Refresh Logs
+              </button>
+            </div>
+
+            {loadingHistory ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={36} className="text-emerald-500 animate-spin" />
+              </div>
+            ) : attendanceHistory.length === 0 ? (
+              <div className="text-center py-20 text-slate-500">
+                <CalendarCheck size={48} className="mx-auto mb-4 opacity-20 text-slate-350" />
+                <p className="font-bold">No attendance records found</p>
+                <p className="text-xs mt-1">Your logs will appear here once you check in.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <table className="w-full text-left border-separate border-spacing-0">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Date</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Check In</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Check Out</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Duration</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Method</th>
+                      <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-sm text-slate-600 bg-white">
+                    {attendanceHistory.map((rec) => {
+                      const recStatus = rec.status || "Present"
+                      const statusBadges = {
+                        Present: "bg-emerald-50 text-emerald-600 border-emerald-100",
+                        Late: "bg-amber-50 text-amber-600 border-amber-100",
+                        Absent: "bg-rose-50 text-rose-600 border-rose-100",
+                        "Half Day": "bg-purple-50 text-purple-650 border-purple-100",
+                      }
+                      const badgeClass = statusBadges[recStatus] || "bg-slate-50 text-slate-500 border-slate-200"
+
+                      return (
+                        <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-bold text-slate-800">
+                            {new Date(rec.date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </td>
+                          <td className="p-4 font-mono text-xs text-slate-500">
+                            {rec.checkInTime ? new Date(rec.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--"}
+                          </td>
+                          <td className="p-4 font-mono text-xs text-slate-500">
+                            {rec.checkOutTime ? new Date(rec.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--"}
+                          </td>
+                          <td className="p-4 text-slate-500">
+                            {rec.workDurationMinutes ? `${(rec.workDurationMinutes / 60).toFixed(1)} hrs` : rec.checkInTime && !rec.checkOutTime ? "Active Shift" : "--"}
+                          </td>
+                          <td className="p-4 text-xs text-slate-400">{rec.verificationMethod || "Manual"}</td>
+                          <td className="p-4">
+                            <span className={`px-2.5 py-1 text-xs font-bold rounded-lg border ${badgeClass}`}>
+                              {recStatus}
+                            </span>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
-        </div>
-      </header>
+        )
 
-      <main className="p-4 md:p-8 max-w-7xl mx-auto">
-        <div className="space-y-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      case "payroll":
+        return (
+          <div className="space-y-8">
+            {/* Payroll Info Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Basic Salary</p>
+                <p className="text-2xl font-extrabold text-slate-800">₹{employeeProfile?.monthlySalary?.toLocaleString() || "0"}</p>
+                <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-slate-500">
+                  <Building2 size={12} className="text-emerald-600" /> Base Pay Rate
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Estimated Net Payout</p>
+                <p className="text-2xl font-extrabold text-emerald-600 text-emerald-600 font-mono">₹{employeeProfile?.monthlySalary?.toLocaleString() || "0"}</p>
+                <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-slate-500">
+                  <BadgePercent size={12} className="text-emerald-600" /> Base + Allowances
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Pay Cycle</p>
+                <p className="text-2xl font-extrabold text-slate-800">Monthly</p>
+                <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-slate-500">
+                  <Clock size={12} className="text-emerald-600" /> Auto credit on 1st
+                </div>
+              </div>
+            </div>
+
+            {/* Payslips Table */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                    <CreditCard size={22} className="text-emerald-600" />
+                    Salary Slips
+                  </h3>
+                  <p className="text-sm text-slate-500 mt-1">Download generated monthly payslips and tax forms.</p>
+                </div>
+                <button 
+                  onClick={fetchPayrollHistory}
+                  className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs font-bold border border-slate-200 flex items-center gap-2 transition-all shadow-sm active:scale-95"
+                >
+                  <Clock size={14} /> Refresh History
+                </button>
+              </div>
+
+              {loadingPayroll ? (
+                <div className="flex items-center justify-center py-20">
+                  <Loader2 size={36} className="text-emerald-500 animate-spin" />
+                </div>
+              ) : payrollHistory.length === 0 ? (
+                <div className="text-center py-20 text-slate-500">
+                  <CreditCard size={48} className="mx-auto mb-4 opacity-20 text-slate-350" />
+                  <p className="font-bold">No payslips generated yet</p>
+                  <p className="text-xs mt-1">Your slips will appear here once payroll is processed by HR.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+                  <table className="w-full text-left border-separate border-spacing-0">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Month</th>
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Basic Salary</th>
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Allowances</th>
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Deductions</th>
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">Net Salary</th>
+                        <th className="p-4 text-xs font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 text-right">Payslip</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100 text-sm text-slate-600 bg-white">
+                      {payrollHistory.map((pay) => (
+                        <tr key={pay._id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="p-4 font-bold text-slate-800">{pay.month}</td>
+                          <td className="p-4 font-mono text-xs text-slate-500">₹{pay.basicSalary?.toLocaleString()}</td>
+                          <td className="p-4 font-mono text-xs text-emerald-600">+₹{pay.allowances?.toLocaleString() || "0"}</td>
+                          <td className="p-4 font-mono text-xs text-rose-600">-₹{pay.deductions?.toLocaleString() || "0"}</td>
+                          <td className="p-4 font-bold text-slate-800">₹{pay.netSalary?.toLocaleString()}</td>
+                          <td className="p-4 text-right">
+                            <button className="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white rounded-xl border border-emerald-100 transition-all inline-flex items-center gap-1.5 text-xs font-bold shadow-sm">
+                              <Download size={14} /> Download
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+
+      case "documents":
+        return (
+          <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-white">Welcome back, {user?.name?.split(" ")[0] || "Employee"}!</h2>
-              <p className="text-slate-400 mt-1">Here's your attendance overview for today</p>
-            </div>
-            <div className={`flex items-center gap-3 px-4 py-3 rounded-2xl border ${statusStyle}`}>
-              <StatusIcon size={20} />
-              <span className="font-semibold text-sm">{statusLabel}</span>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Status</p>
-                  <p className="text-2xl font-bold text-white capitalize">{statusLabel.toLowerCase()}</p>
-                </div>
-                <div className={`p-3 rounded-xl ${statusStyle}`}>
-                  <StatusIcon size={24} />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Check-In Time</p>
-                  <p className="text-2xl font-bold text-white">{attendanceData?.checkInTime ? new Date(attendanceData.checkInTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "--:--"}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-500">
-                  <Clock size={24} />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Check-Out Time</p>
-                  <p className="text-2xl font-bold text-white">{attendanceData?.checkOutTime ? new Date(attendanceData.checkOutTime).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : "--:--"}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-slate-700 border border-slate-600 text-slate-400">
-                  <Clock size={24} />
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Work Hours</p>
-                  <p className="text-2xl font-bold text-white">{attendanceData?.totalHours ? `${attendanceData.totalHours}h` : "0h"}</p>
-                </div>
-                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-500">
-                  <Clock size={24} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <CalendarCheck size={20} className="text-emerald-500" />
-                Quick Actions
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                <FileText size={22} className="text-emerald-600" />
+                Corporate Documents
               </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {currentStatus === "NOT_CHECKED_IN" && (
-                  <button
-                    onClick={() => handleCheckIn("CHECK_IN")}
-                    disabled={loading}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Loader2 size={18} className={loading ? "animate-spin" : "hidden"} />
-                    <span>Check In</span>
-                    <CalendarCheck size={18} />
-                  </button>
-                )}
-                
-                {(currentStatus === "PRESENT" || currentStatus === "LATE") && !attendanceData?.checkOutTime && (
-                  <button
-                    onClick={() => handleCheckIn("CHECK_OUT")}
-                    disabled={loading}
-                    className="bg-blue-600 hover:bg-blue-500 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 disabled:opacity-50"
-                  >
-                    <Loader2 size={18} className={loading ? "animate-spin" : "hidden"} />
-                    <span>Check Out</span>
-                    <Clock size={18} />
-                  </button>
-                )}
-
-                <button className="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-4 px-6 rounded-xl transition-all border border-white/5 flex items-center justify-center gap-2">
-                  <MapPin size={18} className="text-emerald-500" />
-                  <span>View Location</span>
-                </button>
-
-                <button className="bg-slate-800 hover:bg-slate-700 text-white font-semibold py-4 px-6 rounded-xl transition-all border border-white/5 flex items-center justify-center gap-2">
-                  <FileText size={18} className="text-blue-500" />
-                  <span>My Attendance</span>
-                </button>
-              </div>
+              <p className="text-sm text-slate-500 mt-1">Access employment documentation, compliance agreements, and corporate policies.</p>
             </div>
 
-            <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-                <User size={20} className="text-blue-500" />
-                Employee Info
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {mockDocuments.map((doc, idx) => (
+                <div key={idx} className="p-5 bg-slate-50 border border-slate-200/60 hover:border-slate-200 rounded-3xl flex items-start gap-4 transition-all shadow-sm">
+                  <div className="p-3 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex-shrink-0">
+                    <FileText size={24} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-slate-800 truncate text-sm">{doc.name}</h4>
+                    <p className="text-xs text-slate-500 mt-0.5">{doc.size} • Uploaded {doc.date}</p>
+                    <div className="flex items-center gap-2 mt-3">
+                      <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-extrabold uppercase rounded">
+                        {doc.status}
+                      </span>
+                    </div>
+                  </div>
+                  <button className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 rounded-xl border border-slate-200 transition-all self-center shadow-sm">
+                    <FileDown size={18} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case "settings":
+        return (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Profile Overview */}
+            <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6 h-fit">
+              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                <User size={22} className="text-emerald-600" />
+                Personal Profile
               </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-emerald-500/10 rounded-lg text-emerald-500">
-                      <User size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Name</p>
-                      <p className="font-medium text-white">{user?.name}</p>
-                    </div>
-                  </div>
+              
+              <div className="flex flex-col items-center py-6 border-b border-slate-100">
+                <div className="w-24 h-24 rounded-[2rem] bg-emerald-50 border-2 border-emerald-100 flex items-center justify-center text-emerald-600 mb-4 shadow-sm">
+                  <User size={48} />
                 </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500">
-                      <Mail size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Email</p>
-                      <p className="font-medium text-white truncate max-w-[200px]">{user?.email}</p>
-                    </div>
-                  </div>
+                <h4 className="text-slate-800 font-bold text-lg text-center leading-tight">{employeeProfile?.name || user?.name}</h4>
+                <p className="text-xs text-slate-500 mt-1 uppercase tracking-wider font-extrabold">{employeeProfile?.department || "General Department"} • {employeeProfile?.employeeId || "STAFF"}</p>
+              </div>
+
+              <div className="space-y-4 text-sm">
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Mail size={16} className="text-slate-400" />
+                  <span className="truncate">{employeeProfile?.email || user?.email}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-amber-500/10 rounded-lg text-amber-500">
-                      <Shield size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Role</p>
-                      <p className="font-medium text-white">Employee</p>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Phone size={16} className="text-slate-400" />
+                  <span>{employeeProfile?.phoneNumber || "Not configured"}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 bg-slate-700 rounded-lg text-slate-400">
-                      <CalendarCheck size={16} />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Today</p>
-                      <p className="font-medium text-white">{dateStr}</p>
-                    </div>
-                  </div>
+                <div className="flex items-center gap-3 text-slate-600">
+                  <Shield size={16} className="text-slate-400" />
+                  <span className="capitalize">{employeeProfile?.role || "Employee"} Role</span>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="bg-slate-900/80 backdrop-blur-xl border border-white/5 rounded-2xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
-              <FileText size={20} className="text-amber-500" />
-              Quick Links
-            </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-center">
-                <CreditCard size={24} className="text-amber-500 mx-auto mb-2" />
-                <p className="text-sm font-medium text-white">Payroll</p>
-                <p className="text-[10px] text-slate-500 mt-1">View payslips & tax info</p>
-              </a>
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-center">
-                <CalendarCheck size={24} className="text-emerald-500 mx-auto mb-2" />
-                <p className="text-sm font-medium text-white">Attendance</p>
-                <p className="text-[10px] text-slate-500 mt-1">Full history & reports</p>
-              </a>
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-center">
-                <FileText size={24} className="text-blue-500 mx-auto mb-2" />
-                <p className="text-sm font-medium text-white">Documents</p>
-                <p className="text-[10px] text-slate-500 mt-1">Contracts & policies</p>
-              </a>
-              <a href="#" className="p-4 bg-white/5 hover:bg-white/10 rounded-xl border border-white/5 transition-all text-center">
-                <Settings size={24} className="text-slate-400 mx-auto mb-2" />
-                <p className="text-sm font-medium text-white">Settings</p>
-                <p className="text-[10px] text-slate-500 mt-1">Profile & preferences</p>
-              </a>
+            {/* Change Password Panel */}
+            <div className="lg:col-span-2 bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                  <Key size={22} className="text-emerald-600" />
+                  Account Security
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">Configure your login credentials and change password.</p>
+              </div>
+
+              <form onSubmit={handlePasswordChange} className="space-y-6 max-w-md">
+                {settingsError && (
+                  <div className="p-4 bg-rose-50 border border-rose-100 text-rose-700 text-sm font-semibold rounded-2xl flex items-center gap-2">
+                    <AlertCircle size={18} />
+                    {settingsError}
+                  </div>
+                )}
+                {settingsSuccess && (
+                  <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm font-semibold rounded-2xl flex items-center gap-2">
+                    <CheckCircle size={18} />
+                    {settingsSuccess}
+                  </div>
+                )}
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Current Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 px-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Min 6 characters"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 px-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">Confirm New Password</label>
+                  <input
+                    type="password"
+                    required
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl py-3.5 px-4 text-sm text-slate-800 placeholder-slate-455 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/20 transition-all font-medium"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={settingsLoading}
+                  className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3.5 px-6 rounded-2xl transition-all shadow-sm flex items-center justify-center gap-2 active:scale-95 text-sm"
+                >
+                  {settingsLoading && <Loader2 size={16} className="animate-spin" />}
+                  <span>Save Password Changes</span>
+                </button>
+              </form>
             </div>
           </div>
+        )
+
+      default:
+        return null
+    }
+  }
+
+  return (
+    <div className="flex h-screen bg-slate-50 overflow-hidden relative selection:bg-emerald-500/10 font-sans text-slate-600">
+      
+      {/* Glow Effects */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/[0.01] rounded-full filter blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/[0.01] rounded-full filter blur-[120px] pointer-none"></div>
+
+      {/* left Sidebar - Matches User Image */}
+      <aside 
+        className={`fixed inset-y-0 left-0 bg-[#161a29] border-r border-slate-800 text-slate-400 w-72 z-50 transform transition-transform duration-300 md:relative md:translate-x-0 flex flex-col ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* User Card Header */}
+        <div className="p-6 border-b border-slate-800/60">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+              <User size={28} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-white font-bold text-base leading-tight truncate">{user?.name || "Employee"}</h2>
+              <p className="text-[10px] text-emerald-400 font-extrabold uppercase tracking-widest mt-1">Employee</p>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-3 truncate">{user?.email}</p>
         </div>
-      </main>
+
+        {/* Navigation list */}
+        <nav className="p-4 space-y-1.5 flex-1 overflow-y-auto">
+          {navItems.map((item) => {
+            const isActive = activeTab === item.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id)
+                  setIsSidebarOpen(false)
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 ${
+                  isActive
+                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold"
+                    : "hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <item.icon size={20} className={isActive ? "text-emerald-400" : "text-slate-400"} />
+                <span className="text-sm">{item.name}</span>
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Logout button */}
+        <div className="p-4 border-t border-slate-800/60">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-4 py-3 text-rose-400 hover:text-rose-350 hover:bg-rose-500/10 rounded-xl transition-all group font-semibold"
+          >
+            <LogOut size={20} />
+            <span className="text-sm">Sign Out</span>
+          </button>
+        </div>
+      </aside>
+
+      {/* Mobile Sidebar Overlay */}
+      <AnimatePresence>
+        {isSidebarOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.4 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 z-40 md:hidden"
+            onClick={() => setIsSidebarOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Right Content Panel */}
+      <div className="flex flex-col flex-1 overflow-hidden relative z-10">
+        
+        {/* Top Header Bar */}
+        <header className="h-20 flex-shrink-0 border-b border-slate-200 flex items-center justify-between px-6 md:px-10 bg-white shadow-sm">
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              className="md:hidden text-slate-500 hover:text-slate-800 transition-colors focus:outline-none"
+            >
+              <Menu size={24} />
+            </button>
+            <div>
+              <h1 className="text-lg font-black text-slate-800">Employee Portal</h1>
+              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-bold font-heading">WorkSphere Portal</p>
+            </div>
+          </div>
+
+          <div className="hidden sm:flex flex-col items-end text-right">
+            <p className="text-sm font-semibold text-slate-800 leading-tight">{dateStr || "Loading date..."}</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mt-1">{timeStr || "Loading time..."}</p>
+          </div>
+        </header>
+
+        {/* Main scrollable body */}
+        <main className="p-6 md:p-10 flex-1 overflow-y-auto w-full">
+          <div className="max-w-7xl mx-auto space-y-6">
+            
+            {/* Header welcome banner */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-slate-200 pb-6">
+              <div>
+                <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+                  Welcome, {user?.name?.split(" ")[0] || "Employee"}!
+                </h2>
+                <p className="text-slate-500 font-medium mt-1">
+                  {activeTab === "dashboard" && "Here is your summary of achievements and shifts today."}
+                  {activeTab === "attendance" && "Detailed review of your attendance history logs."}
+                  {activeTab === "payroll" && "Your monthly payments ledger and breakdowns."}
+                  {activeTab === "documents" && "Verify and download your employment paperwork."}
+                  {activeTab === "settings" && "Adjust password options and account profile details."}
+                </p>
+              </div>
+
+              {activeTab === "dashboard" && (
+                <div className={`flex items-center gap-3 px-4 py-2.5 rounded-2xl border ${statusStyle} text-xs font-bold shadow-sm`}>
+                  <StatusIcon size={16} />
+                  <span>{statusLabel}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Render selected tab panel */}
+            <Suspense fallback={
+              <div className="flex items-center justify-center py-20">
+                <Loader2 size={36} className="text-emerald-500 animate-spin" />
+              </div>
+            }>
+              {renderTabContent()}
+            </Suspense>
+
+          </div>
+        </main>
+      </div>
+
     </div>
   )
+}
+
+// React lazy-loading support fallback container
+function Suspense({ children, fallback }) {
+  const [isMounted, setIsMounted] = useState(false)
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+  if (!isMounted) return fallback
+  return children
 }

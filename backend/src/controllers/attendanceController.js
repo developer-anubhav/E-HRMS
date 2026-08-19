@@ -1,4 +1,5 @@
 import Company from "../models/Company.js";
+import User from "../models/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
 
 // Mark Attendance
@@ -165,6 +166,109 @@ export const updateShiftSettings = async (req, res) => {
       message: "Shift settings updated successfully",
       shiftSettings: company.shiftSettings,
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+// Employee Self-Check-in/out
+export const checkIn = async (req, res) => {
+  const { type } = req.body;
+
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const company = await Company.findById(req.user.companyId);
+    if (!company) return res.status(404).json({ message: "Company not found" });
+
+    const employee = company.employees.find(emp => emp.email.toLowerCase() === user.email.toLowerCase());
+    if (!employee) return res.status(404).json({ message: "Employee profile not found" });
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const existingAttIndex = company.attendance.findIndex(
+      (att) =>
+        att.employeeId.toString() === employee._id.toString() &&
+        new Date(att.date).setUTCHours(0, 0, 0, 0) === today.getTime()
+    );
+
+    let attRecord;
+    const now = new Date();
+
+    if (type === "CHECK_IN") {
+      if (existingAttIndex >= 0) {
+        attRecord = company.attendance[existingAttIndex];
+        attRecord.checkInTime = attRecord.checkInTime || now;
+      } else {
+        attRecord = {
+          employeeId: employee._id,
+          date: today,
+          checkInTime: now,
+          checkOutTime: null,
+          status: "Present",
+          verificationMethod: "Manual"
+        };
+        company.attendance.push(attRecord);
+        attRecord = company.attendance[company.attendance.length - 1];
+      }
+    } else if (type === "CHECK_OUT") {
+      if (existingAttIndex >= 0) {
+        attRecord = company.attendance[existingAttIndex];
+        attRecord.checkOutTime = now;
+      } else {
+        return res.status(400).json({ message: "No check-in record found for today" });
+      }
+    } else {
+      return res.status(400).json({ message: "Invalid check-in type" });
+    }
+
+    // Evaluate shift timings
+    const startTimeStr = company.shiftSettings?.startTime || "09:00";
+    const graceMinutes = company.shiftSettings?.gracePeriodMinutes || 15;
+    
+    const [startHours, startMinutes] = startTimeStr.split(":").map(Number);
+    const shiftStart = new Date(attRecord.checkInTime);
+    shiftStart.setHours(startHours, startMinutes, 0, 0);
+    
+    const checkInMs = new Date(attRecord.checkInTime).getTime();
+    const shiftStartMs = shiftStart.getTime();
+    const graceMs = graceMinutes * 60 * 1000;
+
+    if (type === "CHECK_IN" && checkInMs > shiftStartMs + graceMs) {
+      attRecord.status = "Late";
+    }
+
+    await company.save();
+    res.json({ success: true, data: attRecord });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+// Get Logged-in Employee Today Attendance Status
+export const getTodayAttendance = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const company = await Company.findById(req.user.companyId);
+    if (!company) return res.status(404).json({ message: "Company not found" });
+
+    const employee = company.employees.find(emp => emp.email.toLowerCase() === user.email.toLowerCase());
+    if (!employee) return res.status(404).json({ message: "Employee profile not found" });
+
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    const record = company.attendance.find(
+      (att) =>
+        att.employeeId.toString() === employee._id.toString() &&
+        new Date(att.date).setUTCHours(0, 0, 0, 0) === today.getTime()
+    );
+
+    res.json({ success: true, data: record || null });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
