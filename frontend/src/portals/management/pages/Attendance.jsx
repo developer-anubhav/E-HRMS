@@ -168,71 +168,71 @@ export default function Attendance() {
         <>
       <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
             Attendance
           </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-500 font-medium">
             Track daily attendance records and perform instant AI facial check-in
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => setOpenSecurityModal(true)}
-            className="flex items-center gap-2 rounded-2xl border border-indigo-500/30 bg-indigo-500/10 px-4 py-3 font-bold text-indigo-300 hover:bg-indigo-500/20 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 font-bold text-indigo-700 hover:bg-indigo-100 transition-all text-xs"
             title="Biometric Security, Encryption & Threshold Calibration"
           >
-            <ShieldCheck size={18} className="text-indigo-400" />
+            <ShieldCheck size={18} className="text-indigo-600" />
             <span>Biometric Protection</span>
           </button>
 
           <button
             onClick={() => setOpenLocationModal(true)}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 hover:bg-slate-50 transition-all text-xs shadow-sm"
             title="Configure Work Location GPS & Geofence Radius"
           >
-            <MapPin size={18} className="text-emerald-400" />
+            <MapPin size={18} className="text-emerald-600" />
             <span>Geofence Settings</span>
           </button>
 
           <button
             onClick={() => setOpenAnalyticsModal(true)}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 hover:bg-slate-50 transition-all text-xs shadow-sm"
             title="View Biometric Facial Analytics & Audit Trail"
           >
-            <Activity size={18} className="text-indigo-400" />
+            <Activity size={18} className="text-indigo-600" />
             <span>Face Analytics</span>
           </button>
 
           <button
             onClick={() => setOpenShiftModal(true)}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 hover:bg-slate-50 transition-all text-xs shadow-sm"
             title="Configure Shift Start/End Hours & Grace Period"
           >
-            <Clock size={18} className="text-cyan-400" />
+            <Clock size={18} className="text-cyan-600" />
             <span>Shift Settings</span>
           </button>
 
           <button
             onClick={() => navigate("/mobile-checkin")}
-            className="flex items-center gap-2 rounded-2xl border border-blue-500/30 bg-blue-500/10 px-4 py-3 font-bold text-blue-300 hover:bg-blue-500/20 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-blue-100 bg-blue-50 px-4 py-3 font-bold text-blue-700 hover:bg-blue-100 transition-all text-xs"
             title="Open Mobile Self Check-In Page"
           >
-            <Smartphone size={18} className="text-blue-400" />
+            <Smartphone size={18} className="text-blue-600" />
             <span>Mobile Check-In</span>
           </button>
 
           <button
             onClick={() => navigate("/kiosk")}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 font-bold text-slate-200 hover:bg-white/10 hover:text-white transition-all"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-3 font-bold text-slate-700 hover:bg-slate-50 transition-all text-xs shadow-sm"
           >
-            <ScanFace size={18} className="text-cyan-400" />
+            <ScanFace size={18} className="text-cyan-650" />
             <span>Launch Kiosk Mode</span>
           </button>
 
           <button
             onClick={() => setOpenFacialCheckIn(true)}
-            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 transition-all hover:scale-[1.02]"
+            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-md hover:shadow-lg transition-all hover:scale-[1.02] text-xs"
           >
             <ScanFace size={20} />
             <span>Facial Check-In</span>
@@ -249,24 +249,24 @@ export default function Attendance() {
             <input
               type="text"
               placeholder="Filter by employee name or ID..."
-              className="w-full bg-black/50 border border-white/10 text-white px-10 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-10 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
             {search && (
               <button 
                 onClick={() => setSearch("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
             )}
           </div>
           {search && (
-            <p className="text-xs font-bold text-blue-500 uppercase tracking-widest">Filtering Active</p>
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-widest">Filtering Active</p>
           )}
         </div>
 
@@ -276,13 +276,13 @@ export default function Attendance() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Department Select */}
           <select
-            className="w-full bg-black/50 border border-white/10 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium cursor-pointer"
             value={selectedDepartment}
             onChange={e => setSelectedDepartment(e.target.value)}
           >
-            <option value="" className="bg-black">Select Department</option>
+            <option value="">Select Department</option>
             {departments.map(dep => (
-              <option key={dep} value={dep} className="bg-black">{dep}</option>
+              <option key={dep} value={dep}>{dep}</option>
             ))}
           </select>
 
@@ -294,14 +294,14 @@ export default function Attendance() {
             onBlur={(e) => {
               if (!e.target.value) e.target.type = "text";
             }}
-            className="w-full bg-black/50 border border-white/10 text-white placeholder-gray-500 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all [color-scheme:dark]"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all [color-scheme:light] font-medium"
             onChange={e => setDate(e.target.value)}
           />
 
           {/* Bulk Mark button */}
           <button
             onClick={handleBulkMark}
-            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl hover:bg-blue-700 shadow-sm hover:shadow transition-all disabled:opacity-60 disabled:cursor-not-allowed"
             disabled={!selectedDepartment || employees.length === 0 || !date}
           >
             Bulk Mark Present
@@ -310,23 +310,23 @@ export default function Attendance() {
 
         {/* Employee List for Bulk Marking */}
         {selectedDepartment && employees.length > 0 && (
-          <div className="w-full mb-6">
-            <table className="min-w-full text-left border-collapse">
-              <thead className="bg-white/5 border-b border-white/10">
+          <div className="w-full mb-6 overflow-hidden border border-slate-200 rounded-2xl bg-white shadow-sm">
+            <table className="min-w-full text-left border-separate border-spacing-0">
+              <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Employee ID</th>
-                  <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Name</th>
-                  <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Status</th>
+                  <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Employee ID</th>
+                  <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Name</th>
+                  <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+              <tbody className="divide-y divide-slate-100 bg-white">
                 {employees.map(emp => (
-                  <tr key={emp._id} className="hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-gray-300 font-medium whitespace-nowrap">{emp.employeeId}</td>
-                    <td className="p-4 text-gray-300 whitespace-nowrap">{emp.name}</td>
+                  <tr key={emp._id} className="hover:bg-slate-50/50 transition-colors">
+                    <td className="p-4 text-slate-500 font-mono text-xs whitespace-nowrap">{emp.employeeId}</td>
+                    <td className="p-4 text-slate-700 font-semibold whitespace-nowrap">{emp.name}</td>
                     <td className="p-4 whitespace-nowrap">
                       <select
-                        className="bg-black/50 border border-white/10 text-white px-2 py-1 rounded-xl focus:outline-none"
+                        className="bg-slate-50 border border-slate-200 text-slate-800 px-2 py-1 rounded-lg text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                         value={bulkStatus[emp._id] || "Present"}
                         onChange={e => setBulkStatus(prev => ({ ...prev, [emp._id]: e.target.value }))}
                       >
@@ -344,21 +344,21 @@ export default function Attendance() {
 
         {/* ATTENDANCE TABLE */}
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto border border-slate-200 rounded-3xl bg-white shadow-sm">
+          <table className="w-full text-left border-separate border-spacing-0">
             <thead>
-              <tr className="border-b border-white/10 text-gray-400 text-xs font-semibold uppercase tracking-wider">
-                <th className="p-4">Emp ID</th>
-                <th className="p-4">Employee</th>
-                <th className="p-4">Date</th>
-                <th className="p-4">Check-In / Out</th>
-                <th className="p-4">Duration</th>
-                <th className="p-4">Status</th>
-                <th className="p-4">Remarks & Method</th>
-                <th className="p-4">Actions</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 text-xs font-semibold uppercase tracking-wider">
+                <th className="p-4 border-b border-slate-200">Emp ID</th>
+                <th className="p-4 border-b border-slate-200">Employee</th>
+                <th className="p-4 border-b border-slate-200">Date</th>
+                <th className="p-4 border-b border-slate-200">Check-In / Out</th>
+                <th className="p-4 border-b border-slate-200">Duration</th>
+                <th className="p-4 border-b border-slate-200">Status</th>
+                <th className="p-4 border-b border-slate-200">Remarks & Method</th>
+                <th className="p-4 border-b border-slate-200 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100 bg-white">
               {attendance
                 .filter(item => 
                   item.employee?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -370,10 +370,10 @@ export default function Attendance() {
                   const isLate = statusLower === "late"
                   const isHalfDay = statusLower === "half day"
 
-                  let statusClass = "bg-gray-500/10 text-gray-400 border-gray-500/20"
-                  if (isPresent) statusClass = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                  if (isLate) statusClass = "bg-amber-500/10 text-amber-400 border-amber-500/20"
-                  if (isHalfDay) statusClass = "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                  let statusClass = "bg-slate-100 text-slate-500 border-slate-200"
+                  if (isPresent) statusClass = "bg-emerald-50 text-emerald-600 border-emerald-100"
+                  if (isLate) statusClass = "bg-amber-50 text-amber-600 border-amber-100"
+                  if (isHalfDay) statusClass = "bg-purple-50 text-purple-600 border-purple-100"
 
                   const checkInFormatted = item.checkInTime ? new Date(item.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"
                   const checkOutFormatted = item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "—"
@@ -386,31 +386,31 @@ export default function Attendance() {
                   }
 
                   return (
-                    <tr key={item._id} className="hover:bg-white/5 transition-colors">
-                      <td className="p-4 text-gray-300 font-medium whitespace-nowrap">
+                    <tr key={item._id} className="hover:bg-slate-50/50 transition-colors">
+                      <td className="p-4 text-slate-500 font-mono text-xs whitespace-nowrap">
                         {item.employee?.employeeId}
                       </td>
 
-                      <td className="p-4 text-gray-300 whitespace-nowrap font-semibold">
+                      <td className="p-4 text-slate-700 whitespace-nowrap font-bold text-sm">
                         {item.employee?.name}
                       </td>
 
-                      <td className="p-4 text-gray-400 whitespace-nowrap text-xs font-mono">
+                      <td className="p-4 text-slate-400 whitespace-nowrap text-xs font-mono">
                         {new Date(item.date).toLocaleDateString()}
                       </td>
 
                       <td className="p-4 text-xs whitespace-nowrap">
-                        <span className="text-emerald-300 font-mono">{checkInFormatted}</span>
-                        <span className="text-slate-500 mx-1">/</span>
-                        <span className="text-amber-300 font-mono">{checkOutFormatted}</span>
+                        <span className="text-emerald-600 font-mono font-semibold">{checkInFormatted}</span>
+                        <span className="text-slate-300 mx-1">/</span>
+                        <span className="text-amber-600 font-mono font-semibold">{checkOutFormatted}</span>
                       </td>
 
-                      <td className="p-4 text-xs font-mono text-slate-300 whitespace-nowrap">
+                      <td className="p-4 text-xs font-mono text-slate-500 whitespace-nowrap">
                         {durationFormatted}
                       </td>
 
                       <td className="p-4 whitespace-nowrap">
-                        <span className={`px-2.5 py-1 text-xs font-semibold rounded-full border ${statusClass}`}>
+                        <span className={`px-2.5 py-1 text-xs font-bold rounded-full border ${statusClass}`}>
                           {item.status || 'N/A'}
                         </span>
                       </td>
@@ -419,15 +419,15 @@ export default function Attendance() {
                         <div className="flex flex-col gap-0.5">
                           {item.verificationMethod === "Mobile Self Check-In" ? (
                             <div className="flex flex-col gap-0.5">
-                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-400">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-cyan-600">
                                 <Smartphone size={12} /> Mobile Selfie {item.confidence ? `(${item.confidence}%)` : ""}
                               </span>
-                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400">
+                              <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600">
                                 <MapPin size={10} /> Geofence Passed {item.distanceFromLocationMeters !== null ? `(${item.distanceFromLocationMeters}m)` : ""}
                               </span>
                             </div>
                           ) : item.verificationMethod === "Facial Recognition" || item.verificationMethod === "Camera Kiosk" ? (
-                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-400">
+                            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
                               <ShieldCheck size={12} /> Face ID {item.confidence ? `(${item.confidence}%)` : ""}
                             </span>
                           ) : (
@@ -439,16 +439,16 @@ export default function Attendance() {
                         </div>
                       </td>
 
-                      <td className="p-4 space-x-3 whitespace-nowrap">
+                      <td className="p-4 text-right whitespace-nowrap space-x-3">
                         <button
                           onClick={() => handleEdit(item)}
-                          className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm"
+                          className="text-blue-600 hover:text-blue-700 hover:underline transition-colors font-bold text-xs uppercase tracking-wider"
                         >
                           Edit
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="text-red-400 hover:text-red-300 transition-colors font-medium text-sm"
+                          className="text-rose-600 hover:text-rose-700 hover:underline transition-colors font-bold text-xs uppercase tracking-wider"
                         >
                           Delete
                         </button>

@@ -93,7 +93,7 @@ export default function Payroll() {
         <Loader fullScreen={false} />
       ) : (
         <>
-      <h1 className="text-3xl font-bold text-white mb-8 tracking-tight">
+      <h1 className="text-3xl font-bold text-slate-800 mb-8 tracking-tight">
         Payroll
       </h1>
 
@@ -103,17 +103,17 @@ export default function Payroll() {
             <input
               type="text"
               placeholder="Search payroll by employee name..."
-              className="w-full bg-black/50 border border-white/10 text-white px-10 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-gray-600"
+              className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-10 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all placeholder:text-slate-400 font-medium"
               value={search}
               onChange={e => setSearch(e.target.value)}
             />
-            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500">
+            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
             {search && (
               <button 
                 onClick={() => setSearch("")}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </button>
@@ -124,12 +124,12 @@ export default function Payroll() {
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
 
           <select
-            className="w-full bg-black/50 border border-white/10 text-white px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all appearance-none"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium cursor-pointer"
             onChange={e => setEmployee(e.target.value)}
           >
-            <option value="" className="bg-black">Select Employee</option>
+            <option value="">Select Employee</option>
             {employees.map(emp => (
-              <option key={emp._id} value={emp._id} className="bg-black">
+              <option key={emp._id} value={emp._id}>
                 {emp.employeeId} - {emp.name}
               </option>
             ))}
@@ -138,53 +138,53 @@ export default function Payroll() {
           <input
             type="text"
             placeholder="Month"
-            className="w-full bg-black/50 border border-white/10 text-white placeholder-gray-500 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             onChange={e => setMonth(e.target.value)}
           />
 
           <input
             type="number"
             placeholder="Basic Salary"
-            className="w-full bg-black/50 border border-white/10 text-white placeholder-gray-500 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             onChange={e => setBasicSalary(e.target.value)}
           />
 
           <input
             type="number"
             placeholder="Allowances"
-            className="w-full bg-black/50 border border-white/10 text-white placeholder-gray-500 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             onChange={e => setAllowances(e.target.value)}
           />
 
           <input
             type="number"
             placeholder="Deductions"
-            className="w-full bg-black/50 border border-white/10 text-white placeholder-gray-500 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-blue-500/50 focus:border-blue-500/50 transition-all"
+            className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 px-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
             onChange={e => setDeductions(e.target.value)}
           />
 
           <button
             onClick={handleAdd}
-            className="w-full bg-blue-600 text-white font-semibold py-2.5 rounded-xl hover:bg-blue-500 hover:shadow-[0_0_20px_rgba(59,130,246,0.4)] transition-all transform hover:-translate-y-0.5"
+            className="w-full bg-blue-600 text-white font-bold py-2.5 rounded-xl hover:bg-blue-700 shadow-sm transition-all active:scale-95 text-sm"
           >
             Add
           </button>
 
         </div>
 
-        <div className="w-full overflow-hidden rounded-xl border border-white/10">
+        <div className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
           <table className="min-w-full text-left border-collapse">
 
-            <thead className="bg-white/5 border-b border-white/10">
+            <thead className="bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Employee</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Month</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Net Salary</th>
-                <th className="p-4 text-gray-400 font-semibold text-sm tracking-wide">Actions</th>
+                <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Employee</th>
+                <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Month</th>
+                <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200">Net Salary</th>
+                <th className="p-4 text-slate-500 font-bold text-xs uppercase tracking-wide border-b border-slate-200 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+            <tbody className="divide-y divide-slate-100 bg-white">
 
               {payroll
                 .filter(item => 
@@ -193,32 +193,32 @@ export default function Payroll() {
                 )
                 .map(item => (
 
-                <tr key={item._id} className="hover:bg-white/5 transition-colors">
+                <tr key={item._id} className="hover:bg-slate-50/50 transition-colors">
 
-                  <td className="p-4 text-gray-300 font-medium whitespace-nowrap">
+                  <td className="p-4 text-slate-700 font-bold text-sm whitespace-nowrap">
                     {item.employee?.employeeId} - {item.employee?.name}
                   </td>
 
-                  <td className="p-4 text-gray-400 whitespace-nowrap">
+                  <td className="p-4 text-slate-500 font-semibold text-xs whitespace-nowrap">
                     {item.month}
                   </td>
 
-                  <td className="p-4 text-gray-400 whitespace-nowrap font-mono text-emerald-400">
-                    ₹{item.netSalary}
+                  <td className="p-4 text-emerald-600 font-bold font-mono text-sm whitespace-nowrap">
+                    ₹{item.netSalary?.toLocaleString()}
                   </td>
 
-                  <td className="p-4 space-x-3 whitespace-nowrap">
+                  <td className="p-4 text-right space-x-3 whitespace-nowrap">
 
                     <button
                       onClick={() => handleEdit(item)}
-                      className="text-blue-400 hover:text-blue-300 transition-colors font-medium text-sm"
+                      className="text-blue-600 hover:text-blue-700 hover:underline transition-colors font-bold text-xs uppercase tracking-wider"
                     >
                       Edit
                     </button>
 
                     <button
                       onClick={() => handleDelete(item._id)}
-                      className="text-red-400 hover:text-red-300 transition-colors font-medium text-sm"
+                      className="text-rose-600 hover:text-rose-700 hover:underline transition-colors font-bold text-xs uppercase tracking-wider"
                     >
                       Delete
                     </button>

@@ -32,18 +32,18 @@ export default function AttendanceSummary() {
   }
 
   const items = [
-    { label: "Present", value: present, color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", icon: Users },
-    { label: "Absent", value: absent, color: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20", icon: UserMinus },
-    { label: "Leave", value: leave, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", icon: Clock },
+    { label: "Present", value: present, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100", icon: Users },
+    { label: "Absent", value: absent, color: "text-rose-600", bg: "bg-rose-50", border: "border-rose-100", icon: UserMinus },
+    { label: "Leave", value: leave, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100", icon: Clock },
   ]
 
   return (
     <Card className="h-full">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-xl font-bold text-white tracking-tight font-heading">
+        <h2 className="text-xl font-bold text-slate-800 tracking-tight font-heading">
           Daily Attendance
         </h2>
-        <div className="px-3 py-1 rounded-full bg-white/5 border border-white/5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+        <div className="px-3 py-1 rounded-full bg-slate-100 border border-slate-200 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
             Live
         </div>
       </div>
@@ -55,14 +55,14 @@ export default function AttendanceSummary() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: idx * 0.1 }}
-            className={`p-6 rounded-3xl ${item.bg} border ${item.border} flex flex-col items-center justify-center gap-3 group hover:scale-[1.02] transition-transform`}
+            className={`p-6 rounded-3xl ${item.bg} border ${item.border} flex flex-col items-center justify-center gap-3 group hover:scale-[1.02] transition-transform shadow-sm`}
           >
-            <div className={`p-2 rounded-xl bg-white/5 ${item.color} group-hover:scale-110 transition-transform`}>
+            <div className={`p-2 rounded-xl bg-white border border-slate-100 ${item.color} group-hover:scale-110 transition-transform shadow-sm`}>
                <item.icon size={20} />
             </div>
             <div className="text-center">
                <p className={`text-[10px] font-bold uppercase tracking-[0.2em] ${item.color} mb-1`}>{item.label}</p>
-               <p className="text-3xl font-bold text-white tracking-tight">{item.value}</p>
+               <p className="text-3xl font-bold text-slate-800 tracking-tight">{item.value}</p>
             </div>
           </motion.div>
         ))}

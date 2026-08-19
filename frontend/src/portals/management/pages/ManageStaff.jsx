@@ -65,12 +65,12 @@ export default function ManageStaff() {
           {actionLoading && <div className="fixed inset-0 z-[100]"><Loader fullScreen={true} /></div>}
           <div className="flex justify-between items-center mb-6">
             <div>
-                <h1 className="text-3xl font-bold text-white tracking-tight">Manage Staff</h1>
-                <p className="text-slate-400 mt-1">Create and manage HR, Managers, and Employees</p>
+                <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Manage Staff</h1>
+                <p className="text-slate-500 mt-1">Create and manage HR, Managers, and Employees</p>
             </div>
             <button
               onClick={() => setOpen(true)}
-              className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-blue-600/20"
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-sm transition-all active:scale-95 text-sm"
             >
               Add Staff Member
             </button>
@@ -89,19 +89,19 @@ export default function ManageStaff() {
             <form onSubmit={handleCreateStaff} className="space-y-4 py-4">
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1.5">Full Name</label>
+                        <label className="block text-sm font-semibold text-slate-500 mb-1.5">Full Name</label>
                         <input
                             required
-                            className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                             value={formData.name}
                             onChange={e => setFormData({...formData, name: e.target.value})}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1.5">Employee ID</label>
+                        <label className="block text-sm font-semibold text-slate-500 mb-1.5">Employee ID</label>
                         <input
                             required
-                            className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                             value={formData.employeeId}
                             onChange={e => setFormData({...formData, employeeId: e.target.value})}
                         />
@@ -109,11 +109,11 @@ export default function ManageStaff() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Email Address</label>
+                    <label className="block text-sm font-semibold text-slate-500 mb-1.5">Email Address</label>
                     <input
                         required
                         type="email"
-                        className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                         value={formData.email}
                         onChange={e => setFormData({...formData, email: e.target.value})}
                     />
@@ -121,18 +121,18 @@ export default function ManageStaff() {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1.5">Department</label>
+                        <label className="block text-sm font-semibold text-slate-500 mb-1.5">Department</label>
                         <input
                             required
-                            className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                             value={formData.department}
                             onChange={e => setFormData({...formData, department: e.target.value})}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-slate-400 mb-1.5">Role</label>
+                        <label className="block text-sm font-semibold text-slate-500 mb-1.5">Role</label>
                         <select
-                            className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                            className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                             value={formData.role}
                             onChange={e => setFormData({...formData, role: e.target.value})}
                         >
@@ -144,12 +144,12 @@ export default function ManageStaff() {
                 </div>
 
                 <div>
-                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Initial Password</label>
+                    <label className="block text-sm font-semibold text-slate-500 mb-1.5">Initial Password</label>
                     <input
                         required
                         type="password"
                         placeholder="Default: WorkSphere@2026"
-                        className="w-full bg-slate-800 border border-slate-700 text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                        className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}
                     />
@@ -157,7 +157,7 @@ export default function ManageStaff() {
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition-all mt-4"
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all mt-4 text-sm shadow-sm active:scale-95"
                 >
                     Create Staff Account
                 </button>

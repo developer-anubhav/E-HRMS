@@ -97,24 +97,24 @@ export default function AuthModal({ isOpen, onClose }) {
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Modal Header */}
-                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50">
                     <div className="flex space-x-6">
                         <button
                             onClick={() => { setActiveTab("login"); setError(""); }}
-                            className={`text-lg font-semibold transition-colors duration-200 ${activeTab === "login" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                            className={`text-lg font-semibold transition-colors duration-200 ${activeTab === "login" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
                         >
                             Sign In
                         </button>
                         <button
                             onClick={() => { setActiveTab("register"); setError(""); }}
-                            className={`text-lg font-semibold transition-colors duration-200 ${activeTab === "register" ? "text-blue-600 border-b-2 border-blue-600" : "text-gray-400 hover:text-gray-600"}`}
+                            className={`text-lg font-semibold transition-colors duration-200 ${activeTab === "register" ? "text-emerald-600 border-b-2 border-emerald-600" : "text-slate-400 hover:text-slate-600"}`}
                         >
                             Sign Up
                         </button>
                     </div>
                     <button
                         onClick={handleClose}
-                        className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-full hover:bg-gray-100"
+                        className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-full hover:bg-slate-100"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
@@ -123,7 +123,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 {/* Modal Body */}
                 <div className="p-8">
                     {error && (
-                        <div className="mb-6 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm animate-pulse">
+                        <div className="mb-6 bg-rose-50 border border-rose-100 text-rose-700 px-4 py-3 rounded-xl text-sm animate-pulse shadow-sm">
                             {error}
                         </div>
                     )}
@@ -131,10 +131,10 @@ export default function AuthModal({ isOpen, onClose }) {
                     {activeTab === "login" ? (
                         <form onSubmit={handleLoginSubmit} className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Email</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-3 transition-all duration-200 outline-none"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
                                     placeholder="name@company.com"
                                     value={loginEmail}
                                     onChange={(e) => setLoginEmail(e.target.value)}
@@ -142,10 +142,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Password</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Password</label>
                                 <input
                                     type="password"
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-3 transition-all duration-200 outline-none"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
                                     placeholder="••••••••"
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
@@ -155,7 +155,7 @@ export default function AuthModal({ isOpen, onClose }) {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full text-white bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-xl text-sm px-5 py-3.5 text-center transition-all duration-200 shadow-md shadow-blue-500/30 disabled:opacity-70 flex justify-center items-center"
+                                className="w-full text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm px-5 py-3.5 text-center transition-all duration-200 shadow-sm disabled:opacity-70 flex justify-center items-center active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
@@ -168,10 +168,10 @@ export default function AuthModal({ isOpen, onClose }) {
                     ) : (
                         <form onSubmit={handleRegisterSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Full Name</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Full Name</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-2.5 transition-all outline-none"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="John Doe"
                                     value={regName}
                                     onChange={(e) => setRegName(e.target.value)}
@@ -179,10 +179,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Email</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-2.5 transition-all outline-none"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="john@company.com"
                                     value={regEmail}
                                     onChange={(e) => setRegEmail(e.target.value)}
@@ -190,10 +190,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Password</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Password</label>
                                 <input
                                     type="password"
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-2.5 transition-all outline-none"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="••••••••"
                                     value={regPassword}
                                     onChange={(e) => setRegPassword(e.target.value)}
@@ -201,9 +201,9 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1.5 ml-1">Role</label>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Role</label>
                                 <select
-                                    className="w-full bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:bg-white block p-2.5 outline-none transition-all"
+                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 outline-none transition-all shadow-sm cursor-pointer"
                                     value={regRole}
                                     onChange={(e) => setRegRole(e.target.value)}
                                 >
@@ -216,7 +216,7 @@ export default function AuthModal({ isOpen, onClose }) {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full text-white bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-300 font-medium rounded-xl text-sm px-5 py-3.5 mt-2 text-center transition-all duration-200 shadow-md shadow-indigo-500/30 disabled:opacity-70 flex justify-center items-center"
+                                className="w-full text-white bg-emerald-600 hover:bg-emerald-700 font-medium rounded-xl text-sm px-5 py-3.5 mt-2 text-center transition-all duration-200 shadow-sm disabled:opacity-70 flex justify-center items-center active:scale-[0.98]"
                             >
                                 {isLoading ? (
                                     <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">

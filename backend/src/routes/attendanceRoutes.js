@@ -5,12 +5,16 @@ import {
   updateAttendance,
   deleteAttendance,
   getShiftSettings,
-  updateShiftSettings
+  updateShiftSettings,
+  checkIn,
+  getTodayAttendance
 } from "../controllers/attendanceController.js"
 import { protect } from "../middleware/authMiddleware.js"
 
 const router = express.Router()
 
+router.get("/today", protect, getTodayAttendance)
+router.post("/checkin", protect, checkIn)
 router.get("/", protect, getAttendance)
 router.post("/", protect, markAttendance)
 router.get("/shift-settings", protect, getShiftSettings)
