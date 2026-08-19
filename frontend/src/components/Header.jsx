@@ -126,7 +126,7 @@ export default function Header({ toggleSidebar }) {
                      searchResults.payroll.length > 0
 
   return (
-    <header className="h-20 flex-shrink-0 bg-background/50 backdrop-blur-xl border-b border-white/5 text-slate-200 flex items-center justify-between px-6 md:px-10 w-full z-40">
+    <header className="relative h-20 flex-shrink-0 bg-background/50 backdrop-blur-xl border-b border-white/5 text-slate-200 flex items-center justify-between px-6 md:px-10 w-full z-50">
       <div className="flex items-center gap-6 flex-1">
         {toggleSidebar && (
           <button onClick={toggleSidebar} className="md:hidden text-slate-400 hover:text-white transition-colors focus:outline-none">

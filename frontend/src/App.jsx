@@ -5,22 +5,22 @@ import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./routes/ProtectedRoute"
 import Loader from "./components/ui/Loader"
 
-const UnifiedLogin = lazy(() => import("./pages/auth/UnifiedLogin"))
-const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"))
-const OrganizationSignup = lazy(() => import("./pages/auth/OrganizationSignup"))
+const UnifiedLogin = lazy(() => import("./portals/auth/pages/UnifiedLogin"))
+const ResetPassword = lazy(() => import("./portals/auth/pages/ResetPassword"))
+const OrganizationSignup = lazy(() => import("./portals/auth/pages/OrganizationSignup"))
 const LandingPage = lazy(() => import("./pages/LandingPage"))
 
-const Dashboard = lazy(() => import("./pages/hr/Dashboard"))
-const Employees = lazy(() => import("./pages/hr/Employees"))
-const Attendance = lazy(() => import("./pages/hr/Attendance"))
-const KioskMode = lazy(() => import("./pages/hr/KioskMode"))
-const MobileCheckIn = lazy(() => import("./pages/employee/MobileCheckIn"))
-const EmployeeDashboard = lazy(() => import("./pages/employee/EmployeeDashboard"))
-const Payroll = lazy(() => import("./pages/hr/Payroll"))
-const Reports = lazy(() => import("./pages/hr/Reports"))
-const SuperAdminDashboard = lazy(() => import("./pages/SuperAdminDashboard"))
-const ManageStaff = lazy(() => import("./pages/admin/ManageStaff"))
-const SuperLogin = lazy(() => import("./pages/auth/SuperLogin"))
+const Dashboard = lazy(() => import("./portals/management/pages/Dashboard"))
+const Employees = lazy(() => import("./portals/management/pages/Employees"))
+const Attendance = lazy(() => import("./portals/management/pages/Attendance"))
+const KioskMode = lazy(() => import("./portals/management/pages/KioskMode"))
+const MobileCheckIn = lazy(() => import("./portals/employee/pages/MobileCheckIn"))
+const EmployeeDashboard = lazy(() => import("./portals/employee/pages/EmployeeDashboard"))
+const Payroll = lazy(() => import("./portals/management/pages/Payroll"))
+const Reports = lazy(() => import("./portals/management/pages/Reports"))
+const SuperAdminDashboard = lazy(() => import("./portals/superadmin/pages/SuperAdminDashboard"))
+const ManageStaff = lazy(() => import("./portals/management/pages/ManageStaff"))
+const SuperLogin = lazy(() => import("./portals/auth/pages/SuperLogin"))
 
 export default function App() {
 
