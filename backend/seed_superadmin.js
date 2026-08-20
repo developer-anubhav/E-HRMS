@@ -11,7 +11,7 @@ const seedSuperAdmin = async () => {
     await connectDB();
 
     const email = "anubhavfordev24@gmail.com";
-    const password = "Anubhav@WorkSphere";
+    const password = "Anubhav@Vektra";
 
     // Check if already exists
     const existing = await User.findOne({ email });

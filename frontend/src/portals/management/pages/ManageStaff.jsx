@@ -148,7 +148,7 @@ export default function ManageStaff() {
                     <input
                         required
                         type="password"
-                        placeholder="Default: WorkSphere@2026"
+                        placeholder="Default: Vektra@2026"
                         className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                         value={formData.password}
                         onChange={e => setFormData({...formData, password: e.target.value})}

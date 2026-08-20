@@ -127,10 +127,10 @@ export const forgotPassword = async (req, res) => {
     // Send reset email
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/reset-password?token=${resetToken}&email=${encodeURIComponent(normalizedEmail)}`
     
-    const emailSubject = "WorkSphere - Password Reset Request"
+    const emailSubject = "Vektra - Password Reset Request"
     const emailMessage = `Dear ${user.name},
 
-You requested a password reset for your WorkSphere account.
+You requested a password reset for your Vektra account.
 
 Click the link below to reset your password (valid for 1 hour):
 ${resetUrl}
@@ -138,7 +138,7 @@ ${resetUrl}
 If you didn't request this, please ignore this email.
 
 Best regards,
-WorkSphere Team`
+Vektra Team`
 
     await sendEmail({
       email: normalizedEmail,

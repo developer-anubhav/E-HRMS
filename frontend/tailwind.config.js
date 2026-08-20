@@ -6,6 +6,11 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Inter'", "system-ui", "-apple-system", "sans-serif"],
+        heading: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Outfit'", "sans-serif"],
+        puvi: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Inter'", "sans-serif"],
+      },
       colors: {
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
