@@ -53,7 +53,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               <span className="w-2 h-2 bg-[#1E88E5] rounded-xs"></span>
               <span className="w-2 h-2 bg-[#FDD835] rounded-xs"></span>
             </div>
-            <span className="text-xl font-bold text-white tracking-tight font-heading">WorkSphere</span>
+            <span className="text-xl font-bold text-white tracking-tight font-heading">Vektra</span>
           </div>
           <button onClick={() => setIsOpen(false)} className="md:hidden text-slate-500 hover:text-white transition-colors">
             <X size={20} />

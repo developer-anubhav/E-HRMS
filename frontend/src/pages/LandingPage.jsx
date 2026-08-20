@@ -127,7 +127,7 @@ export default function LandingPage() {
             {/* Top Announcement Bar */}
             <div className="bg-gradient-to-r from-blue-700 via-indigo-700 to-violet-800 text-white py-2 px-4 text-center text-xs font-semibold tracking-wide relative z-50">
                 <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] uppercase font-bold mr-2">New</span>
-                WorkSphere 2.0 is live! Introducing automated facial recognition kiosk verification. 
+                Vektra 2.0 is live! Introducing automated facial recognition kiosk verification. 
                 <Link to="/signup" className="underline ml-1 hover:text-blue-200 transition-colors">Start Free Trial →</Link>
             </div>
 
@@ -144,7 +144,7 @@ export default function LandingPage() {
                             <span className="w-2.5 h-2.5 bg-[#FDD835] rounded-sm"></span> {/* Yellow */}
                         </div>
                         <span className="text-2xl font-black text-slate-900 tracking-tight font-heading flex items-center gap-1">
-                            WorkSphere
+                            Vektra
                             <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider scale-90">HRMS</span>
                         </span>
                     </Link>
@@ -234,9 +234,9 @@ export default function LandingPage() {
                             Unified Enterprise HR Operating System
                         </div>
                         
-                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-slate-900 font-heading leading-[1.05]">
+                        <h1 className="text-4xl sm:text-5xl md:text-6xl font-light tracking-tight text-slate-900 font-heading leading-[1.08]">
                             Manage your workforce. <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-[#E53935]">
+                            <span className="text-slate-800 font-light">
                                 Minus the friction.
                             </span>
                         </h1>
@@ -395,17 +395,17 @@ export default function LandingPage() {
                             One Integrated Suite. Zero Complexity.
                         </h2>
                         <p className="text-slate-500 font-medium text-lg leading-relaxed">
-                            Click through our core modules below to see how WorkSphere runs your entire employee life cycle in real time.
+                            Click through our core modules below to see how Vektra runs your entire employee life cycle in real time.
                         </p>
                     </div>
 
                     {/* Tab Navigation Switches */}
                     <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-10">
                         {[
-                            { id: "people", label: "WorkSphere People", desc: "Core HR & Directory", color: "#1E88E5", icon: Users },
-                            { id: "attendance", label: "WorkSphere Attendance", desc: "Clock-In & Shifts", color: "#43A047", icon: Clock },
-                            { id: "payroll", label: "WorkSphere Payroll", desc: "Compensation & Taxes", color: "#E53935", icon: Banknote },
-                            { id: "analytics", label: "WorkSphere Analytics", desc: "BI & Performance Reports", color: "#FDD835", icon: BarChart3 },
+                            { id: "people", label: "Vektra People", desc: "Core HR & Directory", color: "#1E88E5", icon: Users },
+                            { id: "attendance", label: "Vektra Attendance", desc: "Clock-In & Shifts", color: "#43A047", icon: Clock },
+                            { id: "payroll", label: "Vektra Payroll", desc: "Compensation & Taxes", color: "#E53935", icon: Banknote },
+                            { id: "analytics", label: "Vektra Analytics", desc: "BI & Performance Reports", color: "#FDD835", icon: BarChart3 },
                         ].map((tab) => {
                             const TabIcon = tab.icon
                             const isSelected = activeTab === tab.id
@@ -446,7 +446,7 @@ export default function LandingPage() {
                             </div>
                             <div className="bg-slate-800 rounded-lg py-1 px-4 text-xs font-semibold text-slate-400 font-mono flex items-center gap-2 max-w-sm w-full">
                                 <Lock size={12} className="text-[#27c93f]" />
-                                secure.worksphere.io/portal/dashboard
+                                secure.Vektra.io/portal/dashboard
                             </div>
                         </div>
 
@@ -856,7 +856,7 @@ export default function LandingPage() {
                         </h2>
 
                         <p className="text-slate-400 text-sm md:text-base leading-relaxed font-semibold">
-                            At WorkSphere, we believe privacy is a fundamental human right. Inspired by Zoho's absolute commitment to security, we pledge:
+                            At Vektra, we believe privacy is a fundamental human right. Inspired by Zoho's absolute commitment to security, we pledge:
                         </p>
 
                         <div className="space-y-4 pt-2">
@@ -919,7 +919,7 @@ export default function LandingPage() {
                     </h2>
                     
                     <p className="text-slate-500 text-lg md:text-xl font-medium max-w-2xl mx-auto leading-relaxed">
-                        Join thousands of companies using WorkSphere to orchestrate core HR operations. Free 14-day trial. No credit card required.
+                        Join thousands of companies using Vektra to orchestrate core HR operations. Free 14-day trial. No credit card required.
                     </p>
 
                     <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
@@ -960,12 +960,12 @@ export default function LandingPage() {
                                     <span className="w-2.5 h-2.5 bg-[#FDD835] rounded-sm"></span>
                                 </div>
                                 <span className="text-xl font-black text-slate-900 tracking-tight font-heading">
-                                    WorkSphere
+                                    Vektra
                                 </span>
                             </Link>
 
                             <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm">
-                                WorkSphere provides enterprise-grade human resource management systems, automated attendance verification modules, dynamic payroll integrations, and reports analytics.
+                                Vektra provides enterprise-grade human resource management systems, automated attendance verification modules, dynamic payroll integrations, and reports analytics.
                             </p>
 
                             <div className="flex gap-4">
@@ -982,10 +982,10 @@ export default function LandingPage() {
                         <div className="space-y-4">
                             <h4 className="text-xs font-bold text-slate-800 uppercase tracking-widest font-heading">Core Modules</h4>
                             <div className="flex flex-col gap-2.5 text-xs font-semibold text-slate-500">
-                                <a href="#demo" className="hover:text-blue-600 transition-colors">WorkSphere People</a>
-                                <a href="#demo" className="hover:text-blue-600 transition-colors">WorkSphere Attendance</a>
-                                <a href="#demo" className="hover:text-blue-600 transition-colors">WorkSphere Payroll</a>
-                                <a href="#demo" className="hover:text-blue-600 transition-colors">WorkSphere Analytics</a>
+                                <a href="#demo" className="hover:text-blue-600 transition-colors">Vektra People</a>
+                                <a href="#demo" className="hover:text-blue-600 transition-colors">Vektra Attendance</a>
+                                <a href="#demo" className="hover:text-blue-600 transition-colors">Vektra Payroll</a>
+                                <a href="#demo" className="hover:text-blue-600 transition-colors">Vektra Analytics</a>
                             </div>
                         </div>
 
@@ -1024,7 +1024,7 @@ export default function LandingPage() {
                     <hr className="border-slate-200" />
 
                     <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-xs font-semibold text-slate-400">
-                        <p>© {new Date().getFullYear()} WorkSphere Engineering. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} Vektra Engineering. All rights reserved.</p>
                         <div className="flex gap-6">
                             <a href="#" className="hover:text-slate-600 transition-colors">Privacy Policy</a>
                             <a href="#" className="hover:text-slate-600 transition-colors">Terms of Service</a>

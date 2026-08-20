@@ -217,7 +217,7 @@ export default function EmployeeDashboard() {
   // Mock corporate documents
   const mockDocuments = [
     { name: "Employment Contract.pdf", type: "PDF", size: "2.4 MB", date: "Jan 12, 2026", status: "Signed" },
-    { name: "WorkSphere Employee Handbook 2026.pdf", type: "PDF", size: "5.8 MB", date: "Feb 01, 2026", status: "Reviewed" },
+    { name: "Vektra Employee Handbook 2026.pdf", type: "PDF", size: "5.8 MB", date: "Feb 01, 2026", status: "Reviewed" },
     { name: "IT Security and Device Policies.pdf", type: "PDF", size: "1.1 MB", date: "Feb 10, 2026", status: "Signed" },
     { name: "Leave Policy Guidelines.pdf", type: "PDF", size: "850 KB", date: "Mar 15, 2026", status: "Shared" },
   ]
@@ -780,7 +780,7 @@ export default function EmployeeDashboard() {
             </button>
             <div>
               <h1 className="text-lg font-black text-slate-800">Employee Portal</h1>
-              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-bold font-heading">WorkSphere Portal</p>
+              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-bold font-heading">Vektra Portal</p>
             </div>
           </div>
 

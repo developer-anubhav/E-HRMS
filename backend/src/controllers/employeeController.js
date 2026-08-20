@@ -52,9 +52,9 @@ export const createEmployee = async (req, res) => {
         return res.status(400).json({ message: "A user with this email already exists in the system" });
     }
 
-    // Generate default password: username@WorkSphere (username = email prefix)
+    // Generate default password: username@Vektra (username = email prefix)
     const username = normalizedEmail.split('@')[0];
-    const defaultPassword = `${username}@WorkSphere`;
+    const defaultPassword = `${username}@Vektra`;
     const finalPassword = password || defaultPassword;
 
     // Hash password
@@ -95,21 +95,21 @@ export const createEmployee = async (req, res) => {
 
     // 3. Send credentials email to employee (non-blocking)
     try {
-      const emailSubject = "Welcome to WorkSphere - Your Login Credentials";
+      const emailSubject = "Welcome to Vektra - Your Login Credentials";
       const emailMessage = `Dear ${name},
 
-Welcome to WorkSphere! Your employee account has been created by your HR department.
+Welcome to Vektra! Your employee account has been created by your HR department.
 
 Your login credentials are:
 - Email: ${normalizedEmail}
 - Password: ${finalPassword}
 - Portal: Employee Portal
 
-Please log in at the WorkSphere Employee Portal and change your password after first login for security.
+Please log in at the Vektra Employee Portal and change your password after first login for security.
 
 Best regards,
 HR Team
-WorkSphere`;
+Vektra`;
 
       await sendEmail({
         email: normalizedEmail,
@@ -178,7 +178,7 @@ export const createStaff = async (req, res) => {
 
     // 2. Create User record for login
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password || "WorkSphere@2026", salt);
+    const hashedPassword = await bcrypt.hash(password || "Vektra@2026", salt);
 
     const newUser = new User({
         name,

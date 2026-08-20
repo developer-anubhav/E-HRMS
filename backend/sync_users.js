@@ -28,7 +28,7 @@ const syncUsers = async () => {
         }
 
         const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash("Admin@WorkSphere2026", salt);
+        const hashedPassword = await bcrypt.hash("Admin@Vektra2026", salt);
 
         const newAdmin = new User({
           name: reg.name,

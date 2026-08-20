@@ -82,7 +82,7 @@ export default function ResetPassword() {
               <div className="bg-blue-500 rounded-sm"></div>
               <div className="bg-amber-400 rounded-sm"></div>
             </div>
-            <span className="text-3xl font-extrabold text-slate-800 tracking-tighter font-heading">WorkSphere</span>
+            <span className="text-3xl font-extrabold text-slate-800 tracking-tighter font-heading">Vektra</span>
           </Link>
         </div>
 

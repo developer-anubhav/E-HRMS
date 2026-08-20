@@ -129,7 +129,7 @@ export default function SuperAdminDashboard() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(res.data.data, null, 2))
             const downloadAnchorNode = document.createElement('a')
             downloadAnchorNode.setAttribute("href", dataStr)
-            downloadAnchorNode.setAttribute("download", `Worksphere_Trace_${company.name.replace(/\s+/g, '_')}.json`)
+            downloadAnchorNode.setAttribute("download", `Vektra_Trace_${company.name.replace(/\s+/g, '_')}.json`)
             document.body.appendChild(downloadAnchorNode)
             downloadAnchorNode.click()
             downloadAnchorNode.remove()
@@ -211,7 +211,7 @@ const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchT
                             </div>
                             <span className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-600">Super Admin Control</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-800 font-heading tracking-tight">WorkSphere Portal</h1>
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-800 font-heading tracking-tight">Vektra Portal</h1>
                     </motion.div>
 
                     <motion.div 

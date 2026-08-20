@@ -390,7 +390,7 @@ export default function Header({ toggleSidebar }) {
                         <div className="w-8 h-8 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center group-hover/item:bg-primary/10 group-hover/item:text-primary transition-colors">
                           <Mail size={14} />
                         </div>
-                        <span className="text-xs font-semibold text-slate-600 truncate">{user.email || "admin@worksphere.com"}</span>
+                        <span className="text-xs font-semibold text-slate-600 truncate">{user.email || "admin@Vektra.com"}</span>
                       </div>
                       <div className="flex items-center gap-3 text-slate-600 group/item">
                         <div className="w-8 h-8 rounded-lg bg-slate-200/50 text-slate-500 flex items-center justify-center group-hover/item:bg-blue-500/10 group-hover/item:text-blue-500 transition-colors">
@@ -424,7 +424,7 @@ export default function Header({ toggleSidebar }) {
 
                   {/* Dropdown Footer */}
                   <div className="bg-slate-50 p-4 text-center">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">WorkSphere Pro v1.0</p>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Vektra Pro v1.0</p>
                   </div>
                 </motion.div>
               )}

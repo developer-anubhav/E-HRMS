@@ -25,9 +25,9 @@ export default function AddEmployeeForm({ onSubmit }) {
   }
 
   const getDefaultPassword = () => {
-    if (!form.email) return "username@WorkSphere"
+    if (!form.email) return "username@Vektra"
     const username = form.email.split('@')[0]
-    return `${username}@WorkSphere`
+    return `${username}@Vektra`
   }
 
   const handleSubmit = async (e) => {
