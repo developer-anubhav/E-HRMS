@@ -206,12 +206,12 @@ const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchT
                         animate={{ opacity: 1, x: 0 }}
                     >
                         <div className="flex items-center gap-3 mb-2">
-                            <div className="bg-emerald-600 p-2 rounded-lg text-white">
-                                <ShieldCheck size={20} />
-                            </div>
+                            <img src="/Vektra.png" alt="Vektra" className="h-10 md:h-12 w-auto object-contain" />
                             <span className="text-xs font-bold uppercase tracking-[0.3em] text-emerald-600">Super Admin Control</span>
                         </div>
-                        <h1 className="text-4xl md:text-5xl font-black text-slate-800 font-heading tracking-tight">Vektra Portal</h1>
+                        <h1 className="text-4xl md:text-5xl font-black text-slate-800 font-heading tracking-tight flex items-center gap-3">
+                            Vektra Portal
+                        </h1>
                     </motion.div>
 
                     <motion.div 
