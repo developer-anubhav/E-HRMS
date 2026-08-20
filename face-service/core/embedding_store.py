@@ -34,9 +34,10 @@ import threading
 logger = logging.getLogger("face-service.store")
 
 # ---------------------------------------------------------------------------
-# Store path — relative to face-service root
+# Store path — relative to face-service root or custom DATA_DIR
 # ---------------------------------------------------------------------------
-_STORE_DIR = Path(__file__).resolve().parent.parent / "data"
+_data_dir_env = os.getenv("DATA_DIR")
+_STORE_DIR = Path(_data_dir_env) if _data_dir_env else (Path(__file__).resolve().parent.parent / "data")
 _STORE_PATH = _STORE_DIR / "embeddings.json"
 
 # Thread lock for safe concurrent writes (FastAPI can run concurrent requests)
