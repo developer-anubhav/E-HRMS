@@ -1,5 +1,6 @@
 import Company from "../models/Company.js";
 import User from "../models/userModel.js";
+import Employee from "../models/Employee.js";
 import bcrypt from "bcryptjs";
 import sendEmail from "../utils/sendEmail.js";
 
@@ -62,7 +63,7 @@ export const createEmployee = async (req, res) => {
     const hashedPassword = await bcrypt.hash(finalPassword, salt);
 
     // 1. Add to Company Employees array
-    const newEmployee = {
+    const newEmployeeData = {
         employeeId,
         name,
         email: normalizedEmail,
@@ -72,10 +73,27 @@ export const createEmployee = async (req, res) => {
         monthlySalary,
         status: status || "Active"
     };
-    company.employees.push(newEmployee);
+    company.employees.push(newEmployeeData);
     await company.save();
 
-    // 2. Create User record for login (with compensating rollback on failure)
+    const createdSubdoc = company.employees[company.employees.length - 1];
+
+    // 2. Create standalone document in 'employees' collection in MongoDB
+    const standaloneEmp = new Employee({
+        _id: createdSubdoc._id,
+        companyId: req.user.companyId,
+        employeeId,
+        name,
+        email: normalizedEmail,
+        phoneNumber,
+        department,
+        role: employeeRole,
+        monthlySalary: monthlySalary || 0,
+        status: status || "Active"
+    });
+    await standaloneEmp.save();
+
+    // 3. Create User record for login (with compensating rollback on failure)
     let newUser;
     try {
         newUser = new User({
@@ -87,13 +105,14 @@ export const createEmployee = async (req, res) => {
         });
         await newUser.save();
     } catch (userError) {
-        // COMPENSATING TRANSACTION: Remove employee from Company array
-        company.employees.pull({ employeeId });
+        // COMPENSATING TRANSACTION: Remove from Company array & standalone collection
+        company.employees.pull({ _id: createdSubdoc._id });
         await company.save();
+        await Employee.deleteOne({ _id: createdSubdoc._id });
         throw userError;
     }
 
-    // 3. Send credentials email to employee (non-blocking)
+    // 4. Send credentials email to employee (non-blocking)
     try {
       const emailSubject = "Welcome to Vektra - Your Login Credentials";
       const emailMessage = `Dear ${name},
@@ -122,9 +141,8 @@ Vektra`;
     }
     
     // Return the newly created employee with userId
-    const createdEmployee = company.employees[company.employees.length - 1];
     res.status(201).json({
-      ...(createdEmployee.toObject ? createdEmployee.toObject() : createdEmployee),
+      ...(createdSubdoc.toObject ? createdSubdoc.toObject() : createdSubdoc),
       userId: newUser._id,
       credentialsSent: true,
       defaultPasswordUsed: !password
@@ -176,7 +194,22 @@ export const createStaff = async (req, res) => {
     });
     await company.save();
 
-    // 2. Create User record for login
+    const createdSubdoc = company.employees[company.employees.length - 1];
+
+    // 2. Create standalone document in 'employees' collection in MongoDB
+    const standaloneEmp = new Employee({
+        _id: createdSubdoc._id,
+        companyId: req.user.companyId,
+        employeeId,
+        name,
+        email: normalizedEmail,
+        department,
+        role,
+        status: "Active"
+    });
+    await standaloneEmp.save();
+
+    // 3. Create User record for login
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password || "Vektra@2026", salt);
 
@@ -189,7 +222,7 @@ export const createStaff = async (req, res) => {
     });
     await newUser.save();
     
-    res.status(201).json(company.employees[company.employees.length - 1]);
+    res.status(201).json(createdSubdoc);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -250,9 +283,12 @@ export const updateEmployee = async (req, res) => {
       return res.status(404).json({ message: "Employee not found" });
     }
 
-    // Update fields
+    // Update subdocument
     Object.assign(employee, req.body);
     await company.save();
+
+    // Also update standalone 'employees' collection
+    await Employee.updateOne({ _id: req.params.id }, { $set: req.body });
 
     res.json(employee);
   } catch (error) {
@@ -280,6 +316,10 @@ export const deleteEmployee = async (req, res) => {
     company.payrolls = company.payrolls.filter(pay => pay.employeeId.toString() !== req.params.id);
 
     await company.save();
+
+    // Also delete from standalone 'employees' collection
+    await Employee.deleteOne({ _id: req.params.id });
+
     res.json({ message: "Employee and related records deleted successfully" });
   } catch (err) {
     res.status(500).json({ message: err.message });
