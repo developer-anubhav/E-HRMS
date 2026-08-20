@@ -1,4 +1,4 @@
-# Vektra Pro - Enterprise HR Management System (E-HRMS)
+# Vektra - Enterprise HR Management System
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/Frontend-React%2019%20%7C%20Vite%20%7C%20TailwindCSS-61DAFB)](frontend/)
@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/badge/AI%20Service-FastAPI%20%7C%20PyTorch%20%7C%20FaceNet-3776AB)](face-service/)
 [![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen)]()
 
-**Vektra Pro** is a modern, full-stack, enterprise-grade **Human Resource Management System (E-HRMS)** engineered for multi-tenant organizations. It combines core HR administrative operations, intelligent shift evaluation, dynamic payroll processing, GPS geofencing, and AI-powered facial recognition biometric kiosks with real-time anti-spoofing liveness verification.
+**Vektra** is a modern, full-stack, enterprise-grade **Human Resource Management System (E-HRMS)** engineered for multi-tenant organizations. It combines core HR administrative operations, intelligent shift evaluation, dynamic payroll processing, GPS geofencing, and AI-powered facial recognition biometric kiosks with real-time anti-spoofing liveness verification.
 
 ---
 
