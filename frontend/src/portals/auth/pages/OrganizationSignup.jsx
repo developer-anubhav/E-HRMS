@@ -158,14 +158,8 @@ export default function OrganizationSignup() {
                     {/* Left Column: Branding & Features */}
                     <div className="md:col-span-5 flex flex-col justify-between h-full border-b md:border-b-0 md:border-r border-slate-100 pb-6 md:pb-0 md:pr-6">
                         <div>
-                            <Link to="/" className="inline-flex items-center gap-3 mb-6 group">
-                                <div className="grid grid-cols-2 gap-0.5 w-7 h-7">
-                                    <div className="bg-rose-500 rounded-sm"></div>
-                                    <div className="bg-emerald-500 rounded-sm"></div>
-                                    <div className="bg-blue-500 rounded-sm"></div>
-                                    <div className="bg-amber-400 rounded-sm"></div>
-                                </div>
-                                <span className="text-3xl font-extrabold text-slate-800 tracking-tighter font-heading">Vektra</span>
+                            <Link to="/" className="inline-block mb-6 group">
+                                <img src="/Vektra.png" alt="Vektra" className="h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
                             </Link>
 
                             <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-3 font-heading">

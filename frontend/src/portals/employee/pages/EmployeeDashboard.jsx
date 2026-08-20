@@ -703,6 +703,14 @@ export default function EmployeeDashboard() {
           isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
+        {/* Brand Header */}
+        <div className="p-6 pb-4 border-b border-slate-800/80 flex items-center justify-between">
+          <img src="/Vektra-dark.png" alt="Vektra" className="h-8 md:h-9 w-auto object-contain" />
+          <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-slate-500 hover:text-white transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+
         {/* User Card Header */}
         <div className="p-6 border-b border-slate-800/60">
           <div className="flex items-center gap-4">
@@ -778,9 +786,9 @@ export default function EmployeeDashboard() {
             >
               <Menu size={24} />
             </button>
+            <img src="/Vektra.png" alt="Vektra" className="h-7 w-auto object-contain" />
             <div>
               <h1 className="text-lg font-black text-slate-800">Employee Portal</h1>
-              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-bold font-heading">Vektra Portal</p>
             </div>
           </div>
 

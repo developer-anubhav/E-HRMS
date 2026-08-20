@@ -75,14 +75,8 @@ export default function ResetPassword() {
         className="w-[90%] max-w-md relative z-10"
       >
         <div className="flex flex-col items-center mb-10">
-          <Link to="/" className="flex items-center gap-3 mb-4 group">
-            <div className="grid grid-cols-2 gap-0.5 w-7 h-7">
-              <div className="bg-rose-500 rounded-sm"></div>
-              <div className="bg-emerald-500 rounded-sm"></div>
-              <div className="bg-blue-500 rounded-sm"></div>
-              <div className="bg-amber-400 rounded-sm"></div>
-            </div>
-            <span className="text-3xl font-extrabold text-slate-800 tracking-tighter font-heading">Vektra</span>
+          <Link to="/" className="inline-block mb-4 group">
+            <img src="/Vektra.png" alt="Vektra" className="h-11 md:h-12 w-auto object-contain hover:scale-105 transition-transform duration-300" />
           </Link>
         </div>
 

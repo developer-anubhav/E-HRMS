@@ -135,18 +135,14 @@ export default function LandingPage() {
             <header className="sticky top-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-sm transition-all duration-300">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
                     
-                    {/* Brand Logo: Zoho-style multi-color boxes */}
+                    {/* Brand Logo */}
                     <Link to="/" className="flex items-center gap-3 group">
-                        <div className="grid grid-cols-2 gap-1 w-7 h-7 p-0.5 bg-slate-100 rounded-lg group-hover:rotate-12 transition-transform duration-300 shadow-sm border border-slate-200">
-                            <span className="w-2.5 h-2.5 bg-[#E53935] rounded-sm"></span> {/* Red */}
-                            <span className="w-2.5 h-2.5 bg-[#43A047] rounded-sm"></span> {/* Green */}
-                            <span className="w-2.5 h-2.5 bg-[#1E88E5] rounded-sm"></span> {/* Blue */}
-                            <span className="w-2.5 h-2.5 bg-[#FDD835] rounded-sm"></span> {/* Yellow */}
-                        </div>
-                        <span className="text-2xl font-black text-slate-900 tracking-tight font-heading flex items-center gap-1">
-                            Vektra
-                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider scale-90">HRMS</span>
-                        </span>
+                        <img 
+                            src="/Vektra.png" 
+                            alt="Vektra" 
+                            className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300" 
+                        />
+                        <span className="text-[11px] bg-blue-100/80 text-blue-800 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider shadow-xs">HRMS</span>
                     </Link>
 
                     {/* Desktop Navigation Link Menu */}
@@ -952,16 +948,12 @@ export default function LandingPage() {
                         
                         {/* Footer Brand Info */}
                         <div className="col-span-2 space-y-6">
-                            <Link to="/" className="flex items-center gap-3 group">
-                                <div className="grid grid-cols-2 gap-1 w-6 h-6 p-0.5 bg-slate-100 rounded-md group-hover:rotate-12 transition-transform duration-300 shadow-sm border border-slate-200">
-                                    <span className="w-2.5 h-2.5 bg-[#E53935] rounded-sm"></span>
-                                    <span className="w-2.5 h-2.5 bg-[#43A047] rounded-sm"></span>
-                                    <span className="w-2.5 h-2.5 bg-[#1E88E5] rounded-sm"></span>
-                                    <span className="w-2.5 h-2.5 bg-[#FDD835] rounded-sm"></span>
-                                </div>
-                                <span className="text-xl font-black text-slate-900 tracking-tight font-heading">
-                                    Vektra
-                                </span>
+                            <Link to="/" className="inline-block group">
+                                <img 
+                                    src="/Vektra.png" 
+                                    alt="Vektra" 
+                                    className="h-10 md:h-12 w-auto object-contain group-hover:scale-105 transition-transform duration-300" 
+                                />
                             </Link>
 
                             <p className="text-xs text-slate-500 font-medium leading-relaxed max-w-sm">

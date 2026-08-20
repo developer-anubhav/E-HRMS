@@ -46,14 +46,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       >
         <div className="p-8 pb-10 border-b border-slate-800/80 flex justify-between items-center">
           <div className="flex items-center gap-3">
-            {/* Zoho-style 4-box logo mark */}
-            <div className="grid grid-cols-2 gap-0.5 w-6 h-6 p-0.5 bg-slate-800 rounded-md shadow-sm border border-slate-700">
-              <span className="w-2 h-2 bg-[#E53935] rounded-xs"></span>
-              <span className="w-2 h-2 bg-[#43A047] rounded-xs"></span>
-              <span className="w-2 h-2 bg-[#1E88E5] rounded-xs"></span>
-              <span className="w-2 h-2 bg-[#FDD835] rounded-xs"></span>
-            </div>
-            <span className="text-xl font-bold text-white tracking-tight font-heading">Vektra</span>
+            <img src="/Vektra-dark.png" alt="Vektra" className="h-9 md:h-10 w-auto object-contain" />
           </div>
           <button onClick={() => setIsOpen(false)} className="md:hidden text-slate-500 hover:text-white transition-colors">
             <X size={20} />
