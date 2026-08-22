@@ -5,6 +5,9 @@ import { apiLimiter } from "./middleware/rateLimitMiddleware.js"
 
 const app = express()
 
+// Trust reverse proxy for live deployment (Render, Vercel, Railway, Nginx, Cloudflare)
+app.set("trust proxy", 1)
+
 // Global Request Logger - MOVED TO TOP
 app.use((req, res, next) => {
   console.log(`[NETWORK] ${new Date().toISOString()} | ${req.method} ${req.url}`);
