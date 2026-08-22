@@ -42,7 +42,7 @@ export default function UnifiedLogin() {
       console.log('[FRONTEND] Login attempt:', { email: trimmedEmail, passwordLength: trimmedPassword.length, passwordChars: Array.from(trimmedPassword).map(c => c.charCodeAt(0)) })
       const res = await loginUser({ email: trimmedEmail, password: trimmedPassword })
       if (res.data.role !== selectedRole) {
-        setError(`Invalid credentials for ${currentRole.label}. Please select the correct role.`)
+        setError(`Your account role is registered as "${res.data.role}". Please select "${res.data.role}" in the role dropdown above to sign in.`)
         setLoading(false)
         return
       }

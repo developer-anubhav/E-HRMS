@@ -167,18 +167,14 @@ export default function Employees() {
                     key={col}
                     className={`p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-slate-200 ${
                       idx === 0 ? "rounded-tl-[2rem]" : ""
-                    } ${
-                      idx === columns.length - 1 && user?.role === "ADMIN" ? "rounded-tr-[2rem]" : ""
                     }`}
                   >
                     {col}
                   </th>
                 ))}
-                {user?.role !== "ADMIN" && (
-                  <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-slate-200 text-right rounded-tr-[2rem]">
-                    Actions
-                  </th>
-                )}
+                <th className="p-6 text-slate-500 font-bold text-[10px] uppercase tracking-[0.2em] border-b border-slate-200 text-right rounded-tr-[2rem]">
+                  Actions
+                </th>
               </tr>
             </thead>
 
@@ -214,26 +210,24 @@ export default function Employees() {
                       {emp.status || "N/A"}
                     </span>
                   </td>
-                  {user?.role !== "ADMIN" && (
-                    <td className="p-6 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleEditClick(emp)}
-                          className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-primary hover:bg-primary/10 transition-all"
-                          title="Edit Record"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteEmployee(emp._id)}
-                          className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition-all"
-                          title="Delete Record"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  )}
+                  <td className="p-6 text-right whitespace-nowrap">
+                    <div className="flex items-center justify-end gap-2 transition-all">
+                      <button
+                        onClick={() => handleEditClick(emp)}
+                        className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
+                        title="Edit Record"
+                      >
+                        <Edit2 size={16} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEmployee(emp._id)}
+                        className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
+                        title="Delete Record"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
