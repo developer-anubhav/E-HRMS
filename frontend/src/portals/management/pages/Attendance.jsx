@@ -232,12 +232,12 @@ export default function Attendance() {
 
           <button
             onClick={() => setOpenFacialCheckIn(true)}
-            className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 px-5 py-3 font-bold text-white shadow-md hover:shadow-lg transition-all hover:scale-[1.02] text-xs"
+            className="flex items-center gap-2.5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 hover:border-indigo-400/50 px-5 py-3 font-bold text-white shadow-lg shadow-indigo-950/40 hover:shadow-indigo-900/60 transition-all hover:scale-[1.02] text-xs"
           >
-            <ScanFace size={20} />
+            <ScanFace size={20} className="text-indigo-400" />
             <span>Facial Check-In</span>
-            <span className="flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider">
-              <Sparkles size={10} /> AI
+            <span className="flex items-center gap-1 rounded-full bg-indigo-500/20 text-indigo-200 border border-indigo-400/30 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider">
+              <Sparkles size={10} className="text-indigo-400" /> AI
             </span>
           </button>
         </div>

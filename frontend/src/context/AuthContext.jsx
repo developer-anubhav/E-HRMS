@@ -5,14 +5,40 @@ import { createContext, useContext, useState, useEffect } from "react"
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-
-  const [user, setUser] = useState(null)
+  // Synchronously initialize state from localStorage so session is restored instantly before initial render
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user")
+      const token = localStorage.getItem("token")
+      if (stored && token) {
+        return JSON.parse(stored)
+      }
+      return null
+    } catch (err) {
+      console.error("Failed to restore auth session:", err)
+      return null
+    }
+  })
 
   useEffect(() => {
-    const stored = localStorage.getItem("user")
-    if (stored) {
-      setUser(JSON.parse(stored))
+    const handleStorageChange = (e) => {
+      if (e.key === "user" || e.key === "token") {
+        const stored = localStorage.getItem("user")
+        const token = localStorage.getItem("token")
+        if (stored && token) {
+          try {
+            setUser(JSON.parse(stored))
+          } catch (err) {
+            setUser(null)
+          }
+        } else {
+          setUser(null)
+        }
+      }
     }
+
+    window.addEventListener("storage", handleStorageChange)
+    return () => window.removeEventListener("storage", handleStorageChange)
   }, [])
 
   const login = (userData) => {

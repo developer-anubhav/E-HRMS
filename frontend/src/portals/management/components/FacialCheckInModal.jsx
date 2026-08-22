@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import {
   Camera, CheckCircle2, AlertTriangle, Loader2, ScanFace,
   RefreshCcw, UserCheck, ShieldCheck, Zap
@@ -146,55 +147,56 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/90 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in"
       onClick={onClose}
       role="presentation"
     >
       <div
-        className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#0b1329] shadow-2xl shadow-black/80"
+        className="relative w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden transform transition-all"
         onClick={e => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
         aria-labelledby="checkin-modal-title"
       >
-        {/* Header glow */}
-        <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-r from-emerald-600/20 via-cyan-500/20 to-blue-600/20 pointer-events-none" />
-
-        {/* Close Button */}
-        <button
-          type="button"
-          onClick={onClose}
-          className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-black/40 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-white/10 hover:text-white"
-        >
-          Close
-        </button>
-
-        <div className="relative p-6 sm:p-8">
-          {/* Title Header */}
-          <div className="mb-6 flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
-              <ScanFace size={24} />
+        {/* Header - Matches BiometricSettingsModal */}
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-indigo-500/20 rounded-xl border border-indigo-400/30">
+              <ScanFace className="w-6 h-6 text-indigo-400" />
             </div>
             <div>
-              <h2 id="checkin-modal-title" className="text-xl font-black tracking-tight text-white flex items-center gap-2">
+              <h2 id="checkin-modal-title" className="text-lg font-bold flex items-center gap-2">
                 Facial Attendance Check-In
-                <span className="flex items-center gap-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
                   <Zap size={11} /> AI Powered
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-indigo-200">
                 Face the camera directly and blink your eyes to check in
               </p>
             </div>
           </div>
 
-          {/* Mode Selector */}
-          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-2">
-            <div className="flex flex-1 items-center gap-2">
-              <UserCheck size={16} className="text-slate-400 ml-2" />
-              <label htmlFor="employee-select" className="text-xs font-semibold text-slate-300">
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content Body */}
+        <div className="p-6 space-y-5">
+          {/* Target Employee Selector */}
+          <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <UserCheck size={18} className="text-indigo-500" />
+              <label htmlFor="employee-select" className="text-sm font-bold text-gray-800 dark:text-gray-200">
                 Target Employee:
               </label>
             </div>
@@ -202,7 +204,7 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
               id="employee-select"
               value={selectedEmployeeId}
               onChange={e => setSelectedEmployeeId(e.target.value)}
-              className="w-full sm:w-64 rounded-xl border border-white/10 bg-slate-900 px-3 py-1.5 text-xs text-white focus:border-emerald-500 focus:outline-none"
+              className="w-full sm:w-64 px-3 py-2 text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none"
             >
               <option value="">Auto Detect (1:N Match All Enrolled)</option>
               {employees.map(emp => (
@@ -214,7 +216,7 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
           </div>
 
           {/* Camera Scanner Viewport */}
-          <div className="relative mb-5 overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950 aspect-video shadow-inner">
+          <div className="relative overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-700 bg-slate-950 aspect-video shadow-lg">
             {cameraError ? (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 text-center">
                 <AlertTriangle size={36} className="text-amber-400" />
@@ -255,7 +257,7 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
                 />
                 {!cameraReady && (
                   <div className="absolute inset-0 flex items-center justify-center bg-slate-950">
-                    <Loader2 size={32} className="animate-spin text-emerald-400" />
+                    <Loader2 size={32} className="animate-spin text-indigo-400" />
                   </div>
                 )}
                 {/* HUD Scanner Bounding Ring */}
@@ -277,52 +279,62 @@ export default function FacialCheckInModal({ open, onClose, onAttendanceMarked, 
 
           {/* Feedback messages */}
           {errorMsg && (
-            <div className="mb-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300 flex items-center gap-2">
-              <AlertTriangle size={16} className="shrink-0" />
+            <div className="p-4 bg-rose-50 dark:bg-rose-900/20 border border-rose-200 dark:border-rose-800/40 text-rose-700 dark:text-rose-400 rounded-xl text-sm flex items-center gap-3">
+              <AlertTriangle size={18} className="shrink-0 text-rose-500" />
               <span>{errorMsg}</span>
             </div>
           )}
 
           {result?.message && !result.matched && (
-            <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-amber-300 flex items-center gap-2">
-              <AlertTriangle size={16} className="shrink-0" />
+            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-amber-700 dark:text-amber-400 rounded-xl text-sm flex items-center gap-3">
+              <AlertTriangle size={18} className="shrink-0 text-amber-500" />
               <span>{result.message}</span>
             </div>
           )}
 
-          {/* Action buttons */}
-          <div className="flex gap-3">
+          {/* Footer Buttons */}
+          <div className="flex items-center justify-end gap-3 border-t border-gray-100 dark:border-gray-700 pt-4 mt-6">
             {result?.matched ? (
               <>
                 <button
                   onClick={handleReset}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white/10 px-4 py-3 font-semibold text-white hover:bg-white/15 transition"
+                  className="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors flex items-center gap-2"
                 >
                   <RefreshCcw size={16} /> Scan Next Person
                 </button>
                 <button
                   onClick={onClose}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 font-bold text-white hover:bg-emerald-500 transition"
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-500/25 transition-all"
                 >
                   Done
                 </button>
               </>
             ) : (
-              <button
-                onClick={handleScanAndCheckIn}
-                disabled={!cameraReady || verifying}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3.5 text-sm font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {verifying ? (
-                  <><Loader2 size={18} className="animate-spin" /> Verifying Face…</>
-                ) : (
-                  <><Camera size={18} /> Verify Face & Mark Attendance</>
-                )}
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-5 py-2.5 text-sm font-medium text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleScanAndCheckIn}
+                  disabled={!cameraReady || verifying}
+                  className="px-6 py-2.5 text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-500/25 transition-all disabled:opacity-50 flex items-center gap-2"
+                >
+                  {verifying ? (
+                    <><Loader2 size={18} className="animate-spin" /> Verifying Face…</>
+                  ) : (
+                    <><Camera size={18} /> Verify Face & Mark Attendance</>
+                  )}
+                </button>
+              </>
             )}
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

@@ -10,6 +10,7 @@ import {
   Menu, X, Key, FileDown, Download, Building2, Phone, BadgePercent
 } from "lucide-react"
 import api from "../../../api/axios"
+import Loader from "../../../components/ui/Loader"
 
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth()
@@ -826,11 +827,7 @@ export default function EmployeeDashboard() {
             </div>
 
             {/* Render selected tab panel */}
-            <Suspense fallback={
-              <div className="flex items-center justify-center py-20">
-                <Loader2 size={36} className="text-emerald-500 animate-spin" />
-              </div>
-            }>
+            <Suspense fallback={<Loader fullScreen={false} />}>
               {renderTabContent()}
             </Suspense>
 
