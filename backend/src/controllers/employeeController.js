@@ -273,22 +273,46 @@ export const getEmployeeById = async (req, res) => {
 
 export const updateEmployee = async (req, res) => {
   try {
-    if (req.user.role === "ADMIN") {
-        return res.status(403).json({ message: "Admins cannot manage regular employees." });
-    }
     const company = await Company.findById(req.user.companyId);
-    const employee = company.employees.id(req.params.id);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
 
+    const employee = company.employees.id(req.params.id);
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
     }
 
+    const oldEmail = employee.email ? employee.email.toLowerCase().trim() : "";
+
+    // Prepare update data
+    const updateData = { ...req.body };
+    if (updateData.email) {
+      updateData.email = updateData.email.toLowerCase().trim();
+    }
+
     // Update subdocument
-    Object.assign(employee, req.body);
+    Object.assign(employee, updateData);
     await company.save();
 
     // Also update standalone 'employees' collection
-    await Employee.updateOne({ _id: req.params.id }, { $set: req.body });
+    await Employee.updateOne({ _id: req.params.id }, { $set: updateData });
+
+    // Also update corresponding 'users' collection record
+    const targetEmail = oldEmail || updateData.email;
+    if (targetEmail) {
+      const userDoc = await User.findOne({ email: targetEmail });
+      if (userDoc) {
+        if (updateData.name) userDoc.name = updateData.name;
+        if (updateData.email) userDoc.email = updateData.email;
+        if (updateData.role) userDoc.role = updateData.role;
+        if (updateData.password && String(updateData.password).trim() !== "") {
+          const salt = await bcrypt.genSalt(10);
+          userDoc.password = await bcrypt.hash(String(updateData.password).trim(), salt);
+        }
+        await userDoc.save();
+      }
+    }
 
     res.json(employee);
   } catch (error) {
@@ -298,27 +322,34 @@ export const updateEmployee = async (req, res) => {
 
 export const deleteEmployee = async (req, res) => {
   try {
-    if (req.user.role === "ADMIN") {
-        return res.status(403).json({ message: "Admins cannot manage regular employees." });
-    }
     const company = await Company.findById(req.user.companyId);
+    if (!company) {
+      return res.status(404).json({ message: "Company not found" });
+    }
     
     // Remove the employee subdocument
     const employee = company.employees.id(req.params.id);
     if (!employee) {
         return res.status(404).json({ message: "Employee not found" });
     }
+
+    const targetEmail = employee.email ? employee.email.toLowerCase().trim() : "";
     
     employee.deleteOne(); // Mongoose subdocument method
     
     // Also cleanup linked attendance and payrolls within the same document
-    company.attendance = company.attendance.filter(att => att.employeeId.toString() !== req.params.id);
-    company.payrolls = company.payrolls.filter(pay => pay.employeeId.toString() !== req.params.id);
+    company.attendance = company.attendance.filter(att => att.employeeId?.toString() !== req.params.id);
+    company.payrolls = company.payrolls.filter(pay => pay.employeeId?.toString() !== req.params.id);
 
     await company.save();
 
     // Also delete from standalone 'employees' collection
     await Employee.deleteOne({ _id: req.params.id });
+
+    // Also delete from 'users' collection so auth user is purged
+    if (targetEmail) {
+      await User.deleteOne({ email: targetEmail });
+    }
 
     res.json({ message: "Employee and related records deleted successfully" });
   } catch (err) {

@@ -45,21 +45,25 @@ export default function Table({ columns, data, onEdit, onDelete }) {
               </td>
 
               <td className="p-6 text-right whitespace-nowrap">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => onEdit(emp)}
-                    className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-primary hover:bg-primary/10 transition-all"
-                    title="Edit Record"
-                  >
-                    <Edit2 size={16} />
-                  </button>
-                  <button
-                    onClick={() => onDelete(emp._id)}
-                    className="p-2 rounded-lg bg-slate-100 text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-all"
-                    title="Delete Record"
-                  >
-                    <Trash2 size={16} />
-                  </button>
+                <div className="flex items-center justify-end gap-2 transition-all">
+                  {onEdit && (
+                    <button
+                      onClick={() => onEdit(emp)}
+                      className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
+                      title="Edit Record"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  )}
+                  {onDelete && (
+                    <button
+                      onClick={() => onDelete(emp._id)}
+                      className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
+                      title="Delete Record"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>
