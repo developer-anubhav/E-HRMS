@@ -5,14 +5,24 @@ import { createContext, useContext, useState, useEffect } from "react"
 const AuthContext = createContext()
 
 export const AuthProvider = ({ children }) => {
-  // Synchronously initialize state from localStorage so session is restored instantly before initial render
+  // Check sessionStorage (tab-isolated) first, then fallback to localStorage
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem("user")
-      const token = localStorage.getItem("token")
-      if (stored && token) {
-        return JSON.parse(stored)
+      const sessionUser = sessionStorage.getItem("user")
+      const sessionToken = sessionStorage.getItem("token")
+      if (sessionUser && sessionToken) {
+        return JSON.parse(sessionUser)
       }
+
+      const localUser = localStorage.getItem("user")
+      const localToken = localStorage.getItem("token")
+      if (localUser && localToken) {
+        // Seed sessionStorage for this tab
+        sessionStorage.setItem("user", localUser)
+        sessionStorage.setItem("token", localToken)
+        return JSON.parse(localUser)
+      }
+
       return null
     } catch (err) {
       console.error("Failed to restore auth session:", err)
@@ -20,34 +30,17 @@ export const AuthProvider = ({ children }) => {
     }
   })
 
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "user" || e.key === "token") {
-        const stored = localStorage.getItem("user")
-        const token = localStorage.getItem("token")
-        if (stored && token) {
-          try {
-            setUser(JSON.parse(stored))
-          } catch (err) {
-            setUser(null)
-          }
-        } else {
-          setUser(null)
-        }
-      }
-    }
-
-    window.addEventListener("storage", handleStorageChange)
-    return () => window.removeEventListener("storage", handleStorageChange)
-  }, [])
-
   const login = (userData) => {
     setUser(userData)
+    // Write to both sessionStorage (tab-isolated) and localStorage
+    sessionStorage.setItem("user", JSON.stringify(userData))
     localStorage.setItem("user", JSON.stringify(userData))
   }
 
   const logout = () => {
     setUser(null)
+    sessionStorage.removeItem("user")
+    sessionStorage.removeItem("token")
     localStorage.removeItem("user")
     localStorage.removeItem("token")
   }

@@ -4,10 +4,10 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api"
 })
 
-// 🔐 Attach JWT Token Automatically
+// 🔐 Attach JWT Token Automatically (sessionStorage for tab isolation, localStorage fallback)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token")
+    const token = sessionStorage.getItem("token") || localStorage.getItem("token")
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -25,6 +25,8 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       const isAuthPath = window.location.pathname.startsWith("/login") || window.location.pathname.startsWith("/super-login")
       if (!isAuthPath) {
+        sessionStorage.removeItem("user")
+        sessionStorage.removeItem("token")
         localStorage.removeItem("user")
         localStorage.removeItem("token")
         window.location.href = "/login"

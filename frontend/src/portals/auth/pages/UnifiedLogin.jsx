@@ -51,6 +51,7 @@ export default function UnifiedLogin() {
         setLoading(false)
         return
       }
+      sessionStorage.setItem("token", res.data.token)
       localStorage.setItem("token", res.data.token)
       login({ 
         role: res.data.role, 

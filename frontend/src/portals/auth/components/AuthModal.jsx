@@ -40,6 +40,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 password: loginPassword,
             })
 
+            sessionStorage.setItem("token", res.data.token)
             localStorage.setItem("token", res.data.token)
             login({
                 role: res.data.role,
@@ -74,6 +75,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 password: regPassword,
             })
 
+            sessionStorage.setItem("token", res.data.token)
             localStorage.setItem("token", res.data.token)
             login({
                 role: res.data.role,

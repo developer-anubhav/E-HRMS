@@ -33,6 +33,7 @@ export default function SuperLogin() {
       }
 
       // Store JWT Token
+      sessionStorage.setItem("token", res.data.token)
       localStorage.setItem("token", res.data.token)
 
       // Store user role & name in AuthContext
