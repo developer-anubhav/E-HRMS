@@ -1,0 +1,17 @@
+export const COLORS = {
+  navy900: '#0F172A',
+  navy800: '#1E293B',
+  slate700: '#334155',
+  slate400: '#94A3B8',
+  slate100: '#F1F5F9',
+  emerald500: '#10B981',
+  emerald600: '#059669',
+  sky500: '#0EA5E9',
+  indigo500: '#6366F1',
+  rose600: '#E11D48',
+  amber500: '#F59E0B',
+  cardBg: '#1E293B',
+  screenBg: '#0F172A',
+  textPrimary: '#FFFFFF',
+  textSecondary: '#94A3B8',
+};
