@@ -17,7 +17,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const menu = [
     { name: "Dashboard", path: "/dashboard", roles: ["ADMIN", "HR", "MANAGER"], icon: LayoutDashboard },
-    { name: "Employees", path: "/employees", roles: ["ADMIN", "HR"], icon: Users },
+    { name: user?.role === "ADMIN" ? "View Employees" : "Employees", path: "/employees", roles: ["ADMIN", "HR"], icon: Users },
     { name: "Attendance", path: "/attendance", roles: ["ADMIN", "HR", "MANAGER"], icon: CalendarCheck },
     { name: "Manage Staff", path: "/admin/manage-staff", roles: ["ADMIN"], icon: ShieldCheck },
     { name: "Payroll", path: "/payroll", roles: ["ADMIN", "HR"], icon: DollarSign },
@@ -81,16 +81,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
               </NavLink>
             ))}
         </nav>
-
-        <div className="p-6 border-t border-slate-800/80">
-          <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-800">
-            <p className="text-xs font-semibold text-primary mb-1">Enterprise Pro</p>
-            <p className="text-[11px] text-slate-500 mb-3 font-medium">Your company workspace is active.</p>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full w-3/4 bg-primary rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"></div>
-            </div>
-          </div>
-        </div>
       </aside>
     </>
   )

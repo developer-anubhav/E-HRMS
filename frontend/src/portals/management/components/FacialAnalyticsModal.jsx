@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import {
   X,
   RefreshCw,
@@ -95,23 +96,23 @@ export default function FacialAnalyticsModal({ isOpen, onClose }) {
     document.body.removeChild(link)
   }
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-5xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden text-slate-100 max-h-[90vh] flex flex-col">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-800 bg-slate-900/60">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-              <Activity className="w-6 h-6" />
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto animate-fade-in">
+      <div className="relative w-full max-w-5xl bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 overflow-hidden text-gray-800 dark:text-gray-100 max-h-[90vh] flex flex-col transform transition-all">
+        {/* Modal Header - Matches BiometricSettingsModal */}
+        <div className="flex items-center justify-between px-6 py-4 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white">
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-indigo-500/20 rounded-xl border border-indigo-400/30">
+              <Activity className="w-6 h-6 text-indigo-400" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+              <h2 className="text-lg font-bold flex items-center gap-2">
                 Facial Recognition Analytics & Audit Trail
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
                   Live Engine
                 </span>
               </h2>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-indigo-200">
                 Biometric accuracy insights, verification method splits, and real-time audit logs
               </p>
             </div>
@@ -121,28 +122,30 @@ export default function FacialAnalyticsModal({ isOpen, onClose }) {
             <button
               onClick={fetchData}
               disabled={loading}
-              className="p-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition"
+              className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
               title="Refresh Analytics"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+              <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin" : ""}`} />
             </button>
             <button
               onClick={onClose}
-              className="p-2.5 rounded-xl bg-slate-800 text-slate-400 hover:text-white hover:bg-slate-700 transition"
+              className="p-1 text-gray-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           </div>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex items-center gap-4 px-6 border-b border-slate-800 bg-slate-900/40 text-sm font-medium">
+        <div className="flex items-center gap-4 px-6 border-b border-gray-200 dark:border-gray-700 bg-slate-50 dark:bg-gray-800/80 text-sm font-semibold">
           <button
             onClick={() => setActiveTab("overview")}
             className={`py-3.5 border-b-2 transition flex items-center gap-2 ${
               activeTab === "overview"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             <TrendingUp className="w-4 h-4" />
@@ -152,8 +155,8 @@ export default function FacialAnalyticsModal({ isOpen, onClose }) {
             onClick={() => setActiveTab("audit")}
             className={`py-3.5 border-b-2 transition flex items-center gap-2 ${
               activeTab === "audit"
-                ? "border-indigo-500 text-indigo-400"
-                : "border-transparent text-slate-400 hover:text-slate-200"
+                ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                : "border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -173,56 +176,56 @@ export default function FacialAnalyticsModal({ isOpen, onClose }) {
             <div className="space-y-6">
               {/* Metric Overview Cards */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/60 relative overflow-hidden">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-700 relative overflow-hidden">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Facial Today</span>
-                    <Zap className="w-5 h-5 text-indigo-400" />
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Facial Today</span>
+                    <Zap className="w-5 h-5 text-indigo-500" />
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-white">{metrics?.facialToday || 0}</span>
-                    <span className="text-xs text-slate-400">/ {metrics?.totalToday || 0} check-ins</span>
+                    <span className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{metrics?.facialToday || 0}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">/ {metrics?.totalToday || 0} check-ins</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-1 text-xs text-emerald-400">
+                  <div className="mt-2 flex items-center gap-1 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                     <span>{metrics?.adoptionRate || 0}% Adoption</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/60 relative overflow-hidden">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-700 relative overflow-hidden">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Avg Match Accuracy</span>
-                    <Award className="w-5 h-5 text-emerald-400" />
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Avg Match Accuracy</span>
+                    <Award className="w-5 h-5 text-emerald-500" />
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-emerald-400">{metrics?.avgConfidence || 95}%</span>
+                    <span className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400">{metrics?.avgConfidence || 95}%</span>
                   </div>
-                  <div className="mt-2 text-xs text-slate-400">
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
                     High Precision FaceNet Model
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/60 relative overflow-hidden">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-700 relative overflow-hidden">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Face Enrollment</span>
-                    <UserCheck className="w-5 h-5 text-sky-400" />
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Face Enrollment</span>
+                    <UserCheck className="w-5 h-5 text-sky-500" />
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-3xl font-extrabold text-white">{metrics?.enrolledEmployees || 0}</span>
-                    <span className="text-xs text-slate-400">/ {metrics?.totalEmployees || 0} staff</span>
+                    <span className="text-3xl font-extrabold text-gray-800 dark:text-gray-100">{metrics?.enrolledEmployees || 0}</span>
+                    <span className="text-xs text-gray-500 dark:text-gray-400">/ {metrics?.totalEmployees || 0} staff</span>
                   </div>
-                  <div className="mt-2 flex items-center gap-1 text-xs text-sky-400">
+                  <div className="mt-2 flex items-center gap-1 text-xs text-sky-600 dark:text-sky-400 font-semibold">
                     <span>{metrics?.enrollmentPercentage || 0}% Enrolled</span>
                   </div>
                 </div>
 
-                <div className="p-5 rounded-2xl bg-slate-800/50 border border-slate-700/60 relative overflow-hidden">
+                <div className="p-4 rounded-xl bg-slate-50 dark:bg-gray-700/50 border border-slate-200 dark:border-gray-700 relative overflow-hidden">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Anti-Spoof Status</span>
-                    <Lock className="w-5 h-5 text-violet-400" />
+                    <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Anti-Spoof Status</span>
+                    <Lock className="w-5 h-5 text-indigo-500" />
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-violet-300">Active</span>
+                    <span className="text-xl font-bold text-indigo-600 dark:text-indigo-300">Active</span>
                   </div>
-                  <div className="mt-2 text-xs text-slate-400">
+                  <div className="mt-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
                     Eye Blink & FFT Spectrum Active
                   </div>
                 </div>
@@ -417,6 +420,7 @@ export default function FacialAnalyticsModal({ isOpen, onClose }) {
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }

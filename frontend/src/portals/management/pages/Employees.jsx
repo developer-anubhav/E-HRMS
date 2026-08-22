@@ -129,7 +129,14 @@ export default function Employees() {
         <>
       {actionLoading && <div className="fixed inset-0 z-[100]"><Loader fullScreen={true} /></div>}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">Employees</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
+            {user?.role === "ADMIN" ? "View Employees" : "Employees"}
+          </h1>
+          {user?.role === "ADMIN" && (
+            <p className="text-slate-500 mt-1 text-sm">Read-only view of all registered company employees</p>
+          )}
+        </div>
         {user?.role !== "ADMIN" && (
           <button
             onClick={() => setOpen(true)}
@@ -212,20 +219,32 @@ export default function Employees() {
                   </td>
                   <td className="p-6 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2 transition-all">
-                      <button
-                        onClick={() => handleEditClick(emp)}
-                        className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
-                        title="Edit Record"
-                      >
-                        <Edit2 size={16} />
-                      </button>
-                      <button
-                        onClick={() => handleDeleteEmployee(emp._id)}
-                        className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
-                        title="Delete Record"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {user?.role === "ADMIN" ? (
+                        <button
+                          onClick={() => handleProfileOpen(emp)}
+                          className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm flex items-center gap-1.5 text-xs font-semibold"
+                          title="View Profile"
+                        >
+                          View Profile
+                        </button>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => handleEditClick(emp)}
+                            className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm"
+                            title="Edit Record"
+                          >
+                            <Edit2 size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteEmployee(emp._id)}
+                            className="p-2 rounded-lg bg-slate-100 text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all shadow-sm"
+                            title="Delete Record"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
