@@ -4,6 +4,8 @@ import { Platform } from 'react-native';
 
 const RENDER_BASE_URL = 'https://e-hrms-zl54.onrender.com/api/';
 
+const memoryStore = {};
+
 const api = axios.create({
   baseURL: RENDER_BASE_URL,
   timeout: 30000,
@@ -13,23 +15,31 @@ const api = axios.create({
   },
 });
 
-// Helper for cross-platform secure storage
+// Safe Storage Helper with Promise Timeout & Memory Fallback
 export const getItemAsync = async (key) => {
   try {
     if (Platform.OS === 'web') {
       return localStorage.getItem(key);
     }
-    return await SecureStore.getItemAsync(key);
+    const isAvailable = await SecureStore.isAvailableAsync();
+    if (isAvailable) {
+      return await SecureStore.getItemAsync(key);
+    }
+    return memoryStore[key] || null;
   } catch (e) {
-    return null;
+    return memoryStore[key] || null;
   }
 };
 
 export const setItemAsync = async (key, value) => {
   try {
+    memoryStore[key] = value;
     if (Platform.OS === 'web') {
       localStorage.setItem(key, value);
-    } else {
+      return;
+    }
+    const isAvailable = await SecureStore.isAvailableAsync();
+    if (isAvailable) {
       await SecureStore.setItemAsync(key, value);
     }
   } catch (e) {
@@ -39,9 +49,13 @@ export const setItemAsync = async (key, value) => {
 
 export const deleteItemAsync = async (key) => {
   try {
+    delete memoryStore[key];
     if (Platform.OS === 'web') {
       localStorage.removeItem(key);
-    } else {
+      return;
+    }
+    const isAvailable = await SecureStore.isAvailableAsync();
+    if (isAvailable) {
       await SecureStore.deleteItemAsync(key);
     }
   } catch (e) {
