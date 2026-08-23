@@ -13,3 +13,13 @@ face-service/__pycache__/
 face-service/**/__pycache__/
 face-service/**/*.pyc
 face-service/.facenet/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/*.iml
+android/.externalNativeBuild/
+android/.cxx/
