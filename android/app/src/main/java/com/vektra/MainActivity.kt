@@ -4,42 +4,25 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.vektra.presentation.home.HomeScreen
-import com.vektra.presentation.home.SplashScreen
-import com.vektra.presentation.navigation.Screen
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
+import com.vektra.presentation.navigation.VektraNavGraph
 import com.vektra.presentation.theme.VektraTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+/**
+ * Single Activity entry point for Project Vektra.
+ * Delegates layout and flow to Navigation Compose (VektraNavGraph).
+ */
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             VektraTheme {
-                VektraApp()
+                VektraNavGraph(modifier = Modifier.fillMaxSize())
             }
-        }
-    }
-}
-
-@Composable
-fun VektraApp() {
-    var currentScreen by remember { mutableStateOf<Screen>(Screen.Splash) }
-
-    when (currentScreen) {
-        is Screen.Splash -> {
-            SplashScreen(
-                onSplashFinished = {
-                    currentScreen = Screen.Home
-                }
-            )
-        }
-        is Screen.Home -> {
-            HomeScreen()
         }
     }
 }
