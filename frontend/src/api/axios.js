@@ -18,7 +18,7 @@ api.interceptors.request.use(
   }
 )
 
-// 🚨 Response Interceptor: Only log out if token is invalid/expired (401 status)
+// 🚨 Response Interceptor: Handle 401 & 429 rate limit responses
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -31,6 +31,9 @@ api.interceptors.response.use(
         localStorage.removeItem("token")
         window.location.href = "/login"
       }
+    }
+    if (error.response && error.response.status === 429) {
+      console.warn("[RateLimit] Too many requests hit. Waiting before retrying.")
     }
     return Promise.reject(error)
   }
