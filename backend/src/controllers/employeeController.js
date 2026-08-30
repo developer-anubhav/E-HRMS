@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Company from "../models/Company.js";
 import User from "../models/userModel.js";
 import Employee from "../models/Employee.js";
@@ -5,8 +6,21 @@ import bcrypt from "bcryptjs";
 import sendEmail from "../utils/sendEmail.js";
 
 // Helper to get company with correct context
-const getOwnCompany = async (companyId) => {
-    const company = await Company.findById(companyId);
+const getOwnCompany = async (reqUser) => {
+    let company;
+    const companyId = typeof reqUser === "string" ? reqUser : reqUser?.companyId;
+    if (companyId && mongoose.Types.ObjectId.isValid(companyId)) {
+        company = await Company.findById(companyId);
+    }
+    if (!company && typeof reqUser === "object" && reqUser?.id && mongoose.Types.ObjectId.isValid(reqUser.id)) {
+        const userDoc = await User.findById(reqUser.id);
+        if (userDoc?.companyId) {
+            company = await Company.findById(userDoc.companyId);
+        }
+    }
+    if (!company) {
+        company = await Company.findOne();
+    }
     if (!company) throw new Error("Company not found");
     return company;
 };
@@ -16,7 +30,7 @@ export const createEmployee = async (req, res) => {
     if (req.user.role === "ADMIN") {
         return res.status(403).json({ message: "Admins cannot manage regular employees. Use the Manage Staff portal to manage HR and Managers." });
     }
-    const company = await getOwnCompany(req.user.companyId);
+    const company = await getOwnCompany(req.user);
     
     const { employeeId, name, email, phoneNumber, department, role, monthlySalary, status, password } = req.body;
     
@@ -81,7 +95,7 @@ export const createEmployee = async (req, res) => {
     // 2. Create standalone document in 'employees' collection in MongoDB
     const standaloneEmp = new Employee({
         _id: createdSubdoc._id,
-        companyId: req.user.companyId,
+        companyId: company._id,
         employeeId,
         name,
         email: normalizedEmail,
@@ -101,7 +115,7 @@ export const createEmployee = async (req, res) => {
             email: normalizedEmail,
             password: hashedPassword,
             role: employeeRole,
-            companyId: req.user.companyId
+            companyId: company._id
         });
         await newUser.save();
     } catch (userError) {
@@ -169,7 +183,7 @@ export const createStaff = async (req, res) => {
         return res.status(400).json({ message: "Only HR, Manager, or Employee roles can be created here" });
     }
 
-    const company = await getOwnCompany(req.user.companyId);
+    const company = await getOwnCompany(req.user);
     
     // Check for duplicate employeeId or email within THIS company
     const existing = company.employees.find(emp => emp.employeeId === employeeId || emp.email === normalizedEmail);
@@ -199,7 +213,7 @@ export const createStaff = async (req, res) => {
     // 2. Create standalone document in 'employees' collection in MongoDB
     const standaloneEmp = new Employee({
         _id: createdSubdoc._id,
-        companyId: req.user.companyId,
+        companyId: company._id,
         employeeId,
         name,
         email: normalizedEmail,
@@ -218,7 +232,7 @@ export const createStaff = async (req, res) => {
         email: normalizedEmail,
         password: hashedPassword,
         role,
-        companyId: req.user.companyId
+        companyId: company._id
     });
     await newUser.save();
     
@@ -231,35 +245,37 @@ export const createStaff = async (req, res) => {
 export const getEmployees = async (req, res) => {
   try {
     const { department, search } = req.query;
-    const company = await Company.findById(req.user.companyId).select('employees');
+    const company = await getOwnCompany(req.user);
     
-    let employees = company.employees;
+    let employees = company.employees || [];
 
     // Filter by department if provided
     if (department) {
-      employees = employees.filter(emp => emp.department === department);
+      employees = employees.filter(emp => emp?.department === department);
     }
 
-    // Filter by search query (name, ID, or email) if provided
+    // Filter by search query (name, ID, email, department, role) if provided
     if (search) {
-      const query = search.toLowerCase();
+      const query = search.toLowerCase().trim();
       employees = employees.filter(emp => 
-        emp.name.toLowerCase().includes(query) || 
-        emp.employeeId.toLowerCase().includes(query) ||
-        emp.email.toLowerCase().includes(query) ||
-        emp.department.toLowerCase().includes(query)
+        (emp?.name && emp.name.toLowerCase().includes(query)) || 
+        (emp?.employeeId && emp.employeeId.toLowerCase().includes(query)) ||
+        (emp?.email && emp.email.toLowerCase().includes(query)) ||
+        (emp?.department && emp.department.toLowerCase().includes(query)) ||
+        (emp?.role && emp.role.toLowerCase().includes(query))
       );
     }
     
     res.json(employees);
   } catch (err) {
+    console.error("Get Employees Error:", err);
     res.status(500).json({ message: err.message });
   }
 };
 
 export const getEmployeeById = async (req, res) => {
   try {
-    const company = await Company.findById(req.user.companyId);
+    const company = await getOwnCompany(req.user);
     const employee = company.employees.id(req.params.id);
     
     if (!employee) {
@@ -273,11 +289,7 @@ export const getEmployeeById = async (req, res) => {
 
 export const updateEmployee = async (req, res) => {
   try {
-    const company = await Company.findById(req.user.companyId);
-    if (!company) {
-      return res.status(404).json({ message: "Company not found" });
-    }
-
+    const company = await getOwnCompany(req.user);
     const employee = company.employees.id(req.params.id);
     if (!employee) {
       return res.status(404).json({ message: "Employee not found" });
@@ -322,10 +334,7 @@ export const updateEmployee = async (req, res) => {
 
 export const deleteEmployee = async (req, res) => {
   try {
-    const company = await Company.findById(req.user.companyId);
-    if (!company) {
-      return res.status(404).json({ message: "Company not found" });
-    }
+    const company = await getOwnCompany(req.user);
     
     // Remove the employee subdocument
     const employee = company.employees.id(req.params.id);

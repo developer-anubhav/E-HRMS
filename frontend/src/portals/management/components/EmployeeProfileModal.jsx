@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
 import { createPortal } from "react-dom"
 import {
-  BadgeCheck, BriefcaseBusiness, Building2, CircleDot,
+  BadgeCheck, BriefcaseBusiness, Building2,
   Mail, Phone, IndianRupee, ScanFace, Trash2, ShieldCheck,
-  ShieldOff, Loader2, RefreshCcw
+  ShieldOff, Loader2, X
 } from "lucide-react"
 import FaceEnrollModal from "./FaceEnrollModal"
 import { getFaceProfile, deleteFaceProfile } from "../../../api/faceApi"
@@ -37,35 +37,36 @@ const getInitials = (name = "") =>
 
 const detailItems = (employee) => [
   {
-    label: "Employee ID",
+    label: "EMPLOYEE ID",
     value: employee.employeeId || "Not assigned",
     icon: BadgeCheck
   },
   {
-    label: "Department",
+    label: "DEPARTMENT",
     value: employee.department || "Not specified",
     icon: Building2
   },
   {
-    label: "Role",
+    label: "ROLE",
     value: employee.role || "Not specified",
     icon: BriefcaseBusiness
   },
   {
-    label: "Email",
+    label: "EMAIL",
     value: employee.email || "Not available",
     icon: Mail
   },
   {
-    label: "Phone Number",
+    label: "PHONE NUMBER",
     value: employee.phoneNumber || "Not available",
     icon: Phone
   },
   {
-    label: "Salary Details",
+    label: "SALARY DETAILS",
     value: formatCurrency(employee.monthlySalary),
     icon: IndianRupee
-  }]
+  }
+]
 
 export default function EmployeeProfileModal({ employee, open, onClose }) {
   const [enrollOpen, setEnrollOpen] = useState(false)
@@ -119,168 +120,187 @@ export default function EmployeeProfileModal({ employee, open, onClose }) {
   const modalContent = (
     <>
       <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/85 p-4 backdrop-blur-sm"
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 overflow-y-auto"
         onClick={onClose}
         role="presentation"
       >
         <div
-          className="relative w-full max-w-2xl overflow-hidden rounded-[2rem] border border-white/10 bg-[#0f172ae6] shadow-2xl"
+          className="relative w-full max-w-2xl bg-slate-900 rounded-2xl shadow-2xl border border-slate-800 overflow-hidden transform transition-all my-8"
           onClick={event => event.stopPropagation()}
           role="dialog"
           aria-modal="true"
           aria-labelledby="employee-profile-title"
         >
-          <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-r from-primary/20 via-cyan-400/10 to-emerald-400/20" />
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="absolute right-4 top-4 z-10 rounded-full border border-white/10 bg-black/20 px-3 py-1 text-sm font-medium text-slate-200 transition hover:bg-white/10 hover:text-white"
-          >
-            Close
-          </button>
-
-          <div className="relative p-6 sm:p-8">
-            <div className="flex items-center gap-4">
-              <div className="flex h-20 w-20 items-center justify-center rounded-[1.5rem] border border-primary/20 bg-gradient-to-br from-primary/25 to-cyan-500/10 text-2xl font-black text-primary shadow-lg shadow-primary/10">
+          {/* Header matching Biometric Settings Modal */}
+          <div className="flex items-center justify-between px-6 py-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border-b border-slate-800">
+            <div className="flex items-center space-x-3.5">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 font-bold text-base shadow-inner">
                 {getInitials(employee.name)}
               </div>
-
               <div>
-                <p className="mb-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-black uppercase tracking-[0.24em] text-slate-300">
-                  <CircleDot size={12} className={isActive ? "text-emerald-400" : "text-amber-400"} />
-                  {status}
-                </p>
-                <h2 id="employee-profile-title" className="text-2xl font-black tracking-tight text-white">
-                  {employee.name || "Unnamed Employee"}
-                </h2>
-                <p className="mt-1 text-sm text-slate-400">
+                <div className="flex items-center gap-2.5">
+                  <h3 id="employee-profile-title" className="text-lg font-bold text-white">
+                    {employee.name || "Unnamed Employee"}
+                  </h3>
+                  <span className={`px-2.5 py-0.5 text-[10px] font-bold tracking-wider uppercase rounded-full border ${
+                    isActive
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                      : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                  }`}>
+                    {status}
+                  </span>
+                </div>
+                <p className="text-xs text-indigo-200 mt-0.5">
                   {employee.role || "Role pending"} in {employee.department || "Unknown department"}
                 </p>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
 
-            {/* Detail grid */}
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          {/* Content Body */}
+          <div className="p-6 space-y-6">
+            {/* Detail Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {detailItems(employee).map(({ label, value, icon: Icon }) => (
                 <div
                   key={label}
-                  className="rounded-[1.5rem] border border-white/8 bg-white/[0.04] p-4 shadow-inner shadow-black/10"
+                  className="p-4 rounded-xl bg-slate-800/40 border border-slate-800 hover:border-slate-700/60 transition-all"
                 >
-                  <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-primary">
-                      <Icon size={18} />
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
+                      <Icon size={16} />
                     </div>
-                    <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">
+                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
                       {label}
-                    </p>
+                    </span>
                   </div>
-                  <p className="break-words text-sm font-semibold text-slate-100">{value}</p>
+                  <p className="text-base font-bold text-white break-words mt-1">{value}</p>
                 </div>
               ))}
             </div>
 
-            {/* Snapshot summary */}
-            <div className="mt-6 rounded-[1.5rem] border border-white/8 bg-gradient-to-r from-white/[0.03] to-white/[0.06] p-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">
-                Snapshot
-              </p>
-              <p className="mt-2 text-sm leading-6 text-slate-300">
+            {/* Snapshot Summary Card */}
+            <div className="p-4 rounded-xl bg-slate-800/40 border border-slate-800">
+              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-1">
+                SNAPSHOT
+              </span>
+              <p className="text-sm text-slate-300 leading-relaxed">
                 {employee.name || "This employee"} is currently marked as{" "}
-                <span className={isActive ? "text-emerald-300" : "text-amber-300"}>{status}</span>.
-                Reach them at <span className="text-white">{employee.email || "no email on file"}</span>.
+                <span className={`font-semibold ${isActive ? "text-emerald-400" : "text-amber-400"}`}>{status}</span>. Reach them at{" "}
+                <span className="text-white font-medium">{employee.email || "no email on file"}</span>.
               </p>
             </div>
 
-            {/* ---------------------------------------------------------- Face Profile Section */}
-            <div className="mt-6 rounded-[1.5rem] border border-white/8 bg-white/[0.03] p-4">
-              <div className="mb-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <ScanFace size={16} className="text-violet-400" />
-                  <p className="text-[11px] font-black uppercase tracking-[0.22em] text-slate-500">
-                    Face Recognition
-                  </p>
+            {/* Face Recognition Section Card */}
+            <div className="p-5 rounded-2xl bg-slate-800/40 border border-slate-800 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-400">
+                    <ScanFace size={18} />
+                  </div>
+                  <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                    FACE RECOGNITION
+                  </span>
                 </div>
 
                 {/* Enrollment status badge */}
                 {profileLoading ? (
-                  <span className="flex items-center gap-1 text-xs text-slate-500">
-                    <Loader2 size={12} className="animate-spin" /> Loading…
+                  <span className="flex items-center gap-1.5 text-xs text-slate-400">
+                    <Loader2 size={12} className="animate-spin text-indigo-400" /> Loading…
                   </span>
                 ) : profileError ? (
-                  <span className="text-xs text-amber-400">{profileError}</span>
+                  <span className="text-xs text-amber-400 font-medium">{profileError}</span>
                 ) : (
-                  <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest border ${
+                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-bold rounded-full border ${
                     isEnrolled
                       ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                      : "bg-slate-500/10 text-slate-500 border-slate-500/20"
+                      : "bg-slate-700/40 text-slate-400 border-slate-700"
                   }`}>
-                    {isEnrolled ? <ShieldCheck size={11} /> : <ShieldOff size={11} />}
-                    {isEnrolled ? "Enrolled" : "Not Enrolled"}
+                    {isEnrolled ? <ShieldCheck size={13} /> : <ShieldOff size={13} />}
+                    {isEnrolled ? "ENROLLED" : "NOT ENROLLED"}
                   </span>
                 )}
               </div>
 
               {/* Profile details when enrolled */}
               {!profileLoading && !profileError && isEnrolled && (
-                <div className="mb-4 grid grid-cols-3 gap-3 text-center">
-                  <div className="rounded-xl bg-white/[0.04] p-3">
-                    <p className="text-lg font-black text-white">{faceProfile.embedding_count}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Embeddings</p>
+                <div className="grid grid-cols-3 gap-3 text-center">
+                  <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
+                    <p className="text-lg font-bold text-white">{faceProfile.embedding_count}</p>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Embeddings</p>
                   </div>
-                  <div className="rounded-xl bg-white/[0.04] p-3">
+                  <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
                     <p className="text-xs font-bold text-white uppercase">{faceProfile.model_version || "—"}</p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Model</p>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Model</p>
                   </div>
-                  <div className="rounded-xl bg-white/[0.04] p-3">
+                  <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800">
                     <p className="text-xs font-bold text-white">
                       {faceProfile.created_at
                         ? new Date(faceProfile.created_at).toLocaleDateString()
                         : "—"}
                     </p>
-                    <p className="text-[10px] text-slate-500 uppercase tracking-wider">Enrolled On</p>
+                    <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-0.5">Enrolled On</p>
                   </div>
                 </div>
               )}
 
               {/* Not enrolled helper text */}
               {!profileLoading && !profileError && !isEnrolled && (
-                <p className="mb-4 text-xs text-slate-500">
-                  This employee has not been enrolled for facial recognition yet.
-                  Enroll their face so they can check in via the entrance camera or mobile app.
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  This employee has not been enrolled for facial recognition yet. Enroll their face so they can check in via the entrance camera or mobile app.
                 </p>
               )}
 
-              {/* Action buttons */}
+              {/* Action buttons matching Biometric Modal primary button styling */}
               {!profileLoading && !profileError && (
-                <div className="flex gap-2">
+                <div className="flex gap-3 pt-1">
                   <button
+                    type="button"
                     onClick={() => setEnrollOpen(true)}
-                    className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-violet-600/20 border border-violet-500/30 px-4 py-2.5 text-xs font-bold text-violet-300 transition hover:bg-violet-600/30 hover:text-violet-200"
+                    className="flex flex-1 items-center justify-center gap-2 py-2.5 px-4 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg shadow-indigo-500/25 transition-all"
                   >
-                    <ScanFace size={14} />
+                    <ScanFace size={15} />
                     {isEnrolled ? "Re-enroll Face" : "Enroll Face"}
                   </button>
 
                   {isEnrolled && (
                     <button
+                      type="button"
                       onClick={handleDeleteProfile}
                       disabled={deleteLoading}
-                      className="flex items-center justify-center gap-2 rounded-xl bg-rose-500/10 border border-rose-500/20 px-4 py-2.5 text-xs font-bold text-rose-400 transition hover:bg-rose-500/20 disabled:opacity-50"
+                      className="flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/20 rounded-xl transition-all disabled:opacity-50"
                     >
                       {deleteLoading ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
-                      Delete
+                      Delete Profile
                     </button>
                   )}
                 </div>
               )}
             </div>
-            {/* ---------------------------------------------------------- /Face Profile */}
+          </div>
+
+          {/* Footer matching Biometric Settings Modal */}
+          <div className="flex items-center justify-end px-6 py-4 bg-slate-900/80 border-t border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800 rounded-xl transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Face enrollment modal — stacked above profile modal */}
+      {/* Face enrollment modal */}
       <FaceEnrollModal
         employee={employee}
         open={enrollOpen}
