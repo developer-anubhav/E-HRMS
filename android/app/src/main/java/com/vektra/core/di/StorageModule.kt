@@ -1,6 +1,7 @@
 package com.vektra.core.di
 
 import android.content.Context
+import com.vektra.core.security.TokenManager
 import com.vektra.core.storage.DataStoreManager
 import dagger.Module
 import dagger.Provides
@@ -22,5 +23,13 @@ object StorageModule {
         @ApplicationContext context: Context
     ): DataStoreManager {
         return DataStoreManager(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTokenManager(
+        @ApplicationContext context: Context
+    ): TokenManager {
+        return TokenManager(context)
     }
 }

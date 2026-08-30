@@ -10,8 +10,8 @@ const seedSuperAdmin = async () => {
   try {
     await connectDB();
 
-    const email = "anubhavfordev24@gmail.com";
-    const password = "Anubhav@Vektra";
+    const email = "vektra@gmail.com";
+    const password = "vektra26";
 
     // Check if already exists
     const existing = await User.findOne({ email });

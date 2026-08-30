@@ -1,6 +1,8 @@
 package com.vektra.core.di
 
+import com.vektra.data.repository.AuthRepositoryImpl
 import com.vektra.data.repository.ConfigRepositoryImpl
+import com.vektra.domain.repository.AuthRepository
 import com.vektra.domain.repository.ConfigRepository
 import dagger.Binds
 import dagger.Module
@@ -20,4 +22,10 @@ abstract class RepositoryModule {
     abstract fun bindConfigRepository(
         impl: ConfigRepositoryImpl
     ): ConfigRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(
+        impl: AuthRepositoryImpl
+    ): AuthRepository
 }

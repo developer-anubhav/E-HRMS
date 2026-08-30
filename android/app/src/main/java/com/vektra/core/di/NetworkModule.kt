@@ -1,7 +1,11 @@
 package com.vektra.core.di
 
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.vektra.core.network.ApiConstants
+import com.vektra.core.network.AuthInterceptor
 import com.vektra.data.remote.api.ApiService
+import com.vektra.data.remote.api.AuthApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,11 +18,17 @@ import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 /**
- * Hilt DI module providing Retrofit, OkHttp, and API Services.
+ * Hilt DI module providing Gson, Retrofit, OkHttp, and API Services.
  */
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
+    @Provides
+    @Singleton
+    fun provideGson(): Gson {
+        return GsonBuilder().create()
+    }
 
     @Provides
     @Singleton
@@ -31,9 +41,11 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(
+        authInterceptor: AuthInterceptor,
         loggingInterceptor: HttpLoggingInterceptor
     ): OkHttpClient {
         return OkHttpClient.Builder()
+            .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
             .connectTimeout(ApiConstants.CONNECT_TIMEOUT_SECONDS, TimeUnit.SECONDS)
             .readTimeout(ApiConstants.READ_TIMEOUT_SECONDS, TimeUnit.SECONDS)
@@ -44,12 +56,13 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideRetrofit(
-        okHttpClient: OkHttpClient
+        okHttpClient: OkHttpClient,
+        gson: Gson
     ): Retrofit {
         return Retrofit.Builder()
             .baseUrl(ApiConstants.BASE_URL)
             .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
     }
 
@@ -57,5 +70,11 @@ object NetworkModule {
     @Singleton
     fun provideApiService(retrofit: Retrofit): ApiService {
         return retrofit.create(ApiService::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAuthApi(retrofit: Retrofit): AuthApi {
+        return retrofit.create(AuthApi::class.java)
     }
 }
