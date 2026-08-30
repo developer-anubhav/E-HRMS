@@ -116,10 +116,18 @@ export default function Employees() {
     ])
   )
 
-  const filtered = (Array.isArray(employees) ? employees : []).filter(emp =>
-    (emp?.name || "").toLowerCase().includes((search || "").toLowerCase()) &&
-    (department ? emp?.department === department : true)
-  )
+  const query = (search || "").trim().toLowerCase()
+  const filtered = (Array.isArray(employees) ? employees : []).filter(emp => {
+    const matchesSearch = !query || (
+      (emp?.name || "").toLowerCase().includes(query) ||
+      (emp?.employeeId || "").toLowerCase().includes(query) ||
+      (emp?.email || "").toLowerCase().includes(query) ||
+      (emp?.department || "").toLowerCase().includes(query) ||
+      (emp?.role || "").toLowerCase().includes(query)
+    )
+    const matchesDept = !department || emp?.department === department
+    return matchesSearch && matchesDept
+  })
 
   return (
     <MainLayout>
