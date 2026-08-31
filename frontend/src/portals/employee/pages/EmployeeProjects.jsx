@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import MainLayout from "../../../layouts/MainLayout";
 import { fetchProjectsApi } from "../../../api/projectApi";
 import Loader from "../../../components/ui/Loader";
-import { FolderCanvas, Users, Calendar, Clock } from "lucide-react";
+import { FolderKanban, Users, Calendar, Clock } from "lucide-react";
 
 export default function EmployeeProjects() {
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export default function EmployeeProjects() {
         <div className="space-y-6">
           <header>
             <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
-              <FolderCanvas size={14} />
+              <FolderKanban size={14} />
               My Workspace
             </div>
             <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">My Projects</h1>
@@ -91,7 +91,7 @@ export default function EmployeeProjects() {
 
           {projects.length === 0 && (
             <div className="p-12 text-center bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
-              <FolderCanvas size={48} className="mx-auto text-slate-300 mb-3" />
+              <FolderKanban size={48} className="mx-auto text-slate-300 mb-3" />
               <p className="text-slate-500 font-medium">You are not currently assigned to any active projects.</p>
             </div>
           )}
