@@ -1,0 +1,273 @@
+import express from "express";
+import mongoose from "mongoose";
+import {
+  requireCopilotAuth,
+  copilotRbacGuard,
+  validateChatPayload,
+  validatePayrollPayload,
+} from "../middleware/copilotMiddleware.js";
+import CopilotConversation from "../models/CopilotConversation.js";
+import config from "../config/env.js";
+
+const router = express.Router();
+
+/**
+ * Persists messages and citations into MongoDB CopilotConversation.
+ */
+async function saveConversationTurn({
+  companyId,
+  userId,
+  role,
+  sessionId,
+  userMessage,
+  assistantMessage,
+  citations = [],
+}) {
+  if (mongoose.connection.readyState !== 1) {
+    return; // DB offline, skip persistence in detached tests
+  }
+
+  try {
+    const validSessionId = sessionId || "default_session";
+    await CopilotConversation.findOneAndUpdate(
+      { companyId, userId, sessionId: validSessionId },
+      {
+        $setOnInsert: { role: role || "EMPLOYEE" },
+        $push: {
+          thread: [
+            {
+              role: "user",
+              content: userMessage,
+              timestamp: new Date(),
+            },
+            {
+              role: "assistant",
+              content: assistantMessage,
+              citations: citations || [],
+              timestamp: new Date(),
+            },
+          ],
+        },
+      },
+      { upsert: true, new: true }
+    );
+  } catch (err) {
+    console.error("Failed to persist CopilotConversation:", err.message);
+  }
+}
+
+/**
+ * @route   POST /api/copilot/chat
+ * @desc    Chat with Vektra AI Co-Pilot (Live proxy to copilot-service with SSE streaming)
+ * @access  Private (JWT + RBAC guarded)
+ */
+router.post(
+  "/chat",
+  requireCopilotAuth,
+  copilotRbacGuard,
+  validateChatPayload,
+  async (req, res) => {
+    const { userId, companyId, role } = req.authContext;
+    const { message, query, sessionId, stream = false, history = [] } = req.body;
+    const userPrompt = message || query;
+    const activeSessionId = sessionId || "session_" + Date.now();
+
+    const forwardPayload = {
+      company_id: String(companyId),
+      user_id: String(userId),
+      role: String(role),
+      query: userPrompt,
+      session_id: activeSessionId,
+      history: history,
+    };
+
+    const isStreaming = stream || req.headers.accept === "text/event-stream";
+
+    try {
+      const endpoint = isStreaming
+        ? `${config.copilotServiceUrl}/agent/chat/stream`
+        : `${config.copilotServiceUrl}/agent/chat`;
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Secret": config.internalServiceSecret,
+        },
+        body: JSON.stringify(forwardPayload),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return res.status(response.status).json({
+          success: false,
+          message: "AI Microservice error",
+          detail: errText,
+        });
+      }
+
+      if (isStreaming) {
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+        res.setHeader("X-Accel-Buffering", "no");
+
+        let accumulatedAnswer = "";
+        let accumulatedCitations = [];
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunkStr = decoder.decode(value, { stream: true });
+          res.write(chunkStr);
+
+          // Parse SSE lines to accumulate final answer for DB saving
+          const lines = chunkStr.split("\n\n");
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              try {
+                const parsed = JSON.parse(line.replace("data: ", ""));
+                if (parsed.token) {
+                  accumulatedAnswer += parsed.token;
+                }
+                if (parsed.citations) {
+                  accumulatedCitations = parsed.citations;
+                }
+              } catch (_) {}
+            }
+          }
+        }
+
+        res.end();
+
+        // Asynchronously persist conversation
+        await saveConversationTurn({
+          companyId,
+          userId,
+          role,
+          sessionId: activeSessionId,
+          userMessage: userPrompt,
+          assistantMessage: accumulatedAnswer,
+          citations: accumulatedCitations,
+        });
+      } else {
+        const data = await response.json();
+        const agentData = data.data || data;
+
+        await saveConversationTurn({
+          companyId,
+          userId,
+          role,
+          sessionId: activeSessionId,
+          userMessage: userPrompt,
+          assistantMessage: agentData.answer || "",
+          citations: agentData.citations || [],
+        });
+
+        return res.json({
+          success: true,
+          sessionId: activeSessionId,
+          data: agentData,
+        });
+      }
+    } catch (error) {
+      console.error("[Copilot Proxy Error]:", error.message);
+      return res.status(502).json({
+        success: false,
+        message: "Unable to reach AI Copilot microservice.",
+        error: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * @route   POST /api/copilot/analyze-payroll
+ * @desc    Analyze payroll run details via AI Co-Pilot
+ * @access  Private (JWT + RBAC guarded)
+ */
+router.post(
+  "/analyze-payroll",
+  requireCopilotAuth,
+  copilotRbacGuard,
+  validatePayrollPayload,
+  async (req, res) => {
+    const { userId, companyId, role } = req.authContext;
+    const { month, year, payrollRunId, query } = req.body;
+    const analysisQuery =
+      query ||
+      `Analyze payroll run ${payrollRunId || ""} for month ${month || ""}/${year || ""}`;
+
+    const forwardPayload = {
+      company_id: String(companyId),
+      user_id: String(userId),
+      role: String(role),
+      query: analysisQuery,
+    };
+
+    try {
+      const response = await fetch(`${config.copilotServiceUrl}/agent/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Internal-Secret": config.internalServiceSecret,
+        },
+        body: JSON.stringify(forwardPayload),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        return res.status(response.status).json({
+          success: false,
+          message: "AI Microservice error",
+          detail: errText,
+        });
+      }
+
+      const data = await response.json();
+      return res.json({
+        success: true,
+        data: data.data || data,
+      });
+    } catch (error) {
+      return res.status(502).json({
+        success: false,
+        message: "Unable to reach AI Copilot microservice.",
+        error: error.message,
+      });
+    }
+  }
+);
+
+/**
+ * @route   GET /api/copilot/conversations
+ * @desc    Retrieve conversation history for current session / user
+ * @access  Private (JWT + multi-tenant isolation)
+ */
+router.get("/conversations", requireCopilotAuth, async (req, res) => {
+  try {
+    const { companyId, userId } = req.authContext;
+    const filter = { companyId, userId };
+
+    const conversations = await CopilotConversation.find(filter)
+      .sort({ updatedAt: -1 })
+      .limit(20);
+
+    return res.json({
+      success: true,
+      data: conversations,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to retrieve conversation history.",
+      error: error.message,
+    });
+  }
+});
+
+export default router;
