@@ -4,6 +4,7 @@ import Project from "../models/Project.js";
 import Milestone from "../models/Milestone.js";
 import Employee from "../models/Employee.js";
 import { invalidateAnalyticsCache } from "./analyticsService.js";
+import { createNotificationService } from "./notificationService.js";
 
 const getUserEmployeeIds = async (reqUser) => {
   const userIds = [reqUser.id];
@@ -74,6 +75,20 @@ export const createTaskService = async (taskData, reqUser) => {
 
   await newTask.save();
   invalidateAnalyticsCache(companyId);
+
+  if (Array.isArray(validatedAssignedTo) && validatedAssignedTo.length > 0) {
+    for (const recipientId of validatedAssignedTo) {
+      await createNotificationService({
+        companyId,
+        recipientId,
+        title: "New Task Assigned",
+        message: `You have been assigned to task '${title}'`,
+        type: "TASK_ASSIGNED",
+        link: "/employee/tasks",
+      });
+    }
+  }
+
   return await Task.findOne({ _id: newTask._id, companyId })
     .populate("assignedTo", "name email role department employeeId")
     .populate("assignedBy", "name email role")
@@ -249,6 +264,17 @@ export const updateTaskProgressService = async (taskId, { progress, updateMessag
   });
 
   await taskUpdate.save();
+
+  if (task.assignedBy && task.assignedBy.toString() !== reqUser.id.toString()) {
+    await createNotificationService({
+      companyId,
+      recipientId: task.assignedBy,
+      title: task.status === "COMPLETED" ? "Task Completed" : "Task Progress Updated",
+      message: `Task '${task.title}' updated to ${progressAfter}%`,
+      type: "TASK_UPDATED",
+      link: "/projects",
+    });
+  }
 
   const updatedTask = await Task.findOne({ _id: taskId, companyId })
     .populate("assignedTo", "name email role department employeeId")

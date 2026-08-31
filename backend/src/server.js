@@ -38,6 +38,9 @@ app.use("/api/milestones", milestoneRoutes)
 import taskRoutes from "./routes/taskRoutes.js"
 app.use("/api/tasks", taskRoutes)
 
+import notificationRoutes from "./routes/notificationRoutes.js"
+app.use("/api/notifications", notificationRoutes)
+
 const PORT = process.env.PORT || 5000
 
 // We wrap startup in an async function to ensure DB is ready before server accepts requests
