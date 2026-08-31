@@ -15,7 +15,7 @@ import {
 import { getEmployees } from "../../../api/employeeApi";
 import Loader from "../../../components/ui/Loader";
 import {
-  FolderCanvas,
+  FolderKanban,
   Plus,
   Search,
   Users,
@@ -208,7 +208,7 @@ export default function Projects() {
           <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-primary font-bold text-xs uppercase tracking-widest">
-                <FolderCanvas size={14} />
+                <FolderKanban size={14} />
                 Project Management
               </div>
               <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
@@ -252,7 +252,7 @@ export default function Projects() {
           <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto">
             {[
               { id: "overview", label: "Overview & Analytics", icon: TrendingUp },
-              { id: "projects", label: "All Projects", icon: FolderCanvas },
+              { id: "projects", label: "All Projects", icon: FolderKanban },
               { id: "tasks", label: "Team Tasks", icon: ListTodo },
               { id: "workload", label: "Employee Workload", icon: Users },
               { id: "overdue", label: `Overdue Tasks (${analytics?.summary?.overdueTasksCount || 0})`, icon: AlertTriangle },
@@ -282,7 +282,7 @@ export default function Projects() {
                 </h3>
               </div>
               <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 flex items-center justify-center">
-                <FolderCanvas size={24} />
+                <FolderKanban size={24} />
               </div>
             </div>
 
