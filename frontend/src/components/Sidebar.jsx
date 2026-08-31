@@ -9,7 +9,9 @@ import {
   DollarSign,
   BarChart3,
   X,
-  ChevronRight
+  ChevronRight,
+  FolderCanvas,
+  ListTodo
 } from "lucide-react"
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -17,11 +19,17 @@ export default function Sidebar({ isOpen, setIsOpen }) {
 
   const menu = [
     { name: "Dashboard", path: "/dashboard", roles: ["ADMIN", "HR", "MANAGER"], icon: LayoutDashboard },
+    { name: "Projects & Analytics", path: "/projects", roles: ["ADMIN", "HR", "MANAGER"], icon: FolderCanvas },
     { name: user?.role === "ADMIN" ? "View Employees" : "Employees", path: "/employees", roles: ["ADMIN", "HR"], icon: Users },
     { name: "Attendance", path: "/attendance", roles: ["ADMIN", "HR", "MANAGER"], icon: CalendarCheck },
     { name: "Manage Staff", path: "/admin/manage-staff", roles: ["ADMIN"], icon: ShieldCheck },
     { name: "Payroll", path: "/payroll", roles: ["ADMIN", "HR"], icon: DollarSign },
     { name: "Reports", path: "/reports", roles: ["ADMIN", "HR"], icon: BarChart3 },
+    
+    // Employee Portal items
+    { name: "My Dashboard", path: "/employee/dashboard", roles: ["EMPLOYEE"], icon: LayoutDashboard },
+    { name: "My Projects", path: "/employee/projects", roles: ["EMPLOYEE"], icon: FolderCanvas },
+    { name: "My Tasks", path: "/employee/tasks", roles: ["EMPLOYEE"], icon: ListTodo },
   ]
 
   return (
@@ -85,4 +93,3 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     </>
   )
 }
-

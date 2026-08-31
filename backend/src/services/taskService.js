@@ -3,6 +3,7 @@ import TaskUpdate from "../models/TaskUpdate.js";
 import Project from "../models/Project.js";
 import Milestone from "../models/Milestone.js";
 import Employee from "../models/Employee.js";
+import { invalidateAnalyticsCache } from "./analyticsService.js";
 
 const getUserEmployeeIds = async (reqUser) => {
   const userIds = [reqUser.id];
@@ -72,6 +73,7 @@ export const createTaskService = async (taskData, reqUser) => {
   });
 
   await newTask.save();
+  invalidateAnalyticsCache(companyId);
   return await Task.findOne({ _id: newTask._id, companyId })
     .populate("assignedTo", "name email role department employeeId")
     .populate("assignedBy", "name email role")
