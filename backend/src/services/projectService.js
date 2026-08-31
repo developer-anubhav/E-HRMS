@@ -1,6 +1,7 @@
 import Project from "../models/Project.js";
 import Employee from "../models/Employee.js";
 import User from "../models/userModel.js";
+import { invalidateAnalyticsCache } from "./analyticsService.js";
 
 // Helper to resolve user/employee IDs for role-based scoping
 const getUserEmployeeIds = async (reqUser) => {
@@ -81,6 +82,7 @@ export const createProjectService = async (projectData, reqUser) => {
   });
 
   await newProject.save();
+  invalidateAnalyticsCache(companyId);
   return await Project.findOne({ _id: newProject._id, companyId })
     .populate("projectManager", "name email role department employeeId")
     .populate("teamMembers", "name email role department employeeId");

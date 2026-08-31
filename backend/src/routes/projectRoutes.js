@@ -14,11 +14,15 @@ import {
   createMilestone,
   getMilestones,
 } from "../controllers/milestoneController.js";
+import { getProjectAnalytics } from "../controllers/analyticsController.js";
 
 const router = express.Router();
 
 // Apply protect middleware to all project routes
 router.use(protect);
+
+// Specific project endpoints
+router.get("/analytics", getProjectAnalytics);
 
 router.post("/", authorize("ADMIN", "MANAGER", "SUPERADMIN"), createProject);
 router.get("/", getProjects);
