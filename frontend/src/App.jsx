@@ -11,11 +11,14 @@ const OrganizationSignup = lazy(() => import("./portals/auth/pages/OrganizationS
 const LandingPage = lazy(() => import("./pages/LandingPage"))
 
 const Dashboard = lazy(() => import("./portals/management/pages/Dashboard"))
+const Projects = lazy(() => import("./portals/management/pages/Projects"))
 const Employees = lazy(() => import("./portals/management/pages/Employees"))
 const Attendance = lazy(() => import("./portals/management/pages/Attendance"))
 const KioskMode = lazy(() => import("./portals/management/pages/KioskMode"))
 const MobileCheckIn = lazy(() => import("./portals/employee/pages/MobileCheckIn"))
 const EmployeeDashboard = lazy(() => import("./portals/employee/pages/EmployeeDashboard"))
+const EmployeeProjects = lazy(() => import("./portals/employee/pages/EmployeeProjects"))
+const EmployeeTasks = lazy(() => import("./portals/employee/pages/EmployeeTasks"))
 const Payroll = lazy(() => import("./portals/management/pages/Payroll"))
 const Reports = lazy(() => import("./portals/management/pages/Reports"))
 const SuperAdminDashboard = lazy(() => import("./portals/superadmin/pages/SuperAdminDashboard"))
@@ -44,12 +47,36 @@ export default function App() {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/employee/projects"
+            element={
+              <ProtectedRoute roles={["EMPLOYEE"]}>
+                <EmployeeProjects />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/employee/tasks"
+            element={
+              <ProtectedRoute roles={["EMPLOYEE"]}>
+                <EmployeeTasks />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/dashboard"
             element={
               <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
                 <Dashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/projects"
+            element={
+              <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
+                <Projects />
               </ProtectedRoute>
             }
           />

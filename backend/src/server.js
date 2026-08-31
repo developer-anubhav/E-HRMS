@@ -33,6 +33,17 @@ import copilotRoutes from "./routes/copilotRoutes.js"
 app.use("/api/copilot", copilotRoutes)
 
 import { validateEnv } from "./config/env.js"
+import projectRoutes from "./routes/projectRoutes.js"
+app.use("/api/projects", projectRoutes)
+
+import milestoneRoutes from "./routes/milestoneRoutes.js"
+app.use("/api/milestones", milestoneRoutes)
+
+import taskRoutes from "./routes/taskRoutes.js"
+app.use("/api/tasks", taskRoutes)
+
+import notificationRoutes from "./routes/notificationRoutes.js"
+app.use("/api/notifications", notificationRoutes)
 
 const PORT = process.env.PORT || 5000
 

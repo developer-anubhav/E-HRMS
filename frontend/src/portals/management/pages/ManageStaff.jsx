@@ -39,8 +39,11 @@ export default function ManageStaff() {
     if (isInitial) setLoading(true)
     try {
       const res = await getEmployees()
+      const data = Array.isArray(res.data)
+        ? res.data
+        : (res.data?.employees || res.data?.data || [])
       // Filter for HR/Managers/Employees
-      const staff = res.data.filter(emp => emp.role === "HR" || emp.role === "MANAGER" || emp.role === "EMPLOYEE")
+      const staff = data.filter(emp => emp.role === "HR" || emp.role === "MANAGER" || emp.role === "EMPLOYEE")
       setEmployees(staff)
     } catch (err) {
       console.error(err)
