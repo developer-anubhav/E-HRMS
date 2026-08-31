@@ -1,7 +1,13 @@
 import json
 import re
 import asyncio
+import sys
+from pathlib import Path
 from typing import Dict, Any, List, Optional, AsyncGenerator
+
+# Ensure microservice root is on python path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from security.scrubber import scrub_text
 from security.guardrails import check_domain_guardrail
 from agent.escalation import check_sensitive_escalation, create_hr_escalation_ticket

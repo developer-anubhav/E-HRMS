@@ -1,5 +1,11 @@
 import datetime
+import sys
+from pathlib import Path
 from typing import Dict, Any, Optional, List
+
+# Ensure microservice root is on python path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 from rag.retriever import retrieve_company_documents
 
 # Mock database records for isolated testing and demonstration
