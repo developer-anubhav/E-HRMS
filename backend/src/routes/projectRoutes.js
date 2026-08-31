@@ -6,7 +6,14 @@ import {
   getProjectById,
   updateProject,
   deleteProject,
+  addTeamMembers,
+  removeTeamMember,
+  getProjectMembers,
 } from "../controllers/projectController.js";
+import {
+  createMilestone,
+  getMilestones,
+} from "../controllers/milestoneController.js";
 
 const router = express.Router();
 
@@ -18,5 +25,15 @@ router.get("/", getProjects);
 router.get("/:id", getProjectById);
 router.put("/:id", authorize("ADMIN", "MANAGER", "SUPERADMIN"), updateProject);
 router.delete("/:id", authorize("ADMIN", "MANAGER", "SUPERADMIN"), deleteProject);
+
+// Team membership routes
+router.get("/:id/members", getProjectMembers);
+router.post("/:id/members", authorize("ADMIN", "MANAGER", "SUPERADMIN"), addTeamMembers);
+router.delete("/:id/members/:memberId", authorize("ADMIN", "MANAGER", "SUPERADMIN"), removeTeamMember);
+router.delete("/:id/members", authorize("ADMIN", "MANAGER", "SUPERADMIN"), removeTeamMember);
+
+// Project Milestone routes
+router.post("/:id/milestones", authorize("ADMIN", "MANAGER", "SUPERADMIN"), createMilestone);
+router.get("/:id/milestones", getMilestones);
 
 export default router;

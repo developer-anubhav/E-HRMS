@@ -5,7 +5,6 @@ import User from "../models/userModel.js";
 // Helper to resolve user/employee IDs for role-based scoping
 const getUserEmployeeIds = async (reqUser) => {
   const userIds = [reqUser.id];
-  // Find matching employee by user email or ID if present
   if (reqUser.email) {
     const emp = await Employee.findOne({ email: reqUser.email.toLowerCase().trim(), companyId: reqUser.companyId });
     if (emp) {
@@ -61,6 +60,9 @@ export const createProjectService = async (projectData, reqUser) => {
   let validatedTeamMembers = [];
   if (Array.isArray(teamMembers) && teamMembers.length > 0) {
     const validEmployees = await Employee.find({ _id: { $in: teamMembers }, companyId }).select("_id");
+    if (validEmployees.length !== teamMembers.length) {
+      throw new Error("Invalid employee assignment: One or more employees do not belong to your company.");
+    }
     validatedTeamMembers = validEmployees.map((e) => e._id);
   }
 
@@ -196,6 +198,9 @@ export const updateProjectService = async (projectId, updateData, reqUser) => {
 
   if (Array.isArray(updateData.teamMembers)) {
     const validEmployees = await Employee.find({ _id: { $in: updateData.teamMembers }, companyId }).select("_id");
+    if (validEmployees.length !== updateData.teamMembers.length) {
+      throw new Error("Invalid employee assignment: One or more employees do not belong to your company.");
+    }
     project.teamMembers = validEmployees.map((e) => e._id);
   }
 
@@ -228,8 +233,82 @@ export const deleteProjectService = async (projectId, reqUser) => {
     }
   }
 
-  // Soft-delete / Archive project
   project.status = "ARCHIVED";
   await project.save();
   return { message: "Project archived successfully", project };
+};
+
+export const addTeamMembersService = async (projectId, employeeIds, reqUser) => {
+  const companyId = reqUser.companyId;
+  if (!companyId) throw new Error("Company ID missing from user context.");
+
+  const project = await Project.findOne({ _id: projectId, companyId });
+  if (!project) throw new Error("Project not found.");
+
+  const userRole = (reqUser.role || "").toUpperCase();
+  if (userRole === "MANAGER") {
+    const userIds = await getUserEmployeeIds(reqUser);
+    const pmIdStr = project.projectManager?.toString();
+    const isPM = userIds.map((id) => id.toString()).includes(pmIdStr);
+    const isMember = project.teamMembers.some((m) => userIds.map((id) => id.toString()).includes(m.toString()));
+    if (!isPM && !isMember) {
+      throw new Error("Access denied. You are not assigned to this project.");
+    }
+  }
+
+  const idsToAdd = Array.isArray(employeeIds) ? employeeIds : [employeeIds];
+  if (idsToAdd.length === 0) {
+    throw new Error("No employee IDs provided for assignment.");
+  }
+
+  // Validate assigned employees belong to THIS companyId
+  const validEmployees = await Employee.find({ _id: { $in: idsToAdd }, companyId }).select("_id");
+  if (validEmployees.length !== idsToAdd.length) {
+    throw new Error("Invalid employee assignment: One or more employees do not belong to your company.");
+  }
+
+  const existingSet = new Set(project.teamMembers.map((id) => id.toString()));
+  validEmployees.forEach((emp) => existingSet.add(emp._id.toString()));
+  project.teamMembers = Array.from(existingSet);
+
+  await project.save();
+  return await Project.findOne({ _id: projectId, companyId })
+    .populate("projectManager", "name email role department employeeId")
+    .populate("teamMembers", "name email role department employeeId");
+};
+
+export const removeTeamMemberService = async (projectId, memberId, reqUser) => {
+  const companyId = reqUser.companyId;
+  if (!companyId) throw new Error("Company ID missing from user context.");
+
+  const project = await Project.findOne({ _id: projectId, companyId });
+  if (!project) throw new Error("Project not found.");
+
+  const userRole = (reqUser.role || "").toUpperCase();
+  if (userRole === "MANAGER") {
+    const userIds = await getUserEmployeeIds(reqUser);
+    const pmIdStr = project.projectManager?.toString();
+    const isPM = userIds.map((id) => id.toString()).includes(pmIdStr);
+    const isMember = project.teamMembers.some((m) => userIds.map((id) => id.toString()).includes(m.toString()));
+    if (!isPM && !isMember) {
+      throw new Error("Access denied. You are not assigned to this project.");
+    }
+  }
+
+  project.teamMembers = project.teamMembers.filter((m) => m.toString() !== memberId.toString());
+  await project.save();
+  return await Project.findOne({ _id: projectId, companyId })
+    .populate("projectManager", "name email role department employeeId")
+    .populate("teamMembers", "name email role department employeeId");
+};
+
+export const getProjectMembersService = async (projectId, reqUser) => {
+  const companyId = reqUser.companyId;
+  if (!companyId) throw new Error("Company ID missing from user context.");
+
+  const project = await getProjectByIdService(projectId, reqUser);
+  return {
+    projectManager: project.projectManager,
+    teamMembers: project.teamMembers,
+  };
 };
