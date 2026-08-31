@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import api from "../../../api/axios"
 import Loader from "../../../components/ui/Loader"
+import CopilotDrawer from "../../../components/copilot/CopilotDrawer"
 
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth()
@@ -835,6 +836,8 @@ export default function EmployeeDashboard() {
         </main>
       </div>
 
+      {/* Vektra AI Co-Pilot Floating Drawer */}
+      <CopilotDrawer />
     </div>
   )
 }

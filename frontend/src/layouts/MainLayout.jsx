@@ -1,6 +1,7 @@
 import { useState } from "react"
 import Sidebar from "../components/Sidebar"
 import Header from "../components/Header"
+import CopilotDrawer from "../components/copilot/CopilotDrawer"
 
 export default function MainLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
@@ -24,6 +25,9 @@ export default function MainLayout({ children }) {
           </div>
         </main>
       </div>
+
+      {/* Vektra AI Co-Pilot Floating Drawer */}
+      <CopilotDrawer />
     </div>
   )
 }
