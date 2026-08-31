@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -10,12 +11,8 @@ import {
   AlertTriangle,
   Bot,
   User as UserIcon,
-  ChevronRight,
   ShieldCheck,
   Building,
-  HelpCircle,
-  ExternalLink,
-  Loader2,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { streamCopilotChat } from "../../api/copilotApi";
@@ -50,11 +47,21 @@ export default function CopilotDrawer() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState(() => [
+    {
+      id: "welcome",
+      role: "assistant",
+      content: `Hello! I am your Vektra AI Co-Pilot. I can answer questions regarding official company policies, your leave balances, and workplace guidelines. How can I help you today?`,
+      timestamp: new Date().toISOString(),
+      citations: [],
+      escalation: null,
+    },
+  ]);
   const [errorMsg, setErrorMsg] = useState(null);
   const [activeCitationModal, setActiveCitationModal] = useState(null);
 
-  const sessionIdRef = useRef(`sess_${Date.now()}`);
+  const sessionIdRef = useRef("session_default");
+  const counterRef = useRef(0);
   const abortControllerRef = useRef(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
@@ -62,26 +69,15 @@ export default function CopilotDrawer() {
   const userRole = user?.role?.toUpperCase() || "EMPLOYEE";
   const suggestions = ROLE_SUGGESTIONS[userRole] || ROLE_SUGGESTIONS.EMPLOYEE;
 
+  // Initialize session ID once mounted
+  useEffect(() => {
+    sessionIdRef.current = `sess_${window.crypto?.randomUUID?.() || Math.random().toString(36).substring(2)}`;
+  }, []);
+
   // Auto-scroll to bottom of messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isStreaming]);
-
-  // Initial welcome greeting
-  useEffect(() => {
-    if (messages.length === 0 && user) {
-      setMessages([
-        {
-          id: "welcome",
-          role: "assistant",
-          content: `Hello ${user.name || "there"}! I am your Vektra AI Co-Pilot. I can answer questions regarding official company policies, your leave balances, and workplace guidelines. How can I help you today?`,
-          timestamp: new Date(),
-          citations: [],
-          escalation: null,
-        },
-      ]);
-    }
-  }, [user]);
 
   const handleSendMessage = async (textToSend) => {
     const prompt = (textToSend || inputMessage).trim();
@@ -90,22 +86,22 @@ export default function CopilotDrawer() {
     setErrorMsg(null);
     setInputMessage("");
 
-    // Create user message
-    const userMsgId = `user_${Date.now()}`;
-    const assistantMsgId = `asst_${Date.now()}`;
+    counterRef.current += 1;
+    const userMsgId = `user_${counterRef.current}`;
+    const assistantMsgId = `asst_${counterRef.current}`;
 
     const userMessage = {
       id: userMsgId,
       role: "user",
       content: prompt,
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
     };
 
     const initialAssistantMessage = {
       id: assistantMsgId,
       role: "assistant",
       content: "",
-      timestamp: new Date(),
+      timestamp: new Date().toISOString(),
       citations: [],
       escalation: null,
       isStreaming: true,
@@ -185,14 +181,14 @@ export default function CopilotDrawer() {
   };
 
   const handleClearChat = () => {
-    sessionIdRef.current = `sess_${Date.now()}`;
+    sessionIdRef.current = `sess_${Math.random().toString(36).substring(2)}`;
     setErrorMsg(null);
     setMessages([
       {
-        id: "welcome_new",
+        id: `welcome_${Math.random()}`,
         role: "assistant",
         content: `Conversation reset. Feel free to ask another question regarding company policies or records!`,
-        timestamp: new Date(),
+        timestamp: new Date().toISOString(),
         citations: [],
         escalation: null,
       },

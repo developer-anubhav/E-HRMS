@@ -108,7 +108,6 @@ export async function streamCopilotChat({
     // Handle SSE Stream
     const reader = response.body.getReader();
     const decoder = new TextDecoder();
-    let accumulatedAnswer = "";
     let accumulatedCitations = [];
     let accumulatedEscalation = null;
 
@@ -131,7 +130,6 @@ export async function streamCopilotChat({
           const payload = JSON.parse(dataStr);
 
           if (payload.token) {
-            accumulatedAnswer += payload.token;
             onToken?.(payload.token);
           }
 
@@ -152,7 +150,7 @@ export async function streamCopilotChat({
               sessionId,
             });
           }
-        } catch (_) {
+        } catch {
           // Skip partial or non-JSON SSE heartbeat lines
         }
       }
