@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import api from "../../../api/axios"
 import Loader from "../../../components/ui/Loader"
+import CopilotDrawer from "../../../components/copilot/CopilotDrawer"
 
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth()
@@ -465,7 +466,7 @@ export default function EmployeeDashboard() {
 
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Estimated Net Payout</p>
-                <p className="text-2xl font-extrabold text-emerald-600 text-emerald-600 font-mono">₹{employeeProfile?.monthlySalary?.toLocaleString() || "0"}</p>
+                <p className="text-2xl font-extrabold text-emerald-600 font-mono">₹{employeeProfile?.monthlySalary?.toLocaleString() || "0"}</p>
                 <div className="flex items-center gap-1.5 mt-2 text-[10px] font-bold text-slate-500">
                   <BadgePercent size={12} className="text-emerald-600" /> Base + Allowances
                 </div>
@@ -835,6 +836,8 @@ export default function EmployeeDashboard() {
         </main>
       </div>
 
+      {/* Vektra AI Co-Pilot Floating Drawer */}
+      <CopilotDrawer />
     </div>
   )
 }
