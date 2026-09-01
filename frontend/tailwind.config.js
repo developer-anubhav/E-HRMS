@@ -10,6 +10,9 @@ export default {
         sans: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Inter'", "system-ui", "-apple-system", "sans-serif"],
         heading: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Outfit'", "sans-serif"],
         puvi: ["'Zoho Puvi'", "'Plus Jakarta Sans'", "'Inter'", "sans-serif"],
+        'copilot-body': ["'Public Sans'", "system-ui", "-apple-system", "sans-serif"],
+        'copilot-data': ["'IBM Plex Mono'", "monospace"],
+        'copilot-quote': ["'Source Serif 4'", "Georgia", "serif"],
       },
       colors: {
         background: "hsl(var(--background))",

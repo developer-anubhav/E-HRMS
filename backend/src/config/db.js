@@ -1,4 +1,10 @@
 import mongoose from "mongoose"
+import dns from "dns"
+
+// Ensure reliable DNS resolution for MongoDB SRV connection strings on Windows / local ISP
+try {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+} catch (_) {}
 
 export const connectDB = async () => {
   try {
@@ -12,3 +18,4 @@ export const connectDB = async () => {
     process.exit(1);
   }
 }
+

@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom"
 
 import { AuthProvider } from "./context/AuthContext"
 import ProtectedRoute from "./routes/ProtectedRoute"
@@ -38,6 +38,7 @@ export default function App() {
           <Route path="/signup" element={<OrganizationSignup />} />
           <Route path="/super-login" element={<SuperLogin />} />
           <Route path="/" element={<LandingPage />} />
+          <Route path="/employee" element={<Navigate to="/employee/dashboard" replace />} />
 
           <Route
             path="/employee/dashboard"
