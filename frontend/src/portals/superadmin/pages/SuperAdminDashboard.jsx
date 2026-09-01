@@ -16,6 +16,7 @@ import {
     Search,
     Filter
 } from "lucide-react"
+import CopilotDrawer from "../../../components/copilot/CopilotDrawer"
 
 export default function SuperAdminDashboard() {
     const [companies, setCompanies] = useState([])
@@ -595,6 +596,9 @@ const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchT
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Vektra AI Co-Pilot Floating Drawer */}
+            <CopilotDrawer />
         </div>
     )
 }

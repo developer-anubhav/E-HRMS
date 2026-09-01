@@ -27,6 +27,9 @@ app.use(express.urlencoded({ limit: "50mb", extended: true }))
 // 👇 THIS LINE IS CRITICAL
 app.use("/api/employees", employeeRoutes)
 
+import copilotRoutes from "./routes/copilotRoutes.js"
+app.use("/api/copilot", copilotRoutes)
+
 app.get("/", (req, res) => {
   res.json({ message: "E-HRMS API running" })
 })
