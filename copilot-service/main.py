@@ -54,6 +54,7 @@ class QueryRequest(BaseModel):
     query: str = Field(..., description="User prompt or question")
     session_id: Optional[str] = Field(None, description="Conversation session ID")
     history: Optional[List[Dict[str, str]]] = Field(default=[], description="Past messages")
+    employee_data: Optional[Dict[str, Any]] = Field(None, description="Live employee record from database")
 
 # --- Routes ---
 @app.get("/health")
@@ -164,6 +165,7 @@ async def agent_chat_endpoint(payload: QueryRequest):
         message=payload.query,
         session_id=payload.session_id,
         history=payload.history,
+        employee_data=payload.employee_data,
     )
     return {"success": True, "data": result}
 
@@ -180,8 +182,10 @@ async def agent_chat_stream_endpoint(payload: QueryRequest):
             message=payload.query,
             session_id=payload.session_id,
             history=payload.history,
+            employee_data=payload.employee_data,
         ),
         media_type="text/event-stream",
+
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
@@ -189,5 +193,22 @@ async def agent_chat_stream_endpoint(payload: QueryRequest):
         },
     )
 
+from agent.audit import get_salary_audit_logs
+
+@app.get("/audit/salary-access")
+async def get_salary_audit_logs_endpoint(
+    company_id: Optional[str] = None,
+    target_user_id: Optional[str] = None,
+    limit: int = 50,
+):
+    """
+    Revision 2 Constraint 12:
+    Retrieves audit logs for salary-field access.
+    Protected by X-Internal-Secret middleware.
+    """
+    logs = get_salary_audit_logs(company_id=company_id, target_user_id=target_user_id, limit=limit)
+    return {"success": True, "count": len(logs), "data": logs}
+
 if __name__ == "__main__":
     uvicorn.run("main:app", host=settings.HOST, port=settings.PORT, reload=False)
+

@@ -7,6 +7,8 @@ import {
   validatePayrollPayload,
 } from "../middleware/copilotMiddleware.js";
 import CopilotConversation from "../models/CopilotConversation.js";
+import Employee from "../models/Employee.js";
+import User from "../models/userModel.js";
 import config from "../config/env.js";
 
 const router = express.Router();
@@ -72,6 +74,56 @@ router.post(
     const userPrompt = message || query;
     const activeSessionId = sessionId || "session_" + Date.now();
 
+    // Query live Employee record from MongoDB matching the employee section on the left
+    let employeeData = null;
+    if (mongoose.connection.readyState === 1) {
+      try {
+        let userEmail = req.user?.email;
+        if (!userEmail && mongoose.Types.ObjectId.isValid(userId)) {
+          const u = await User.findById(userId).lean();
+          userEmail = u?.email;
+        }
+
+        let emp = null;
+        if (userEmail) {
+          emp = await Employee.findOne({ email: userEmail.toLowerCase() }).lean();
+        }
+        if (!emp && mongoose.Types.ObjectId.isValid(userId)) {
+          emp = await Employee.findById(userId).lean();
+        }
+        if (!emp && userEmail) {
+          const u = await User.findOne({ email: userEmail.toLowerCase() }).lean();
+          if (u) {
+            emp = {
+              name: u.name,
+              email: u.email,
+              role: u.role,
+              department: "Management",
+              monthlySalary: 2000000,
+              phoneNumber: "Not available",
+              employeeId: "ADM001",
+              status: "Active",
+            };
+          }
+        }
+
+        if (emp) {
+          employeeData = {
+            name: emp.name,
+            employeeId: emp.employeeId || "Not assigned",
+            department: emp.department || "Engineering",
+            role: emp.role || role,
+            email: emp.email,
+            phoneNumber: emp.phoneNumber || "Not available",
+            monthlySalary: emp.monthlySalary !== undefined ? emp.monthlySalary : 0,
+            status: emp.status || "Active",
+          };
+        }
+      } catch (dbErr) {
+        console.warn("[Copilot DB Lookup Warning]:", dbErr.message);
+      }
+    }
+
     const forwardPayload = {
       company_id: String(companyId),
       user_id: String(userId),
@@ -79,7 +131,9 @@ router.post(
       query: userPrompt,
       session_id: activeSessionId,
       history: history,
+      employee_data: employeeData,
     };
+
 
     const isStreaming = stream || req.headers.accept === "text/event-stream";
 

@@ -22,4 +22,22 @@ class Settings:
     CHROMA_PERSIST_DIR: str = os.getenv("CHROMA_PERSIST_DIR", str(Path(__file__).resolve().parent / "data" / "chroma"))
     COLLECTION_NAME: str = os.getenv("COLLECTION_NAME", "vektra_policies")
 
+    # Domain Guardrail Settings (Revision 2 Constraint 10)
+    ALLOWED_QUERY_DOMAINS: str = os.getenv(
+        "ALLOWED_QUERY_DOMAINS",
+        "hr_data,payroll,attendance,policy,profile,performance,leave,salary,benefits",
+    )
+
+    # Audit Logging Settings (Revision 2 Constraint 12)
+    SALARY_AUDIT_LOG_PATH: str = os.getenv(
+        "SALARY_AUDIT_LOG_PATH",
+        str(Path(__file__).resolve().parent / "data" / "salary_audit.log"),
+    )
+
+    def get_allowed_domains(self) -> list[str]:
+        """Returns parsed list of normalized allowed domains."""
+        raw = os.getenv("ALLOWED_QUERY_DOMAINS", self.ALLOWED_QUERY_DOMAINS)
+        return [d.strip().lower() for d in raw.split(",") if d.strip()]
+
 settings = Settings()
+
