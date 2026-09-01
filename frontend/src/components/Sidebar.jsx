@@ -11,7 +11,8 @@ import {
   X,
   ChevronRight,
   FolderKanban,
-  ListTodo
+  ListTodo,
+  FileText
 } from "lucide-react"
 
 export default function Sidebar({ isOpen, setIsOpen }) {
@@ -22,6 +23,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: "Projects & Analytics", path: "/projects", roles: ["ADMIN", "HR", "MANAGER"], icon: FolderKanban },
     { name: user?.role === "ADMIN" ? "View Employees" : "Employees", path: "/employees", roles: ["ADMIN", "HR"], icon: Users },
     { name: "Attendance", path: "/attendance", roles: ["ADMIN", "HR", "MANAGER"], icon: CalendarCheck },
+    { name: "Company Documents", path: "/documents", roles: ["ADMIN", "HR", "MANAGER"], icon: FileText },
     { name: "Manage Staff", path: "/admin/manage-staff", roles: ["ADMIN"], icon: ShieldCheck },
     { name: "Payroll", path: "/payroll", roles: ["ADMIN", "HR"], icon: DollarSign },
     { name: "Reports", path: "/reports", roles: ["ADMIN", "HR"], icon: BarChart3 },
