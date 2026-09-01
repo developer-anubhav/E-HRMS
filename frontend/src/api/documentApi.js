@@ -11,11 +11,7 @@ export const getDocuments = (params) => api.get("/documents", { params });
  * @param {FormData} formData - Contains file, title, and category
  */
 export const uploadDocument = (formData) =>
-  api.post("/documents/upload", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  api.post("/documents/upload", formData);
 
 /**
  * Soft-delete a document (ADMIN/HR only)

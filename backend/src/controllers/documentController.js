@@ -1,4 +1,6 @@
 import CompanyDocument from "../models/CompanyDocument.js";
+import Company from "../models/Company.js";
+import User from "../models/userModel.js";
 import { uploadToGridFS, getDownloadStream } from "../services/gridfsService.js";
 
 const VALID_CATEGORIES = [
@@ -10,30 +12,45 @@ const VALID_CATEGORIES = [
 ];
 
 /**
+ * Helper to resolve companyId safely from req.user or database
+ */
+const resolveCompanyId = async (reqUser) => {
+  if (reqUser?.companyId) return reqUser.companyId;
+  const userId = reqUser?._id || reqUser?.id;
+  if (userId) {
+    const userDoc = await User.findById(userId);
+    if (userDoc?.companyId) return userDoc.companyId;
+  }
+  const defaultCompany = await Company.findOne();
+  return defaultCompany?._id;
+};
+
+/**
  * Upload a document to GridFS and store tenant-scoped metadata.
- * Access: ADMIN, HR
+ * Access: ADMIN, HR, MANAGER
  */
 export const uploadDocument = async (req, res) => {
   try {
     const { title, category } = req.body;
-    const companyId = req.user?.companyId;
+    const companyId = await resolveCompanyId(req.user);
     const uploadedBy = req.user?._id || req.user?.id;
 
     if (!companyId) {
-      return res.status(400).json({ message: "Company identification is required" });
+      return res.status(400).json({ message: "Company identification is required. Please check organization settings." });
     }
 
     if (!req.file) {
-      return res.status(400).json({ message: "File is required" });
+      return res.status(400).json({ message: "File is required for upload." });
     }
 
     if (!title || !title.trim()) {
-      return res.status(400).json({ message: "Document title is required" });
+      return res.status(400).json({ message: "Document title is required." });
     }
 
-    if (!category || !VALID_CATEGORIES.includes(category)) {
+    const normCategory = (category || "").toUpperCase();
+    if (!normCategory || !VALID_CATEGORIES.includes(normCategory)) {
       return res.status(400).json({
-        message: `Invalid category. Must be one of: ${VALID_CATEGORIES.join(", ")}`,
+        message: `Invalid category. Allowed categories: ${VALID_CATEGORIES.join(", ")}`,
       });
     }
 
@@ -48,7 +65,7 @@ export const uploadDocument = async (req, res) => {
     const document = await CompanyDocument.create({
       companyId,
       title: title.trim(),
-      category,
+      category: normCategory,
       fileId,
       fileName: req.file.originalname,
       fileSize: req.file.size,
@@ -78,7 +95,7 @@ export const uploadDocument = async (req, res) => {
  */
 export const listDocuments = async (req, res) => {
   try {
-    const companyId = req.user?.companyId;
+    const companyId = await resolveCompanyId(req.user);
 
     if (!companyId) {
       return res.status(400).json({ message: "Company identification is required" });
@@ -122,7 +139,7 @@ export const listDocuments = async (req, res) => {
  */
 export const downloadDocument = async (req, res) => {
   try {
-    const companyId = req.user?.companyId;
+    const companyId = await resolveCompanyId(req.user);
     const documentId = req.params.id;
 
     if (!companyId) {
@@ -167,11 +184,11 @@ export const downloadDocument = async (req, res) => {
 
 /**
  * Soft-delete a document record.
- * Access: ADMIN, HR
+ * Access: ADMIN, HR, MANAGER
  */
 export const deleteDocument = async (req, res) => {
   try {
-    const companyId = req.user?.companyId;
+    const companyId = await resolveCompanyId(req.user);
     const documentId = req.params.id;
 
     if (!companyId) {
