@@ -263,7 +263,7 @@ export default function Projects() {
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-medium text-sm transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "bg-slate-900 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 dark:text-slate-400 dark:hover:text-slate-900 dark:hover:bg-slate-100"
                 }`}
               >
                 <tab.icon size={16} />
@@ -696,7 +696,7 @@ export default function Projects() {
                       placeholder="e.g. PRJ-2026-01"
                       value={projectForm.projectCode}
                       onChange={(e) => setProjectForm({ ...projectForm, projectCode: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
 
@@ -708,7 +708,7 @@ export default function Projects() {
                       placeholder="e.g. Enterprise HR Automation"
                       value={projectForm.name}
                       onChange={(e) => setProjectForm({ ...projectForm, name: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
 
@@ -718,11 +718,11 @@ export default function Projects() {
                       required
                       value={projectForm.projectManager}
                       onChange={(e) => setProjectForm({ ...projectForm, projectManager: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                     >
-                      <option value="">Select Manager</option>
+                      <option value="" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Select Manager</option>
                       {managersList.map((m) => (
-                        <option key={m._id} value={m._id}>
+                        <option key={m._id} value={m._id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
                           {m.name} ({m.role})
                         </option>
                       ))}
@@ -735,12 +735,12 @@ export default function Projects() {
                       <select
                         value={projectForm.priority}
                         onChange={(e) => setProjectForm({ ...projectForm, priority: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                       >
-                        <option value="LOW">LOW</option>
-                        <option value="MEDIUM">MEDIUM</option>
-                        <option value="HIGH">HIGH</option>
-                        <option value="URGENT">URGENT</option>
+                        <option value="LOW" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">LOW</option>
+                        <option value="MEDIUM" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">MEDIUM</option>
+                        <option value="HIGH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">HIGH</option>
+                        <option value="URGENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">URGENT</option>
                       </select>
                     </div>
 
@@ -749,11 +749,11 @@ export default function Projects() {
                       <select
                         value={projectForm.status}
                         onChange={(e) => setProjectForm({ ...projectForm, status: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                       >
-                        <option value="PLANNING">PLANNING</option>
-                        <option value="IN_PROGRESS">IN_PROGRESS</option>
-                        <option value="ON_HOLD">ON_HOLD</option>
+                        <option value="PLANNING" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">PLANNING</option>
+                        <option value="IN_PROGRESS" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">IN_PROGRESS</option>
+                        <option value="ON_HOLD" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">ON_HOLD</option>
                       </select>
                     </div>
                   </div>
@@ -762,7 +762,7 @@ export default function Projects() {
                     <button
                       type="button"
                       onClick={() => setShowCreateModal(false)}
-                      className="px-4 py-2 rounded-xl text-slate-600 font-bold hover:bg-slate-100"
+                      className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                       Cancel
                     </button>
@@ -824,7 +824,7 @@ export default function Projects() {
                     <button
                       type="button"
                       onClick={() => setShowMemberModal(false)}
-                      className="px-4 py-2 rounded-xl text-slate-600 font-bold"
+                      className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                       Cancel
                     </button>
@@ -859,7 +859,7 @@ export default function Projects() {
                       placeholder="e.g. Build authentication endpoints"
                       value={taskForm.title}
                       onChange={(e) => setTaskForm({ ...taskForm, title: e.target.value })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                      className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500"
                     />
                   </div>
 
@@ -874,10 +874,10 @@ export default function Projects() {
                           assignedTo: Array.from(e.target.selectedOptions, (option) => option.value),
                         })
                       }
-                      className="w-full h-28 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                      className="w-full h-28 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                     >
                       {employees.map((emp) => (
-                        <option key={emp._id} value={emp._id}>
+                        <option key={emp._id} value={emp._id} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
                           {emp.name} ({emp.department})
                         </option>
                       ))}
@@ -890,12 +890,12 @@ export default function Projects() {
                       <select
                         value={taskForm.priority}
                         onChange={(e) => setTaskForm({ ...taskForm, priority: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                       >
-                        <option value="LOW">LOW</option>
-                        <option value="MEDIUM">MEDIUM</option>
-                        <option value="HIGH">HIGH</option>
-                        <option value="URGENT">URGENT</option>
+                        <option value="LOW" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">LOW</option>
+                        <option value="MEDIUM" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">MEDIUM</option>
+                        <option value="HIGH" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">HIGH</option>
+                        <option value="URGENT" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">URGENT</option>
                       </select>
                     </div>
 
@@ -905,7 +905,7 @@ export default function Projects() {
                         type="date"
                         value={taskForm.dueDate}
                         onChange={(e) => setTaskForm({ ...taskForm, dueDate: e.target.value })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800"
+                        className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white"
                       />
                     </div>
                   </div>
@@ -914,7 +914,7 @@ export default function Projects() {
                     <button
                       type="button"
                       onClick={() => setShowTaskModal(false)}
-                      className="px-4 py-2 rounded-xl text-slate-600 font-bold"
+                      className="px-4 py-2 rounded-xl text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-white"
                     >
                       Cancel
                     </button>

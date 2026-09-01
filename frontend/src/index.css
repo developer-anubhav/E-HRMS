@@ -94,6 +94,29 @@
     font-weight: 300 !important;
     letter-spacing: -0.02em;
   }
+
+  /* Dark mode form element text styling */
+  @media (prefers-color-scheme: dark) {
+    input, select, textarea {
+      color: #ffffff !important;
+    }
+    select option {
+      background-color: #1e293b !important;
+      color: #ffffff !important;
+    }
+    ::placeholder {
+      color: #94a3b8 !important;
+    }
+  }
+
+  .dark input, .dark select, .dark textarea,
+  html.dark input, html.dark select, html.dark textarea {
+    color: #ffffff !important;
+  }
+  .dark select option, html.dark select option {
+    background-color: #1e293b !important;
+    color: #ffffff !important;
+  }
 }
 
 @layer components {
