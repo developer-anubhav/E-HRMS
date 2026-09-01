@@ -64,8 +64,8 @@ router.use(protect);
 router.get("/", listDocuments);
 router.get("/:id/download", downloadDocument);
 
-// Endpoints restricted to ADMIN and HR roles
-router.post("/upload", authorize("ADMIN", "HR"), handleFileUpload, uploadDocument);
-router.delete("/:id", authorize("ADMIN", "HR"), deleteDocument);
+// Endpoints for document management (ADMIN, HR, MANAGER)
+router.post("/upload", authorize("ADMIN", "HR", "MANAGER"), handleFileUpload, uploadDocument);
+router.delete("/:id", authorize("ADMIN", "HR", "MANAGER"), deleteDocument);
 
 export default router;
