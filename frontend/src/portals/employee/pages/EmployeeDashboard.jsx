@@ -11,6 +11,7 @@ import {
 } from "lucide-react"
 import api from "../../../api/axios"
 import Loader from "../../../components/ui/Loader"
+import { getDocuments, downloadDocument } from "../../../api/documentApi"
 
 export default function EmployeeDashboard() {
   const { user, logout } = useAuth()
@@ -25,6 +26,10 @@ export default function EmployeeDashboard() {
   const [todayAttendance, setTodayAttendance] = useState(null)
   const [attendanceHistory, setAttendanceHistory] = useState([])
   const [payrollHistory, setPayrollHistory] = useState([])
+  const [companyDocuments, setCompanyDocuments] = useState([])
+  const [loadingDocs, setLoadingDocs] = useState(false)
+  const [downloadingDocId, setDownloadingDocId] = useState(null)
+  const [docCategoryFilter, setDocCategoryFilter] = useState("ALL")
   
   // Action states
   const [loadingToday, setLoadingToday] = useState(true)
@@ -83,6 +88,12 @@ export default function EmployeeDashboard() {
 
   // 3. Load tab specific data
   useEffect(() => {
+    if (activeTab === "documents") {
+      fetchCompanyDocuments()
+    }
+  }, [activeTab, docCategoryFilter])
+
+  useEffect(() => {
     if (!employeeProfile) return
 
     if (activeTab === "attendance") {
@@ -91,6 +102,30 @@ export default function EmployeeDashboard() {
       fetchPayrollHistory()
     }
   }, [activeTab, employeeProfile])
+
+  const fetchCompanyDocuments = async () => {
+    setLoadingDocs(true)
+    try {
+      const res = await getDocuments({ category: docCategoryFilter })
+      setCompanyDocuments(res.data?.data || [])
+    } catch (err) {
+      console.error("Failed to fetch company documents:", err)
+    } finally {
+      setLoadingDocs(false)
+    }
+  }
+
+  const handleDocumentDownload = async (doc) => {
+    try {
+      setDownloadingDocId(doc._id)
+      await downloadDocument(doc._id, doc.fileName)
+    } catch (err) {
+      console.error("Download failed:", err)
+      alert("Failed to download document.")
+    } finally {
+      setDownloadingDocId(null)
+    }
+  }
 
   const fetchTodayAttendance = async () => {
     setLoadingToday(true)
@@ -547,35 +582,83 @@ export default function EmployeeDashboard() {
       case "documents":
         return (
           <div className="bg-white border border-slate-200 rounded-3xl p-8 shadow-sm space-y-6">
-            <div>
-              <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
-                <FileText size={22} className="text-emerald-600" />
-                Corporate Documents
-              </h3>
-              <p className="text-sm text-slate-500 mt-1">Access employment documentation, compliance agreements, and corporate policies.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-3">
+                  <FileText size={22} className="text-emerald-600" />
+                  Company Documents
+                </h3>
+                <p className="text-sm text-slate-500 mt-1">
+                  Access official policies, handbooks, and compliance documentation.
+                </p>
+              </div>
+
+              {/* Category Filter Pills */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                {["ALL", "TERMS_AND_CONDITIONS", "POLICY", "HANDBOOK", "COMPLIANCE", "OTHER"].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setDocCategoryFilter(cat)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                      docCategoryFilter === cat
+                        ? "bg-emerald-600 text-white shadow-sm"
+                        : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {cat === "ALL" ? "All" : cat.replace(/_/g, " ")}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {mockDocuments.map((doc, idx) => (
-                <div key={idx} className="p-5 bg-slate-50 border border-slate-200/60 hover:border-slate-200 rounded-3xl flex items-start gap-4 transition-all shadow-sm">
-                  <div className="p-3 bg-blue-50 text-blue-600 border border-blue-100 rounded-2xl flex-shrink-0">
-                    <FileText size={24} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-slate-800 truncate text-sm">{doc.name}</h4>
-                    <p className="text-xs text-slate-500 mt-0.5">{doc.size} • Uploaded {doc.date}</p>
-                    <div className="flex items-center gap-2 mt-3">
-                      <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-extrabold uppercase rounded">
-                        {doc.status}
-                      </span>
+            {loadingDocs ? (
+              <div className="py-12 flex justify-center">
+                <Loader />
+              </div>
+            ) : companyDocuments.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 border border-slate-200/60 rounded-3xl space-y-2">
+                <FileText size={32} className="mx-auto text-slate-400" />
+                <h4 className="font-semibold text-slate-700 text-sm">No documents available</h4>
+                <p className="text-xs text-slate-500">
+                  There are no documents uploaded in this category for your organization yet.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {companyDocuments.map((doc) => (
+                  <div
+                    key={doc._id}
+                    className="p-5 bg-slate-50 border border-slate-200/60 hover:border-slate-300 rounded-3xl flex items-start gap-4 transition-all shadow-sm group"
+                  >
+                    <div className="p-3 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-2xl flex-shrink-0">
+                      <FileText size={24} />
                     </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-slate-800 truncate text-sm group-hover:text-emerald-600 transition-colors">
+                        {doc.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 mt-0.5 truncate">{doc.fileName}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-emerald-600 text-[10px] font-extrabold uppercase rounded">
+                          {doc.category.replace(/_/g, " ")}
+                        </span>
+                        <span className="text-[11px] text-slate-400">
+                          {(doc.fileSize / 1024).toFixed(0)} KB
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDocumentDownload(doc)}
+                      disabled={downloadingDocId === doc._id}
+                      className="p-2.5 bg-white hover:bg-emerald-50 text-slate-600 hover:text-emerald-700 rounded-xl border border-slate-200 hover:border-emerald-200 transition-all self-center shadow-sm disabled:opacity-50"
+                      title="Download File"
+                    >
+                      <Download size={18} />
+                    </button>
                   </div>
-                  <button className="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-800 rounded-xl border border-slate-200 transition-all self-center shadow-sm">
-                    <FileDown size={18} />
-                  </button>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         )
 

@@ -219,10 +219,32 @@ npm run dev
 - `POST /api/payroll/process` - Execute bulk salary calculation run
 - `GET /api/payroll/payslip/:employeeId` - Retrieve detailed payslip statement
 
+### Company Document Storage (`/api/documents`)
+- `POST /api/documents/upload` - Upload tenant document (Max 15MB, PDF/DOC/DOCX/PNG/JPEG) (`ADMIN`, `HR`)
+- `GET /api/documents` - List active tenant documents with category filter & title search (`ADMIN`, `HR`, `MANAGER`, `EMPLOYEE`)
+- `GET /api/documents/:id/download` - Stream document binary content from GridFS (`ADMIN`, `HR`, `MANAGER`, `EMPLOYEE`)
+- `DELETE /api/documents/:id` - Soft-delete document metadata (`ADMIN`, `HR`)
+
 ### SuperAdmin Governance (`/api/superadmin`)
 - `GET /api/superadmin/companies` - List pending & approved organization tenants
 - `POST /api/superadmin/approve/:id` - Approve organization access
 - `POST /api/superadmin/reject/:id` - Reject organization registration
+
+---
+
+## 🔐 RBAC Permission Matrix
+
+| Module & Endpoint | SUPERADMIN | ADMIN | HR | MANAGER | EMPLOYEE |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Org Onboarding & Approval** (`/api/superadmin/*`) | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Manage Staff & Roles** (`/api/admin/*`) | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **Employee Directory** (`/api/employees`) | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Attendance & Biometrics** (`/api/attendance`, `/api/face`) | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Payroll Processing** (`/api/payroll`) | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **Upload Documents** (`POST /api/documents/upload`) | ❌ | ✅ | ✅ | ❌ | ❌ |
+| **List Documents** (`GET /api/documents`) | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Download Document** (`GET /api/documents/:id/download`) | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Soft-Delete Document** (`DELETE /api/documents/:id`) | ❌ | ✅ | ✅ | ❌ | ❌ |
 
 ---
 

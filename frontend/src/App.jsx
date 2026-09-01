@@ -21,6 +21,7 @@ const EmployeeProjects = lazy(() => import("./portals/employee/pages/EmployeePro
 const EmployeeTasks = lazy(() => import("./portals/employee/pages/EmployeeTasks"))
 const Payroll = lazy(() => import("./portals/management/pages/Payroll"))
 const Reports = lazy(() => import("./portals/management/pages/Reports"))
+const Documents = lazy(() => import("./portals/management/pages/Documents"))
 const SuperAdminDashboard = lazy(() => import("./portals/superadmin/pages/SuperAdminDashboard"))
 const ManageStaff = lazy(() => import("./portals/management/pages/ManageStaff"))
 const SuperLogin = lazy(() => import("./portals/auth/pages/SuperLogin"))
@@ -131,6 +132,14 @@ export default function App() {
             element={
               <ProtectedRoute roles={["ADMIN", "HR"]}>
                 <Reports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/documents"
+            element={
+              <ProtectedRoute roles={["ADMIN", "HR", "MANAGER"]}>
+                <Documents />
               </ProtectedRoute>
             }
           />
