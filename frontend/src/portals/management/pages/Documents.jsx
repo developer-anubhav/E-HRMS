@@ -190,7 +190,7 @@ export default function Documents() {
       }, 800);
     } catch (err) {
       const msg =
-        err.response?.data?.message || "Failed to upload document.";
+        err.response?.data?.message || err.message || "Failed to upload document. Please check connection to server.";
       setUploadError(msg);
     } finally {
       setUploading(false);
