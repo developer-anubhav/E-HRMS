@@ -58,6 +58,10 @@ app.options("*", cors(corsOptions));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+// Health check endpoints for Render / AWS / Railway probes
+app.get("/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+app.get("/api/health", (req, res) => res.json({ status: "ok", timestamp: new Date().toISOString() }));
+
 // Register REST API Routers
 app.use("/api/auth", authRoutes);
 app.use("/api/employees", employeeRoutes);
@@ -75,11 +79,6 @@ app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/documents", documentRoutes);
-
-// Health check endpoint
-app.get("/api/health", (req, res) => {
-  res.json({ message: "Vektra E-HRMS API active", timestamp: new Date().toISOString() });
-});
 
 // Serve frontend dist static files if deployed together in a monorepo service
 const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");

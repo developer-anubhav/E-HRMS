@@ -15,8 +15,8 @@ const startServer = async () => {
     await connectDB()
     await syncEmployees()
     
-    app.listen(PORT, () => {
-      console.log(`✅ SERVER ACTIVE: http://localhost:${PORT}`)
+    app.listen(PORT, "0.0.0.0", () => {
+      console.log(`✅ SERVER ACTIVE: http://0.0.0.0:${PORT}`)
       console.log(`📧 MAIL SERVICE: ${process.env.EMAIL_USER}`)
     })
   } catch (error) {
