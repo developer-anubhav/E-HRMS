@@ -68,6 +68,7 @@ app.use("/api/milestones", milestoneRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/documents", documentRoutes);
+app.use("/documents", documentRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Vektra E-HRMS API running" });
