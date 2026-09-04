@@ -12,11 +12,16 @@ const router = express.Router();
 
 const ALLOWED_MIME_TYPES = [
   "application/pdf",
+  "application/x-pdf",
+  "application/acrobat",
+  "applications/vnd.pdf",
+  "text/pdf",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "image/png",
   "image/jpeg",
   "image/jpg",
+  "application/octet-stream",
 ];
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
@@ -27,7 +32,16 @@ const upload = multer({
     fileSize: MAX_FILE_SIZE,
   },
   fileFilter: (req, file, cb) => {
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    const filename = (file.originalname || "").toLowerCase();
+    const isAllowedExt =
+      filename.endsWith(".pdf") ||
+      filename.endsWith(".doc") ||
+      filename.endsWith(".docx") ||
+      filename.endsWith(".png") ||
+      filename.endsWith(".jpg") ||
+      filename.endsWith(".jpeg");
+
+    if (ALLOWED_MIME_TYPES.includes(file.mimetype) || isAllowedExt) {
       cb(null, true);
     } else {
       cb(
@@ -64,8 +78,9 @@ router.use(protect);
 router.get("/", listDocuments);
 router.get("/:id/download", downloadDocument);
 
-// Endpoints for document management (ADMIN, HR, MANAGER)
+// Endpoints for document management (ADMIN, HR, MANAGER) - supports both / and /upload
 router.post("/upload", authorize("ADMIN", "HR", "MANAGER"), handleFileUpload, uploadDocument);
+router.post("/", authorize("ADMIN", "HR", "MANAGER"), handleFileUpload, uploadDocument);
 router.delete("/:id", authorize("ADMIN", "HR", "MANAGER"), deleteDocument);
 
 export default router;
