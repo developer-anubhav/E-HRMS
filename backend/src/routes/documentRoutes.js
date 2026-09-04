@@ -30,9 +30,7 @@ const upload = multer({
     const filename = (file.originalname || "").toLowerCase();
     const extension = Object.keys(FILE_TYPES).find((ext) => filename.endsWith(ext));
     const declaredMimeType = (file.mimetype || "").toLowerCase();
-    // Some browsers label Office documents as application/octet-stream. Permit
-    // that only when the filename has an allowed extension; never use it as a
-    // blanket allow-list entry.
+    
     const mimeTypeMatches =
       extension &&
       (!declaredMimeType ||
@@ -72,13 +70,22 @@ const handleFileUpload = (req, res, next) => {
 // All document endpoints require authentication
 router.use(protect);
 
-// Endpoints accessible by all tenant roles
+// GET routes for listing documents
 router.get("/", listDocuments);
-router.get("/:id/download", downloadDocument);
+router.get("/upload", listDocuments);
 
-// Endpoints for document management (ADMIN, HR, MANAGER) - supports both / and /upload
+// GET routes for downloading document by ID
+router.get("/:id/download", downloadDocument);
+router.get("/:id", (req, res, next) => {
+  if (req.params.id === "upload") return listDocuments(req, res, next);
+  return downloadDocument(req, res, next);
+});
+
+// POST routes for document upload
 router.post("/upload", authorize("ADMIN", "HR", "MANAGER"), handleFileUpload, uploadDocument);
 router.post("/", authorize("ADMIN", "HR", "MANAGER"), handleFileUpload, uploadDocument);
+
+// DELETE route
 router.delete("/:id", authorize("ADMIN", "HR", "MANAGER"), deleteDocument);
 
 export default router;

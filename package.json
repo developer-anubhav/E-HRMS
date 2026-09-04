@@ -8,6 +8,8 @@
     "dev:frontend": "npm --prefix frontend run dev",
     "dev:backend": "npm --prefix backend run dev",
     "dev:copilot": "cd copilot-service && .venv\\Scripts\\uvicorn main:app --host 127.0.0.1 --port 8001 --reload",
+    "start": "npm --prefix backend start",
+    "start:backend": "npm --prefix backend start",
     "build": "npm --prefix frontend run build",
     "test": "npm --prefix backend test",
     "test:backend": "npm --prefix backend test",
