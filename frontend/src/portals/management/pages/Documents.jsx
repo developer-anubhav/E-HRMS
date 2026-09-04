@@ -128,16 +128,18 @@ export default function Documents() {
       return;
     }
 
+    const allowedExtensions = [".pdf", ".doc", ".docx", ".png", ".jpg", ".jpeg"];
+    const extension = file.name.toLowerCase().match(/\.[^.]+$/)?.[0];
     const allowedTypes = [
-      "application/pdf",
-      "application/msword",
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      "image/png",
-      "image/jpeg",
-      "image/jpg",
+      "application/pdf", "application/x-pdf", "application/acrobat", "applications/vnd.pdf", "text/pdf",
+      "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "image/png", "image/jpeg", "image/jpg", "application/octet-stream",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    // Browsers do not consistently report a MIME type for local Office files.
+    // Require a supported filename extension in every case, but do not reject a
+    // valid selection just because the browser supplied an empty generic type.
+    if (!allowedExtensions.includes(extension) || (file.type && !allowedTypes.includes(file.type))) {
       setUploadError(
         "Invalid file format. Only PDF, DOC, DOCX, PNG, and JPEG files are allowed."
       );
