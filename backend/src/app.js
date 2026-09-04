@@ -1,5 +1,8 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
+import fs from "fs";
+import { fileURLToPath } from "url";
 import { connectDB } from "./config/db.js";
 
 import authRoutes from "./routes/authRoutes.js";
@@ -17,6 +20,9 @@ import milestoneRoutes from "./routes/milestoneRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -70,8 +76,23 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/documents", documentRoutes);
 
-app.get("/", (req, res) => {
-  res.json({ message: "Vektra E-HRMS API running" });
+// Health check endpoint
+app.get("/api/health", (req, res) => {
+  res.json({ message: "Vektra E-HRMS API active", timestamp: new Date().toISOString() });
 });
+
+// Serve frontend dist static files if deployed together in a monorepo service
+const frontendDistPath = path.resolve(__dirname, "../../frontend/dist");
+if (fs.existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+  app.get("*", (req, res, next) => {
+    if (req.path.startsWith("/api")) return next();
+    res.sendFile(path.join(frontendDistPath, "index.html"));
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json({ message: "Vektra E-HRMS API running" });
+  });
+}
 
 export default app;
