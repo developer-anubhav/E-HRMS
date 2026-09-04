@@ -18,6 +18,10 @@ export const connectDB = async () => {
     console.log("MongoDB Connected");
   } catch (err) {
     console.error("MongoDB Connection Failed:", err.message);
+    // Callers (including the serverless connection middleware) must receive
+    // this failure. Swallowing it lets an upload continue until GridFS fails
+    // with a misleading "database is not established" error.
+    throw err;
   }
 }
 

@@ -20,12 +20,13 @@ export const getGridFSBucket = () => {
  * @param {string} mimetype 
  * @returns {Promise<mongoose.Types.ObjectId>}
  */
-export const uploadToGridFS = (buffer, filename, mimetype) => {
+export const uploadToGridFS = (buffer, filename, mimetype, metadata = {}) => {
   return new Promise((resolve, reject) => {
     try {
       const bucket = getGridFSBucket();
       const uploadStream = bucket.openUploadStream(filename, {
         contentType: mimetype,
+        metadata,
       });
 
       const readableStream = Readable.from(buffer);
@@ -43,6 +44,16 @@ export const uploadToGridFS = (buffer, filename, mimetype) => {
       reject(err);
     }
   });
+};
+
+/**
+ * Permanently removes a GridFS file and its chunks. This is used as a
+ * compensating action when creating the accompanying metadata record fails.
+ */
+export const deleteFromGridFS = async (fileId) => {
+  const bucket = getGridFSBucket();
+  const objectId = typeof fileId === "string" ? new mongoose.Types.ObjectId(fileId) : fileId;
+  await bucket.delete(objectId);
 };
 
 /**

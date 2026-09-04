@@ -10,19 +10,14 @@ import {
 
 const router = express.Router();
 
-const ALLOWED_MIME_TYPES = [
-  "application/pdf",
-  "application/x-pdf",
-  "application/acrobat",
-  "applications/vnd.pdf",
-  "text/pdf",
-  "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  "image/png",
-  "image/jpeg",
-  "image/jpg",
-  "application/octet-stream",
-];
+const FILE_TYPES = {
+  ".pdf": ["application/pdf", "application/x-pdf", "application/acrobat", "applications/vnd.pdf", "text/pdf"],
+  ".doc": ["application/msword"],
+  ".docx": ["application/vnd.openxmlformats-officedocument.wordprocessingml.document"],
+  ".png": ["image/png"],
+  ".jpg": ["image/jpeg", "image/jpg"],
+  ".jpeg": ["image/jpeg", "image/jpg"],
+};
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
 
@@ -33,15 +28,18 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     const filename = (file.originalname || "").toLowerCase();
-    const isAllowedExt =
-      filename.endsWith(".pdf") ||
-      filename.endsWith(".doc") ||
-      filename.endsWith(".docx") ||
-      filename.endsWith(".png") ||
-      filename.endsWith(".jpg") ||
-      filename.endsWith(".jpeg");
+    const extension = Object.keys(FILE_TYPES).find((ext) => filename.endsWith(ext));
+    const declaredMimeType = (file.mimetype || "").toLowerCase();
+    // Some browsers label Office documents as application/octet-stream. Permit
+    // that only when the filename has an allowed extension; never use it as a
+    // blanket allow-list entry.
+    const mimeTypeMatches =
+      extension &&
+      (!declaredMimeType ||
+        declaredMimeType === "application/octet-stream" ||
+        FILE_TYPES[extension].includes(declaredMimeType));
 
-    if (ALLOWED_MIME_TYPES.includes(file.mimetype) || isAllowedExt) {
+    if (mimeTypeMatches) {
       cb(null, true);
     } else {
       cb(

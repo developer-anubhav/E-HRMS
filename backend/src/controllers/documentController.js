@@ -1,7 +1,7 @@
 import CompanyDocument from "../models/CompanyDocument.js";
 import Company from "../models/Company.js";
 import User from "../models/userModel.js";
-import { uploadToGridFS, getDownloadStream } from "../services/gridfsService.js";
+import { uploadToGridFS, getDownloadStream, deleteFromGridFS } from "../services/gridfsService.js";
 
 const VALID_CATEGORIES = [
   "TERMS_AND_CONDITIONS",
@@ -10,6 +10,14 @@ const VALID_CATEGORIES = [
   "COMPLIANCE",
   "OTHER",
 ];
+
+const safeFileName = (filename) => {
+  const sanitized = String(filename || "document")
+    .replace(/^.*[\\/]/, "")
+    .replace(/[\r\n]/g, "")
+    .trim();
+  return sanitized || "document";
+};
 
 /**
  * Helper to resolve companyId safely from req.user or database
@@ -30,6 +38,7 @@ const resolveCompanyId = async (reqUser) => {
  * Access: ADMIN, HR, MANAGER
  */
 export const uploadDocument = async (req, res) => {
+  let fileId;
   try {
     const { title, category } = req.body;
     const companyId = await resolveCompanyId(req.user);
@@ -37,6 +46,10 @@ export const uploadDocument = async (req, res) => {
 
     if (!companyId) {
       return res.status(400).json({ message: "Company identification is required. Please check organization settings." });
+    }
+
+    if (!uploadedBy) {
+      return res.status(401).json({ message: "Authenticated user identification is required." });
     }
 
     if (!req.file) {
@@ -54,11 +67,15 @@ export const uploadDocument = async (req, res) => {
       });
     }
 
-    // Upload file buffer stream to GridFS
-    const fileId = await uploadToGridFS(
+    const fileName = safeFileName(req.file.originalname);
+
+    // Store the content first, then persist its tenant-scoped metadata. The
+    // catch block below removes the content again if the metadata write fails.
+    fileId = await uploadToGridFS(
       req.file.buffer,
-      req.file.originalname,
-      req.file.mimetype
+      fileName,
+      req.file.mimetype,
+      { companyId: companyId.toString(), uploadedBy: uploadedBy?.toString() }
     );
 
     // Save structured metadata in Mongoose collection
@@ -67,7 +84,7 @@ export const uploadDocument = async (req, res) => {
       title: title.trim(),
       category: normCategory,
       fileId,
-      fileName: req.file.originalname,
+      fileName,
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       uploadedBy,
@@ -85,6 +102,13 @@ export const uploadDocument = async (req, res) => {
     });
   } catch (error) {
     console.error("[DocumentController] Upload error:", error);
+    if (fileId) {
+      try {
+        await deleteFromGridFS(fileId);
+      } catch (cleanupError) {
+        console.error("[DocumentController] Failed to remove orphaned GridFS file:", cleanupError);
+      }
+    }
     return res.status(500).json({ message: error.message || "Failed to upload document" });
   }
 };
@@ -169,7 +193,7 @@ export const downloadDocument = async (req, res) => {
     res.setHeader("Content-Type", document.mimeType);
     res.setHeader(
       "Content-Disposition",
-      `attachment; filename="${encodeURIComponent(document.fileName)}"`
+      `attachment; filename="${safeFileName(document.fileName).replace(/"/g, "")}"; filename*=UTF-8''${encodeURIComponent(safeFileName(document.fileName))}`
     );
     res.setHeader("Content-Length", document.fileSize);
 
