@@ -233,8 +233,8 @@ export default function CopilotDrawer() {
         setIsStreaming(false);
         setErrorMsg(err.message || "Unable to reach AI Co-Pilot.");
         setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === assistantMsgId ? { ...msg, isStreaming: false } : msg
+          prev.filter(
+            (msg) => msg.id !== assistantMsgId || msg.content.trim().length > 0
           )
         );
       },
@@ -384,7 +384,9 @@ export default function CopilotDrawer() {
 
               {/* Message List */}
               <div className="flex-1 p-4 overflow-y-auto space-y-4 text-sm bg-[#F2F1EC] font-sans">
-                {messages.map((msg) => (
+                {messages
+                  .filter((msg) => msg.role === "user" || msg.content?.trim() || msg.isStreaming)
+                  .map((msg) => (
                   <div
                     key={msg.id}
                     className={`flex flex-col ${
@@ -495,15 +497,20 @@ export default function CopilotDrawer() {
                               <button
                                 key={cIdx}
                                 onClick={() => setActiveCitationModal(cite)}
-                                className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-medium bg-[#E4EDE7] hover:bg-[#D7E5DB] text-[#3F6B54] border border-[#3F6B54]/30 rounded-full transition-all font-sans"
+                                className="inline-flex items-center gap-1 px-2.5 py-0.5 text-[11px] font-medium bg-[#E4EDE7] hover:bg-[#D7E5DB] text-[#3F6B54] border border-[#3F6B54]/30 rounded-full transition-all font-sans shadow-sm"
                               >
-                                <FileText className="w-3 h-3 text-[#3F6B54]" />
+                                <FileText className="w-3 h-3 text-[#3F6B54] shrink-0" />
+                                {cite.category_label && (
+                                  <span className="font-semibold text-[#3F6B54] truncate max-w-[120px]">
+                                    {cite.category_label} —
+                                  </span>
+                                )}
                                 <span className="truncate max-w-[160px]">
                                   {cite.source_doc || cite.document}
                                 </span>
                                 {cite.page_number && (
                                   <span
-                                    className="text-[#3F6B54]/80 font-sans"
+                                    className="text-[#3F6B54]/80 font-sans shrink-0"
                                   >
                                     p.{cite.page_number}
                                   </span>
@@ -643,6 +650,14 @@ export default function CopilotDrawer() {
                     {activeCitationModal.source_doc || activeCitationModal.document}
                   </span>
                 </div>
+                {activeCitationModal.category_label && (
+                  <div>
+                    <span className="text-[#5B6B77]">Category: </span>
+                    <span className="font-semibold text-[#3F6B54]">
+                      {activeCitationModal.category_label}
+                    </span>
+                  </div>
+                )}
                 <div>
                   <span className="text-[#5B6B77]">Page Number: </span>
                   <span
