@@ -152,19 +152,19 @@ export default function ManageStaff() {
             <form onSubmit={handleCreateStaff} className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Full Name</label>
                   <input
                     required
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={formData.name}
                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Employee ID</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Employee ID</label>
                   <input
                     required
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={formData.employeeId}
                     onChange={e => setFormData({ ...formData, employeeId: e.target.value })}
                   />
@@ -172,11 +172,11 @@ export default function ManageStaff() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-500 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Email Address</label>
                 <input
                   required
                   type="email"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                   value={formData.email}
                   onChange={e => setFormData({ ...formData, email: e.target.value })}
                 />
@@ -184,18 +184,18 @@ export default function ManageStaff() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Department</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Department</label>
                   <input
                     required
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={formData.department}
                     onChange={e => setFormData({ ...formData, department: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Role</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Role</label>
                   <select
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={formData.role}
                     onChange={e => setFormData({ ...formData, role: e.target.value })}
                   >
@@ -207,15 +207,15 @@ export default function ManageStaff() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-500 mb-1.5">Initial Password (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Initial Password (Optional)</label>
                 <input
                   type="text"
                   placeholder="Default if left blank: Vektra@2026"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                   value={formData.password}
                   onChange={e => setFormData({ ...formData, password: e.target.value })}
                 />
-                <p className="text-[11px] text-slate-400 mt-1">Leave blank to assign default password: <code className="bg-slate-100 text-slate-700 px-1 py-0.5 rounded">Vektra@2026</code></p>
+                <p className="text-[11px] text-slate-400 mt-1">Leave blank to assign default password: <code className="bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 px-1 py-0.5 rounded">Vektra@2026</code></p>
               </div>
 
               <button
@@ -232,31 +232,31 @@ export default function ManageStaff() {
             <form onSubmit={handleUpdateStaff} className="space-y-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Full Name</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Full Name</label>
                   <input
                     required
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={editFormData.name}
                     onChange={e => setEditFormData({ ...editFormData, name: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Employee ID</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Employee ID</label>
                   <input
                     required
                     disabled
-                    className="w-full bg-slate-100 border border-slate-200 text-slate-500 px-4 py-2.5 rounded-lg font-medium cursor-not-allowed"
+                    className="w-full bg-slate-100 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 px-4 py-2.5 rounded-lg font-medium cursor-not-allowed"
                     value={editFormData.employeeId}
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-500 mb-1.5">Email Address</label>
+                <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Email Address</label>
                 <input
                   required
                   type="email"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                   value={editFormData.email}
                   onChange={e => setEditFormData({ ...editFormData, email: e.target.value })}
                 />
@@ -264,18 +264,18 @@ export default function ManageStaff() {
 
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Department</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Department</label>
                   <input
                     required
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={editFormData.department}
                     onChange={e => setEditFormData({ ...editFormData, department: e.target.value })}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Role</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Role</label>
                   <select
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={editFormData.role}
                     onChange={e => setEditFormData({ ...editFormData, role: e.target.value })}
                   >
@@ -285,9 +285,9 @@ export default function ManageStaff() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-500 mb-1.5">Status</label>
+                  <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">Status</label>
                   <select
-                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                     value={editFormData.status}
                     onChange={e => setEditFormData({ ...editFormData, status: e.target.value })}
                   >
@@ -298,11 +298,11 @@ export default function ManageStaff() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-500 mb-1.5">New Password (Optional)</label>
+                <label className="block text-sm font-semibold text-slate-500 dark:text-slate-300 mb-1.5">New Password (Optional)</label>
                 <input
                   type="password"
                   placeholder="Leave blank to keep existing password"
-                  className="w-full bg-slate-50 border border-slate-200 text-slate-800 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
+                  className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 px-4 py-2.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium"
                   value={editFormData.password}
                   onChange={e => setEditFormData({ ...editFormData, password: e.target.value })}
                 />

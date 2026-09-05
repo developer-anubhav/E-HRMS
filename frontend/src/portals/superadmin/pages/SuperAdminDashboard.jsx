@@ -283,7 +283,7 @@ const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchT
                                     placeholder="Search organizations..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-500 transition-all text-slate-800 font-medium placeholder-slate-400 shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-emerald-500 transition-all text-slate-800 dark:text-slate-100 font-medium placeholder-slate-400 dark:placeholder-slate-400 shadow-sm"
                                 />
                             </div>
                         </div>
@@ -365,7 +365,7 @@ const filteredData = companies.filter(c => c.name.toLowerCase().includes(searchT
                                                             placeholder="Enter system announcement..."
                                                             value={newAnnouncement.message}
                                                             onChange={(e) => setNewAnnouncement({...newAnnouncement, message: e.target.value})}
-                                                            className="w-full bg-white border border-slate-200 rounded-2xl p-6 text-slate-800 text-sm focus:outline-none focus:border-emerald-500 transition-all resize-none shadow-sm placeholder-slate-400 font-medium"
+                                                            className="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-6 text-slate-800 dark:text-slate-100 text-sm focus:outline-none focus:border-emerald-500 transition-all resize-none shadow-sm placeholder-slate-400 dark:placeholder-slate-400 font-medium"
                                                         ></textarea>
                                                     </div>
 

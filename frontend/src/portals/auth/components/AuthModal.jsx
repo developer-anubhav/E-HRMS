@@ -133,10 +133,10 @@ export default function AuthModal({ isOpen, onClose }) {
                     {activeTab === "login" ? (
                         <form onSubmit={handleLoginSubmit} className="space-y-5">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
                                     placeholder="name@company.com"
                                     value={loginEmail}
                                     onChange={(e) => setLoginEmail(e.target.value)}
@@ -144,10 +144,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Password</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Password</label>
                                 <input
                                     type="password"
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-3 transition-all duration-200 outline-none shadow-sm"
                                     placeholder="••••••••"
                                     value={loginPassword}
                                     onChange={(e) => setLoginPassword(e.target.value)}
@@ -170,10 +170,10 @@ export default function AuthModal({ isOpen, onClose }) {
                     ) : (
                         <form onSubmit={handleRegisterSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Full Name</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Full Name</label>
                                 <input
                                     type="text"
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="John Doe"
                                     value={regName}
                                     onChange={(e) => setRegName(e.target.value)}
@@ -181,10 +181,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Email</label>
                                 <input
                                     type="email"
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="john@company.com"
                                     value={regEmail}
                                     onChange={(e) => setRegEmail(e.target.value)}
@@ -192,10 +192,10 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Password</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Password</label>
                                 <input
                                     type="password"
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 transition-all outline-none shadow-sm"
                                     placeholder="••••••••"
                                     value={regPassword}
                                     onChange={(e) => setRegPassword(e.target.value)}
@@ -203,9 +203,9 @@ export default function AuthModal({ isOpen, onClose }) {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Role</label>
+                                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1.5 ml-1">Role</label>
                                 <select
-                                    className="w-full bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 outline-none transition-all shadow-sm cursor-pointer"
+                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white text-sm rounded-xl focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500/50 block p-2.5 outline-none transition-all shadow-sm cursor-pointer"
                                     value={regRole}
                                     onChange={(e) => setRegRole(e.target.value)}
                                 >

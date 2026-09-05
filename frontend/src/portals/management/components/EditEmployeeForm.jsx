@@ -118,7 +118,7 @@ export default function EditEmployeeForm({ initial, onSubmit }) {
             type={showPassword ? "text" : "password"}
             name="password"
             placeholder="Leave blank to keep current password"
-            className="w-full bg-white/5 border border-white/[0.08] text-white placeholder-slate-600 pl-4 pr-12 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-medium"
+            className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white placeholder-slate-400 dark:placeholder-slate-400 pl-4 pr-12 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all font-medium"
             value={form.password}
             onChange={handleChange}
             autoComplete="new-password"

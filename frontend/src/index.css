@@ -98,27 +98,40 @@
     letter-spacing: -0.02em;
   }
 
-  /* Dark mode form element text styling */
+  /* Responsive dark mode form element styling */
   @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+    }
     input, select, textarea {
-      color: #ffffff !important;
+      background-color: #1e293b;
+      color: #f8fafc;
+      border-color: #334155;
     }
     select option {
-      background-color: #1e293b !important;
-      color: #ffffff !important;
+      background-color: #1e293b;
+      color: #f8fafc;
     }
     ::placeholder {
-      color: #94a3b8 !important;
+      color: #94a3b8;
     }
   }
 
+  .dark, html.dark {
+    color-scheme: dark;
+  }
   .dark input, .dark select, .dark textarea,
   html.dark input, html.dark select, html.dark textarea {
-    color: #ffffff !important;
+    background-color: #1e293b;
+    color: #f8fafc;
+    border-color: #334155;
   }
   .dark select option, html.dark select option {
-    background-color: #1e293b !important;
-    color: #ffffff !important;
+    background-color: #1e293b;
+    color: #f8fafc;
+  }
+  .dark ::placeholder, html.dark ::placeholder {
+    color: #94a3b8;
   }
 }
 
