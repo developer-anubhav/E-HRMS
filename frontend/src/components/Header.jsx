@@ -141,7 +141,7 @@ export default function Header({ toggleSidebar }) {
             <input 
               type="text" 
               placeholder="Search people, records, months..." 
-              className="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400 text-slate-800"
+              className="bg-transparent border-none outline-none text-sm w-full placeholder:text-slate-400 dark:placeholder:text-slate-400 text-slate-800 dark:text-slate-100"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onFocus={() => searchQuery && setShowSearchResults(true)}
