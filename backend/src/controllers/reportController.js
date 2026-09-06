@@ -1,16 +1,17 @@
 import Company from "../models/Company.js";
+import { getAttendanceRecords } from "../utils/attendanceAdapter.js";
 
 // GET ATTENDANCE REPORT
 export const getAttendanceReport = async (req, res) => {
   try {
     const company = await Company.findById(req.user.companyId);
+    const attendanceList = await getAttendanceRecords(req.user.companyId, {}, { sort: { date: -1 } });
     
-    // Sort by date descending and "populate" employee info
-    const sorted = [...company.attendance].sort((a, b) => new Date(b.date) - new Date(a.date));
-    const enriched = sorted.map(att => {
-        const emp = company.employees.id(att.employeeId);
+    const enriched = attendanceList.map(att => {
+        const emp = company?.employees.id(att.employeeId);
+        const obj = att.toObject ? att.toObject() : att;
         return {
-            ...att.toObject(),
+            ...obj,
             employee: emp ? { _id: emp._id, name: emp.name, employeeId: emp.employeeId } : null
         };
     });
@@ -56,7 +57,8 @@ export const getDashboardStats = async (req, res) => {
     const todayEndUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)).getTime();
 
     // PRESENT / ABSENT TODAY
-    const dailyAttendance = company.attendance.filter(att => {
+    const allAttendance = await getAttendanceRecords(req.user.companyId);
+    const dailyAttendance = allAttendance.filter(att => {
         const attTime = new Date(att.date).getTime();
         return attTime >= todayStartUtc && attTime <= todayEndUtc;
     });
@@ -91,13 +93,12 @@ export const getDashboardStats = async (req, res) => {
 // GET ATTENDANCE SUMMARY
 export const getAttendanceSummary = async (req, res) => {
   try {
-    const company = await Company.findById(req.user.companyId);
-    
     const now = new Date();
     const todayStartUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)).getTime();
     const todayEndUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)).getTime();
 
-    const dailyAtt = company.attendance.filter(att => {
+    const allAttendance = await getAttendanceRecords(req.user.companyId);
+    const dailyAtt = allAttendance.filter(att => {
         const attTime = new Date(att.date).getTime();
         return attTime >= todayStartUtc && attTime <= todayEndUtc;
     });
@@ -152,13 +153,12 @@ export const getHeadcountChart = async (req, res) => {
 
 export const getAttendanceChart = async (req, res) => {
   try {
-    const company = await Company.findById(req.user.companyId);
-    
     const now = new Date();
     const todayStartUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)).getTime();
     const todayEndUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999)).getTime();
 
-    const dailyAtt = company.attendance.filter(att => {
+    const allAttendance = await getAttendanceRecords(req.user.companyId);
+    const dailyAtt = allAttendance.filter(att => {
         const attTime = new Date(att.date).getTime();
         return attTime >= todayStartUtc && attTime <= todayEndUtc;
     });

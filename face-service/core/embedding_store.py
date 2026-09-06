@@ -126,6 +126,16 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
+_CACHE: Optional[Dict[str, Any]] = None
+_CACHE_LOCK = threading.Lock()
+
+
+def invalidate_cache() -> None:
+    global _CACHE
+    with _CACHE_LOCK:
+        _CACHE = None
+
+
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -157,6 +167,7 @@ def save_profile(
         }
 
         _save_store(store)
+        invalidate_cache()
 
     logger.info(
         f"Encrypted & saved {len(embeddings)} embedding(s) for employee {employee_id} ({employee_id_str})"
@@ -165,20 +176,14 @@ def save_profile(
 
 def load_profile(employee_id: str) -> Optional[Dict[str, Any]]:
     """Return the full profile dict for the given employee with decrypted embeddings."""
-    store = _load_store()
-    prof = store.get(employee_id)
-    if not prof:
-        return None
-
-    decrypted_prof = dict(prof)
-    decrypted_prof["embeddings"] = _decrypt_vectors(prof.get("embeddings"))
-    return decrypted_prof
+    all_profs = load_all_profiles()
+    return all_profs.get(employee_id)
 
 
 def profile_exists(employee_id: str) -> bool:
     """Return True if a face profile exists for the given employee."""
-    store = _load_store()
-    return employee_id in store
+    all_profs = load_all_profiles()
+    return employee_id in all_profs
 
 
 def delete_profile(employee_id: str) -> bool:
@@ -191,17 +196,24 @@ def delete_profile(employee_id: str) -> bool:
             return False
         del store[employee_id]
         _save_store(store)
+        invalidate_cache()
 
     logger.info(f"Deleted face profile for employee {employee_id}")
     return True
 
 
 def load_all_profiles() -> Dict[str, Any]:
-    """Return all profiles with decrypted embeddings."""
-    raw_store = _load_store()
-    decrypted_store = {}
-    for emp_id, prof in raw_store.items():
-        copy_prof = dict(prof)
-        copy_prof["embeddings"] = _decrypt_vectors(prof.get("embeddings"))
-        decrypted_store[emp_id] = copy_prof
-    return decrypted_store
+    """Return all profiles with decrypted embeddings (cached in memory for high-performance 1:N matching)."""
+    global _CACHE
+    with _CACHE_LOCK:
+        if _CACHE is not None:
+            return _CACHE
+
+        raw_store = _load_store()
+        decrypted_store = {}
+        for emp_id, prof in raw_store.items():
+            copy_prof = dict(prof)
+            copy_prof["embeddings"] = _decrypt_vectors(prof.get("embeddings"))
+            decrypted_store[emp_id] = copy_prof
+        _CACHE = decrypted_store
+        return _CACHE
