@@ -1,6 +1,7 @@
 import Company from "../models/Company.js";
 import User from "../models/userModel.js";
 import sendEmail from "../utils/sendEmail.js";
+import { syncAttendanceToCollection, deleteAttendanceFromCollection } from "../utils/attendanceSync.js";
 
 // Mark Attendance
 export const markAttendance = async (req, res) => {
@@ -37,6 +38,7 @@ export const markAttendance = async (req, res) => {
       }
       
       await company.save();
+      await syncAttendanceToCollection(company._id, existing);
       return res.json(existing);
     }
 
@@ -58,7 +60,9 @@ export const markAttendance = async (req, res) => {
     }
 
     await company.save();
-    res.status(201).json(company.attendance[company.attendance.length - 1]);
+    const savedRec = company.attendance[company.attendance.length - 1];
+    await syncAttendanceToCollection(company._id, savedRec);
+    res.status(201).json(savedRec);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -109,6 +113,7 @@ export const updateAttendance = async (req, res) => {
     }
 
     await company.save();
+    await syncAttendanceToCollection(company._id, attendance);
     res.json(attendance);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -123,8 +128,10 @@ export const deleteAttendance = async (req, res) => {
     
     if (!attendance) return res.status(404).json({ message: "Record not found" });
     
+    const copyAtt = attendance.toObject ? attendance.toObject() : { ...attendance };
     attendance.deleteOne();
     await company.save();
+    await deleteAttendanceFromCollection(company._id, copyAtt);
     res.json({ message: "Attendance record deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -241,6 +248,7 @@ export const checkIn = async (req, res) => {
     }
 
     await company.save();
+    await syncAttendanceToCollection(company._id, attRecord);
     res.json({ success: true, data: attRecord });
   } catch (err) {
     res.status(500).json({ message: err.message });

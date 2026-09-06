@@ -96,3 +96,26 @@ export const invalidateTenantCache = async (companyId) => {
 };
 
 export const getRedisClient = () => redisClient;
+
+export const acquireCooldownLock = async (employeeId, ttlMs = 10000) => {
+  const key = `cooldown:${employeeId}`;
+  if (isRedisConnected && redisClient) {
+    try {
+      const res = await redisClient.set(key, "1", "PX", ttlMs, "NX");
+      return res === "OK";
+    } catch (err) {
+      isRedisConnected = false;
+    }
+  }
+
+  // Fallback to in-memory cache when Redis is offline
+  const nowMs = Date.now();
+  const cached = inMemoryCache.get(key);
+  const lastScanMs = typeof cached === "number" ? cached : (cached?.expiresAt ? cached.expiresAt - ttlMs : (cached?.value ? cached.value : 0));
+  if (nowMs - lastScanMs < ttlMs) {
+    return false;
+  }
+  inMemoryCache.set(key, nowMs);
+  return true;
+};
+

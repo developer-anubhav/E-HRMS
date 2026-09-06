@@ -12,39 +12,42 @@
 import Company from "../models/Company.js";
 import { evaluateShiftAttendance } from "../utils/shiftEvaluator.js";
 import { validateGeofence } from "../utils/geofenceValidator.js";
+import { acquireCooldownLock } from "../config/redis.js";
+import { faceServiceBreaker } from "../utils/circuitBreaker.js";
+import { syncAttendanceToCollection } from "../utils/attendanceSync.js";
 
 const FACE_SERVICE_URL = process.env.FACE_SERVICE_URL || "http://localhost:8000";
 const INTERNAL_SERVICE_SECRET = process.env.INTERNAL_SERVICE_SECRET || "ehrms_face_service_secret_2026";
-
-// In-memory cooldown tracker (employeeId -> lastScanTimestamp)
-const scansCooldownMap = new Map();
 
 // ---------------------------------------------------------------------------
 // Helper: forward a request to the face-service and return JSON
 // ---------------------------------------------------------------------------
 const callFaceService = async (path, options = {}) => {
-  const url = `${FACE_SERVICE_URL}${path}`;
+  return await faceServiceBreaker.execute(async (signal) => {
+    const url = `${FACE_SERVICE_URL}${path}`;
 
-  const headers = {
-    "Content-Type": "application/json",
-    "X-Internal-Secret": INTERNAL_SERVICE_SECRET,
-    ...(options.headers || {}),
-  };
+    const headers = {
+      "Content-Type": "application/json",
+      "X-Internal-Secret": INTERNAL_SERVICE_SECRET,
+      ...(options.headers || {}),
+    };
 
-  const res = await fetch(url, {
-    ...options,
-    headers,
+    const res = await fetch(url, {
+      ...options,
+      headers,
+      signal,
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const err = new Error(data.detail || `Face service error (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+
+    return data;
   });
-
-  const data = await res.json().catch(() => ({}));
-
-  if (!res.ok) {
-    const err = new Error(data.detail || `Face service error (${res.status})`);
-    err.status = res.status;
-    throw err;
-  }
-
-  return data;
 };
 
 // ---------------------------------------------------------------------------
@@ -243,12 +246,10 @@ export const verifyAndCheckInFace = async (req, res) => {
 
     const matchedEmployeeId = verificationResult.employee_id;
 
-    // --- 10-Second Cooldown Check ---
-    const nowMs = Date.now();
-    const COOLDOWN_MS = 10 * 1000; // 10 seconds
-    const lastScanMs = scansCooldownMap.get(matchedEmployeeId) || 0;
+    // --- 10-Second Cooldown Check (Redis-backed with in-memory fallback) ---
+    const lockAcquired = await acquireCooldownLock(matchedEmployeeId, 10000);
 
-    if (nowMs - lastScanMs < COOLDOWN_MS) {
+    if (!lockAcquired) {
       // Cooldown active — fetch employee info for UI without saving duplicate record
       const company = await Company.findById(req.user.companyId);
       const employee = company?.employees.id(matchedEmployeeId);
@@ -330,12 +331,10 @@ export const verifyAndCheckInFace = async (req, res) => {
     attRecord.verificationMethod = "Facial Recognition";
     attRecord.confidence = verificationResult.confidence;
 
-    // Update cooldown map
-    scansCooldownMap.set(matchedEmployeeId, nowMs);
-
     await company.save();
 
     const savedRecord = company.attendance[existingAttIndex >= 0 ? existingAttIndex : company.attendance.length - 1];
+    await syncAttendanceToCollection(company._id, savedRecord);
 
     const actionText = actionType === "CHECK_OUT" ? "Check-Out recorded" : "Check-In recorded";
 
@@ -442,12 +441,10 @@ export const mobileCheckIn = async (req, res) => {
       });
     }
 
-    // 3. Attendance Cooldown Check (10 seconds)
-    const nowMs = Date.now();
-    const COOLDOWN_MS = 10 * 1000;
-    const lastScanMs = scansCooldownMap.get(matchedEmployeeId) || 0;
+    // 3. Attendance Cooldown Check (10 seconds, Redis-backed with in-memory fallback)
+    const lockAcquired = await acquireCooldownLock(matchedEmployeeId, 10000);
 
-    if (nowMs - lastScanMs < COOLDOWN_MS) {
+    if (!lockAcquired) {
       return res.json({
         success: true,
         matched: true,
@@ -517,10 +514,10 @@ export const mobileCheckIn = async (req, res) => {
     attRecord.geofenceStatus = geofenceResult.geofenceStatus;
     attRecord.distanceFromLocationMeters = geofenceResult.distanceMeters;
 
-    scansCooldownMap.set(matchedEmployeeId, nowMs);
     await company.save();
 
     const savedRecord = company.attendance[existingAttIndex >= 0 ? existingAttIndex : company.attendance.length - 1];
+    await syncAttendanceToCollection(company._id, savedRecord);
     const actionText = actionType === "CHECK_OUT" ? "Mobile Check-Out" : "Mobile Check-In";
 
     return res.json({
